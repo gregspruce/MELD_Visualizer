@@ -44,8 +44,13 @@ def create_empty_figure(message="Upload a file and configure options."):
 )
 def update_data_and_configs(contents, filename):
     """
-    Primary callback triggered on file upload. Parses the file, stores the data,
-    and checks for configuration issues.
+    Primary callback triggered on file upload. This function is responsible for:
+    1. Parsing the uploaded CSV file using the `parse_contents` utility.
+    2. Storing the main DataFrame in a dcc.Store as JSON.
+    3. Updating the filename display.
+    4. Storing configuration data for the layout (e.g., available columns for dropdowns).
+    5. Storing the min/max ranges for all numeric columns.
+    6. Generating warnings if columns specified in `config.json` are not found in the file.
     """
     if contents is None:
         return no_update, "Please upload a CSV file to begin.", no_update, no_update, no_update
@@ -63,7 +68,7 @@ def update_data_and_configs(contents, filename):
     layout_config = {'axis_options': numeric_cols}
     df_columns_set = set(df.columns)
 
-    # Check if columns from config file are present in the uploaded data
+    # Check if columns from the config file are present in the uploaded data
     warnings = []
     for key, options in APP_CONFIG.items():
         if 'options' in key and isinstance(options, list):
@@ -154,9 +159,13 @@ def update_2d_plot_radios(column_ranges):
     Input('store-layout-config', 'data')
 )
 def update_custom_and_mesh_plot_controls(layout_config):
-    """Populates all dropdowns for the Custom Plot and Mesh Plot tabs."""
+    """
+    Populates all dropdowns for the Custom Plot and Mesh Plot tabs.
+    It also sets sensible default values for the custom plot axes.
+    """
     if not layout_config: return [[]]*7 + [None]*5
     axis_options = layout_config['axis_options']
+    # Set default axes to standard positional columns if they exist, otherwise fallback to the first available columns.
     default_x = 'XPos' if 'XPos' in axis_options else (axis_options[0] if axis_options else None)
     default_y = 'YPos' if 'YPos' in axis_options else (axis_options[1] if len(axis_options) > 1 else None)
     default_z = 'ZPos' if 'ZPos' in axis_options else (axis_options[2] if len(axis_options) > 2 else None)
@@ -164,7 +173,7 @@ def update_custom_and_mesh_plot_controls(layout_config):
     default_filter = 'ZPos' if 'ZPos' in axis_options else default_x
     mesh_color_options = axis_options
     mesh_color_value = 'ToolTemp' if 'ToolTemp' in axis_options else (axis_options[0] if axis_options else None)
-    
+
     return (axis_options, axis_options, axis_options, axis_options, axis_options,
             default_x, default_y, default_z, default_color, default_filter,
             mesh_color_options, mesh_color_value)
@@ -180,7 +189,7 @@ def update_custom_and_mesh_plot_controls(layout_config):
     prevent_initial_call=True
 )
 def save_config_and_advise_restart(n_clicks, theme, template, g1_opts, g2_opts, y_2d_opts, color_2d_opts):
-    """Saves the current UI settings to config.json."""
+    """Saves the current UI settings from the 'Settings' tab to config.json."""
     if not n_clicks: raise PreventUpdate
     new_config = {
         "default_theme": theme, "plotly_template": template, "graph_1_options": g1_opts,
@@ -216,48 +225,60 @@ def save_config_and_advise_restart(n_clicks, theme, template, g1_opts, g2_opts, 
 def sync_filter_controls(slider_val, lower_in, upper_in, s_min_in, s_max_in, column_ranges, custom_filter_col):
     """
     Synchronizes all filter components (slider and input boxes) with each other
-    and updates them when new data is loaded. Uses a pattern-matching callback.
+    and updates them when new data is loaded. Uses a pattern-matching callback
+    to handle multiple sets of filter controls with a single function.
     """
     if not column_ranges: raise PreventUpdate
+
+    # Identify which component triggered the callback
     triggered_id = ctx.triggered_id if isinstance(ctx.triggered_id, dict) else {'index': 'init', 'type': 'store'}
     triggered_prop_str = ctx.triggered[0]['prop_id']
     index = triggered_id.get('index')
-    
-    # Determine which column to filter based on the component's index
+
+    # Determine which data column to filter based on the component's 'index'
     if index.startswith('zpos'): col_name = 'ZPos'
     elif index == 'time-2d': col_name = 'TimeInSeconds'
     elif index == 'custom': col_name = custom_filter_col
     else: col_name = 'ZPos' # Fallback
-    
+
     if not col_name: return no_update
 
+    # Get the absolute min/max for the relevant column from stored data
     abs_min, abs_max = column_ranges.get(col_name, [0, 1])
+
+    # Initialize output values with current state or defaults
     out_s_min = s_min_in if s_min_in is not None else abs_min
     out_s_max = s_max_in if s_max_in is not None else abs_max
     out_l_bound, out_u_bound = slider_val
-    
-    # Logic to handle which input triggered the callback
-    if triggered_prop_str == 'store-column-ranges.data':
+
+    # Logic to handle which input triggered the callback and update state accordingly
+    if triggered_prop_str.startswith('store-column-ranges'):
+        # A new file was loaded, so reset all filter controls to the full range.
         out_s_min, out_s_max, out_l_bound, out_u_bound = abs_min, abs_max, abs_min, abs_max
     elif 'range-slider' in triggered_prop_str:
+        # The main slider was moved.
         out_l_bound, out_u_bound = slider_val
     elif 'lower-bound-input' in triggered_prop_str and lower_in is not None:
+        # The "Lower Bound" input box was changed.
         out_l_bound = max(min(lower_in, out_u_bound), abs_min)
         out_s_min = min(out_l_bound, out_s_min)
     elif 'upper-bound-input' in triggered_prop_str and upper_in is not None:
+        # The "Upper Bound" input box was changed.
         out_u_bound = min(max(upper_in, out_l_bound), abs_max)
         out_s_max = max(out_u_bound, out_s_max)
     elif 'slider-min-input' in triggered_prop_str and s_min_in is not None:
+        # The "Slider Min" input box was changed.
         out_s_min = max(s_min_in, abs_min)
     elif 'slider-max-input' in triggered_prop_str and s_max_in is not None:
+        # The "Slider Max" input box was changed.
         out_s_max = min(s_max_in, abs_max)
-        
-    # Ensure values remain within logical bounds
+
+    # Final validation to ensure all values are consistent and within bounds
     if out_s_min > out_s_max: out_s_min = out_s_max
     out_l_bound = max(out_l_bound, out_s_min)
     out_u_bound = min(out_u_bound, out_s_max)
     if out_l_bound > out_u_bound: out_l_bound = out_u_bound
-    
+
     return out_s_min, out_s_max, [out_l_bound, out_u_bound], out_l_bound, out_u_bound, out_s_min, out_s_max
 
 # --- Graph Generation Callbacks ---
@@ -268,7 +289,7 @@ def sync_filter_controls(slider_val, lower_in, upper_in, s_min_in, s_max_in, col
      Input({'type': 'range-slider', 'index': 'zpos-1'}, "value")]
 )
 def update_graph_1(jsonified_df, col_chosen, slider_range):
-    """Updates the first main 3D scatter plot."""
+    """Updates the first main 3D scatter plot based on the selected color and ZPos filter."""
     if not all([jsonified_df, col_chosen, slider_range]): return create_empty_figure()
     df = pd.read_json(io.StringIO(jsonified_df), orient='split')
     if col_chosen not in df.columns: return create_empty_figure(f"Error: Column '{col_chosen}' not in file.")
@@ -285,7 +306,7 @@ def update_graph_1(jsonified_df, col_chosen, slider_range):
      Input({'type': 'range-slider', 'index': 'zpos-2'}, "value")]
 )
 def update_graph_2(jsonified_df, col_chosen, slider_range):
-    """Updates the second main 3D scatter plot."""
+    """Updates the second main 3D scatter plot based on the selected color and ZPos filter."""
     if not all([jsonified_df, col_chosen, slider_range]): return create_empty_figure()
     df = pd.read_json(io.StringIO(jsonified_df), orient='split')
     if col_chosen not in df.columns: return create_empty_figure(f"Error: Column '{col_chosen}' not in file.")
@@ -303,7 +324,7 @@ def update_graph_2(jsonified_df, col_chosen, slider_range):
      Input('radio-2d-color', 'value')]
 )
 def update_2d_scatter(jsonified_df, time_range, y_col, color_col):
-    """Updates the 2D time-series scatter plot."""
+    """Updates the 2D time-series scatter plot based on the selected Y-axis, color, and time filter."""
     if not all([jsonified_df, time_range, y_col, color_col]): return create_empty_figure()
     df = pd.read_json(io.StringIO(jsonified_df), orient='split')
     df['Time'] = pd.to_datetime(df['Time'])
@@ -323,7 +344,7 @@ def update_2d_scatter(jsonified_df, time_range, y_col, color_col):
      Input({'type': 'range-slider', 'index': 'custom'}, 'value')]
 )
 def update_custom_graph(jsonified_df, x_col, y_col, z_col, color_col, filter_col, filter_range):
-    """Updates the fully customizable 3D scatter plot."""
+    """Updates the fully customizable 3D scatter plot based on user selections for all axes and filters."""
     if not all([jsonified_df, x_col, y_col, z_col, color_col, filter_col, filter_range]):
         return create_empty_figure("Select all dropdown values to render graph.")
     df = pd.read_json(io.StringIO(jsonified_df), orient='split')
@@ -344,7 +365,7 @@ def update_custom_graph(jsonified_df, x_col, y_col, z_col, color_col, filter_col
     Input('store-main-df', 'data')
 )
 def update_data_table(jsonified_df):
-    """Updates the data table with the content of the uploaded file."""
+    """Updates the data table with the content of the uploaded file and applies the correct theme."""
     if jsonified_df is None: return [], [], {}, {}, {}
     df = pd.read_json(io.StringIO(jsonified_df), orient='split')
     columns = [{"name": i, "id": i} for i in df.columns]

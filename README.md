@@ -1,6 +1,8 @@
-# Dash Volumetric Plotter - Configuration and Developer Guide
+# Dash Volumetric Plotter
 
-Welcome to the Dash data visualization application. This guide explains how to run the application, customize its appearance, and understand its structure for future development.
+Welcome to the Dash Volumetric Plotter, a powerful and interactive data visualization tool designed for analyzing 3D process data. This application allows users to upload CSV data, explore it through various 3D and 2D plots, and customize the visualization to uncover insights.
+
+This guide explains how to run the application, customize its appearance, and understand its structure for future development.
 
 ---
 
@@ -12,10 +14,12 @@ This section is for users who want to run the application and configure its sett
 
 To run the application, you must have Python and the required packages installed.
 
-1.  **Install requirements:** Open a terminal or command prompt in the project directory and run:
+1.  **Install requirements:** We recommend using a virtual environment. Open a terminal or command prompt in the project directory and run:
     ```bash
-    pip install pandas numpy dash dash-bootstrap-components plotly
+    pip install -r requirements.txt
     ```
+    (If a `requirements.txt` file is not available, you can install the packages individually: `pip install pandas numpy dash dash-bootstrap-components plotly`)
+
 2.  **Start the application:** In the same terminal, run the main `app.py` file:
     ```bash
     python app.py
@@ -77,11 +81,28 @@ The "Settings" tab provides an easy interface for modifying all the options ment
 
 ## Developer Guide
 
-This section is for developers who want to modify, maintain, or build the application.
+This section is for developers who want to modify, maintain, or build upon the application.
 
 ### 4. Project Structure
 
 The application is broken into logical modules to promote maintainability and separation of concerns.
+
+```
+/
+├── CSV/
+│   └── (sample data files)
+├── tests/
+│   ├── test_data_processing.py
+│   └── test_app_e2e.py
+├── app.py                  # Main entry point, runs the server
+├── layout.py               # Defines the UI layout (the "view")
+├── callbacks.py            # Contains all app interactivity (the "controller")
+├── data_processing.py      # Data parsing and mesh generation logic
+├── config.py               # Handles loading and managing configuration
+├── config.json             # User-facing configuration file
+├── agents.md               # Detailed instructions for AI agents/developers
+└── README.md               # This file
+```
 
 -   `app.py`: The main entry point. It initializes the Dash app, brings all pieces together, and runs the server. **This is the file you execute.**
 -   `layout.py`: Contains all functions that create the visual components and structure of the app (the "view").
@@ -96,29 +117,33 @@ Running the app with `python app.py` starts it in **Debug Mode**. This enables *
 
 *Note: Changes to `config.py` or `config.json` still require a manual restart to be loaded.*
 
-### 6. Building a Standalone Executable
+### 6. Testing
 
-You can bundle the application into a single executable file using `pyinstaller`. Due to the multi-file nature of this Dash app, this is a multi-step process.
+The project includes a test suite using `pytest`. The tests are located in the `tests/` directory and are separated into unit tests and end-to-end (E2E) tests.
+
+-   **Unit Tests:** `tests/test_data_processing.py` tests the data manipulation functions in isolation.
+-   **E2E Tests:** `tests/test_app_e2e.py` tests the full application from a user's perspective.
+
+To run the tests, execute `pytest` in the root directory:
+```bash
+pytest
+```
+For more detailed information on the testing strategy, see the `agents.md` file.
+
+### 7. Building a Standalone Executable
+
+You can bundle the application into a single executable file using `pyinstaller`. The following instructions are for **Windows**. The process may vary for other operating systems.
 
 #### **Step 1: Generate a Spec File**
 
 First, run `pyinstaller` to create a `.spec` file. This file acts as a build recipe.
-
 ```bash
 pyinstaller --name VolumetricPlotter --windowed --onefile app.py
 ```
 
---windowed: Creates an application without a visible console window. Use --console instead during testing to see debug messages
-
-```bash
-pyinstaller --name VolumetricPlotter --console --onefile app.py
-```
-
-This command will create a file named VolumetricPlotter.spec.
-
 #### **Step 2: Edit the Spec File**
 
-Open VolumetricPlotter.spec in a text editor. You need to tell pyinstaller where to find the config.json file and include other hidden packages that Dash uses. Modify your spec file to look like this:
+Open `VolumetricPlotter.spec` in a text editor. You need to tell PyInstaller where to find the `config.json` file and include other hidden packages that Dash uses. Modify your spec file to look like this:
 ```python
 # -*- mode: python ; coding: utf-8 -*-
 
@@ -160,9 +185,8 @@ exe = EXE(pyz,
 ```
 #### **Step 3: Build from the Spec File**
 
-Now, run pyinstaller again, but this time point it to your modified .spec file.
+Now, run `pyinstaller` again, but this time point it to your modified `.spec` file.
 ```bash
 pyinstaller VolumetricPlotter.spec
-
 ```
-This will create a dist folder containing VolumetricPlotter.exe. This executable can be shared and run on other Windows machines without requiring a Python installation.
+This will create a `dist` folder containing `VolumetricPlotter.exe`. This executable can be shared and run on other Windows machines without requiring a Python installation.
