@@ -1,5 +1,5 @@
 # Overview
-A sequenced set of small, focused PRs with explicit task lists and acceptance criteria you can hand to Googleâ€™s **Jules** asynchronous agent. Targets Windows first, scales sensibly to larger datasets, and lays groundwork for Linux.
+A sequenced set of small, focused PRs with explicit task lists and acceptance criteria you can hand to Google's Jules asynchronous agent. Targets Windows first, scales sensibly to larger datasets, and lays groundwork for Linux.
 
 ---
 
@@ -13,23 +13,23 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 ---
 
 # Execution Order (milestones)
-1. **PR1 â€“ Repo hygiene & CI skeleton** (infra)
-2. **PR2 â€“ Data pipeline v1 (CSVâ†’Parquet cache + Polars)**
-3. **PR3 â€“ Config validation + Column Mapping UI**
-4. **PR4 â€“ Performance/LOD (decimator + payload cap + slider)**
-5. **PR5 â€“ Voxelization + Isosurface Mode**
-6. **PR6 â€“ ROI Selection + Crossfilter**
-7. **PR7 â€“ Error Panel + Progress/Cancel UX**
-8. **PR8 â€“ Session Save/Load + Export**
-9. **PR9 â€“ Test Suite Upgrade (snapshot, property-based, perf markers, E2E)**
-10. **PR10 â€“ Windows Packaging & Release CI**
-11. **PR11 â€“ Docs + Demo Data**
-12. **PR12 â€“ Watch Folder / Live Reload (optional)**
-13. **PR13 â€“ Linux Containerization & Devcontainer (optional)**
+1. **PR1 - Repo hygiene & CI skeleton** (infra)
+2. **PR2 - Data pipeline v1 (CSV->Parquet cache + Polars)**
+3. **PR3 - Config validation + Column Mapping UI**
+4. **PR4 - Performance/LOD (decimator + payload cap + slider)**
+5. **PR5 - Voxelization + Isosurface Mode**
+6. **PR6 - ROI Selection + Crossfilter**
+7. **PR7 - Error Panel + Progress/Cancel UX**
+8. **PR8 - Session Save/Load + Export**
+9. **PR9 - Test Suite Upgrade (snapshot, property-based, perf markers, E2E)**
+10. **PR10 - Windows Packaging & Release CI**
+11. **PR11 - Docs + Demo Data**
+12. **PR12 - Watch Folder / Live Reload (optional)**
+13. **PR13 - Linux Containerization & Devcontainer (optional)**
 
 ---
 
-## PR1 â€” Repo hygiene & CI skeleton
+## PR1 - Repo hygiene & CI skeleton
 **Branch:** `infra/repo-hygiene-ci`
 
 **Goal:** Standardize packaging, lint/format/type-check, basic CI, PR template.
@@ -37,7 +37,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Scope:**
 - Introduce `pyproject.toml` with runtime + dev deps.
 - Add ruff, black, mypy config; pre-commit optional.
-- Add GitHub Actions CI for lint, type, tests on 3.10â€“3.12.
+- Add GitHub Actions CI for lint, type, tests on 3.10-3.12.
 - Add `.gitignore`; purge tracked cache/bytecode.
 - Add LICENSE (MIT or your choice) and short repo description.
 - Add `.github/pull_request_template.md` and basic issue templates.
@@ -46,9 +46,9 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 **Tasks:**
 - [ ] Create `pyproject.toml` with deps: `dash`, `plotly`, `polars[pyarrow]`, `pydantic`, `kaleido`, `pytest`, `hypothesis`, `dash[testing]`, `ruff`, `black`, `mypy`.
-- [ ] Configure ruff (`pyproject`), line-length 100/120; add rules to match team preference.
+- [ ] Configure ruff (in `pyproject`), set line-length 100 or 120; enable sensible rules.
 - [ ] Configure mypy (ignore missing imports only as needed); enable `warn-redundant-casts`, `warn-unused-ignores`.
-- [ ] Add `.github/workflows/ci.yml`: matrix 3.10â€“3.12; steps: setup-python, cache, `pip install .[dev]`, run ruff/black/mypy/pytest.
+- [ ] Add `.github/workflows/ci.yml`: matrix 3.10-3.12; steps: setup-python, cache, `pip install .[dev]`, run ruff/black/mypy/pytest.
 - [ ] Add `.gitignore` (Python, PyInstaller, build, cache, datasets, `.venv` etc.).
 - [ ] Remove committed `__pycache__/` and other artifacts.
 - [ ] Add `CHANGELOG.md` with Unreleased section.
@@ -68,7 +68,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Rollback:**
 - Revert branch; CI remains as before.
 
-**Estimate:** 0.5â€“1 day.
+**Estimate:** 0.5-1 day.
 
 **Dependencies:** None.
 
@@ -76,7 +76,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR2 â€” Data pipeline v1 (CSVâ†’Parquet cache + Polars)
+## PR2 - Data pipeline v1 (CSV->Parquet cache + Polars)
 **Branch:** `feat/data-pipeline-parquet`
 
 **Goal:** Fast, repeatable data loads with typed schema; future-proof via Parquet and Polars.
@@ -84,19 +84,19 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Scope:**
 - File ingest service: detect schema, coerce dtypes, write Parquet cache (zstd), column pruning.
 - Deterministic cache location `cache/` with file-hash keys.
-- Use Polars **lazy** queries for filters/aggregations.
+- Use Polars lazy queries for filters/aggregations.
 
 **Out of scope:** UI changes beyond wiring loader.
 
 **Tasks:**
 - [ ] Add `src/meldviz/io.py` with `load_csv_to_parquet(path)->CacheKey`, `load_parquet(cache_key)->pl.LazyFrame`.
 - [ ] Implement hashing of file + settings for cache-keying.
-- [ ] Dtype coercion rules: numericâ†’float32/int32 where safe; categorical for short strings.
+- [ ] Dtype coercion rules: numeric->float32/int32 where safe; categorical for short strings.
 - [ ] Column pruning: only materialize columns needed by the app.
 - [ ] Integrate pipeline into app startup; fall back gracefully if cache missing.
 
 **Acceptance Criteria:**
-- First open of CSV writes Parquet; subsequent opens are >2Ã— faster on 10k rows.
+- First open of CSV writes Parquet; subsequent opens are >2x faster on 10k rows.
 - Memory footprint reduced vs pandas baseline.
 - Filters operate via Polars lazy frame.
 
@@ -110,7 +110,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Rollback:**
 - Flag to bypass Parquet path and use legacy reader.
 
-**Estimate:** 1â€“2 days.
+**Estimate:** 1-2 days.
 
 **Dependencies:** PR1.
 
@@ -118,14 +118,14 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR3 â€” Config validation + Column Mapping UI
+## PR3 - Config validation + Column Mapping UI
 **Branch:** `feat/config-validation-column-mapping`
 
 **Goal:** Make diverse CSV headers usable; strict validation with friendly errors.
 
 **Scope:**
 - Pydantic models for `config.json` and runtime settings.
-- Column-mapping dialog to map arbitrary CSV headers â†’ canonical fields.
+- Column-mapping dialog to map arbitrary CSV headers -> canonical fields.
 - Persist mappings per filename pattern/vendor.
 
 **Out of scope:** Advanced rule-builder.
@@ -137,20 +137,20 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 - [ ] On load, apply mapping; warn on missing/extra columns.
 
 **Acceptance Criteria:**
-- Bad configs produce actionable messages; app doesn't crash.
+- Bad configs produce actionable messages; app does not crash.
 - A CSV with different header names can be mapped once and re-used automatically.
 
 **Tests:**
 - Unit: valid/invalid configs; mapping persistence; partial mappings.
-- E2E: upload CSV with odd headers â†’ map â†’ charts render.
+- E2E: upload CSV with odd headers -> map -> charts render.
 
 **Docs:**
-- README: â€œColumn Mappingâ€ walkthrough with screenshots.
+- README: "Column Mapping" walkthrough with screenshots.
 
 **Rollback:**
 - Env flag disables mapping; falls back to hard-coded headers.
 
-**Estimate:** 1â€“2 days.
+**Estimate:** 1-2 days.
 
 **Dependencies:** PR2.
 
@@ -158,30 +158,30 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR4 â€” Performance/LOD (decimator + payload cap + slider)
+## PR4 - Performance/LOD (decimator + payload cap + slider)
 **Branch:** `perf/lod-decimator`
 
-**Goal:** Keep interactivity smooth by capping point count & payload size.
+**Goal:** Keep interactivity smooth by capping point count and payload size.
 
 **Scope:**
 - Server-side decimator: reservoir or stratified by voxel/region/value.
 - Payload cap (~6 MB per update) and live point-count readout.
-- UI â€œPerformanceâ€ slider (Quality â†” Speed) controlling sample %.
+- UI "Performance" slider (Quality <-> Speed) controlling sample %.
 
 **Out of scope:** Voxel/isosurface.
 
 **Tasks:**
 - [ ] Implement `src/meldviz/lod.py` with decimation strategies.
 - [ ] Hook into filter pipeline; emit sampled dataframe to the client.
-- [ ] Add UI slider + label; display current point count & estimated payload.
+- [ ] Add UI slider + label; display current point count and estimated payload.
 
 **Acceptance Criteria:**
-- With 100k rows, interactions stay <800ms median.
+- With 100k rows, interactions stay <800 ms median.
 - Slider changes sample size and latency as expected.
 
 **Tests:**
 - Unit: deterministic sampling with seeded RNG.
-- Perf marker: 100k dataset interaction <800ms.
+- Perf marker: 100k dataset interaction <800 ms.
 
 **Docs:**
 - Add "Performance Mode" section explaining tradeoffs.
@@ -197,15 +197,15 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR5 â€” Voxelization + Isosurface Mode
+## PR5 - Voxelization + Isosurface Mode
 **Branch:** `feat/voxel-isosurface`
 
 **Goal:** Scale to big data via volume/isosurface rendering.
 
 **Scope:**
-- `histogramdd`-based voxelizer (counts/mean per cell) with adjustable resolution (64Â³ default).
+- `histogramdd`-based voxelizer (counts/mean per cell) with adjustable resolution (64^3 default).
 - Plotly `isosurface` or `mesh3d` path (marching cubes) for thresholded views.
-- Toggle: Points â†” Voxels.
+- Toggle: Points <-> Voxels.
 
 **Out of scope:** Advanced GPU acceleration.
 
@@ -215,7 +215,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 - [ ] Render isosurface from selected scalar (e.g., temp/force) + threshold.
 
 **Acceptance Criteria:**
-- 1M synthetic rows voxelize to 64Â³ in â‰¤2.5s on baseline box.
+- 1M synthetic rows voxelize to 64^3 in <=2.5 s on baseline box.
 - Isosurface/points toggle works; threshold slider updates view.
 
 **Tests:**
@@ -237,7 +237,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR6 â€” ROI Selection + Crossfilter
+## PR6 - ROI Selection + Crossfilter
 **Branch:** `feat/roi-crossfilter`
 
 **Goal:** Select a region (box/lasso) and filter all linked charts server-side.
@@ -255,12 +255,12 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 - [ ] Wire ROI to pipeline; expose export endpoint.
 
 **Acceptance Criteria:**
-- ROI reduces dataset and updates in <1s at 100k.
+- ROI reduces dataset and updates in <1 s at 100k.
 - Exported CSV matches filtered points.
 
 **Tests:**
 - Unit: ROI math; edge cases (empty, out-of-bounds).
-- E2E: draw ROI â†’ charts update â†’ export file equals expected.
+- E2E: draw ROI -> charts update -> export file equals expected.
 
 **Docs:**
 - Short guide with GIF.
@@ -268,7 +268,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Rollback:**
 - Disable ROI controls via feature flag.
 
-**Estimate:** 1â€“2 days.
+**Estimate:** 1-2 days.
 
 **Dependencies:** PR4, PR5.
 
@@ -276,7 +276,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR7 â€” Error Panel + Progress/Cancel UX
+## PR7 - Error Panel + Progress/Cancel UX
 **Branch:** `feat/error-panel-progress`
 
 **Goal:** Fail clearly and give users control during heavy ops.
@@ -293,10 +293,10 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 **Acceptance Criteria:**
 - Malformed CSV shows actionable errors (no crash).
-- Cancel stops voxelization/export within ~200ms tick.
+- Cancel stops voxelization/export within ~200 ms tick.
 
 **Tests:**
-- E2E: upload bad CSV â†’ error panel; start heavy task â†’ cancel works.
+- E2E: upload bad CSV -> error panel; start heavy task -> cancel works.
 
 **Docs:**
 - Troubleshooting section.
@@ -312,7 +312,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR8 â€” Session Save/Load + Export
+## PR8 - Session Save/Load + Export
 **Branch:** `feat/session-export`
 
 **Goal:** Persist user state and export visuals deterministically.
@@ -350,7 +350,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR9 â€” Test Suite Upgrade (snapshot, property-based, perf, E2E)
+## PR9 - Test Suite Upgrade (snapshot, property-based, perf, E2E)
 **Branch:** `test/suite-upgrade`
 
 **Goal:** Catch regressions early and enforce performance budgets.
@@ -366,7 +366,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Tasks:**
 - [ ] Add `tests/generators.py` for synthetic data.
 - [ ] Add snapshot tests for scatter3d, isosurface, ROI flow.
-- [ ] Add E2E: upload â†’ map â†’ filter â†’ toggle â†’ export.
+- [ ] Add E2E: upload -> map -> filter -> toggle -> export.
 - [ ] Add perf markers + baseline thresholds.
 
 **Acceptance Criteria:**
@@ -379,15 +379,15 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Rollback:**
 - Disable perf markers via env in CI if needed.
 
-**Estimate:** 1â€“2 days.
+**Estimate:** 1-2 days.
 
-**Dependencies:** PR1â€“PR8.
+**Dependencies:** PR1-PR8.
 
 **Labels:** `test`, `quality`.
 
 ---
 
-## PR10 â€” Windows Packaging & Release CI
+## PR10 - Windows Packaging & Release CI
 **Branch:** `release/windows-packaging`
 
 **Goal:** Ship a one-click Windows build and publish on tag.
@@ -395,7 +395,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Scope:**
 - PyInstaller spec (one-folder).
 - Inno Setup script for installer (optional first pass).
-- GitHub Actions: on tag â†’ build artifact â†’ GitHub Release upload.
+- GitHub Actions: on tag -> build artifact -> GitHub Release upload.
 - App data path in `%APPDATA%/MELD_Visualizer`.
 
 **Out of scope:** macOS packaging.
@@ -427,10 +427,10 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR11 â€” Docs + Demo Data
+## PR11 - Docs + Demo Data
 **Branch:** `docs/demo-data`
 
-**Goal:** Show, donâ€™t tellâ€”demo CSVs, screenshots, short guides.
+**Goal:** Show, do not tell -- demo CSVs, screenshots, short guides.
 
 **Scope:**
 - Anonymized small CSV in `/demo/`.
@@ -446,7 +446,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 - [ ] Add `CONTRIBUTING.md` + `.github/ISSUE_TEMPLATE/*.yml`.
 
 **Acceptance Criteria:**
-- New users can run demo in â‰¤5 minutes.
+- New users can run demo in <=5 minutes.
 - Clear contribution guide is present.
 
 **Tests:**
@@ -455,7 +455,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Rollback:**
 - Revert docs-only changes.
 
-**Estimate:** 0.5â€“1 day.
+**Estimate:** 0.5-1 day.
 
 **Dependencies:** PR1, PR2.
 
@@ -463,7 +463,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR12 â€” Watch Folder / Live Reload (optional)
+## PR12 - Watch Folder / Live Reload (optional)
 **Branch:** `feat/watch-folder`
 
 **Goal:** Auto-refresh when CSV/Parquet grows during a run.
@@ -482,7 +482,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 - When file grows, charts update without manual reload.
 
 **Tests:**
-- Integration: append to file â†’ view updates.
+- Integration: append to file -> view updates.
 
 **Docs:**
 - Note on performance and safety.
@@ -498,7 +498,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-## PR13 â€” Linux Containerization & Devcontainer (optional)
+## PR13 - Linux Containerization & Devcontainer (optional)
 **Branch:** `infra/linux-container-devcontainer`
 
 **Goal:** Make Linux runs easy and set stage for future native packaging.
@@ -526,7 +526,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 **Rollback:**
 - Remove container files; unaffected host runs.
 
-**Estimate:** 0.5â€“1 day.
+**Estimate:** 0.5-1 day.
 
 **Dependencies:** PR1.
 
@@ -538,5 +538,5 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 - Each PR is self-contained with feature flags where useful.
 - Prefer small, reviewable commits.
 - Link PRs to this plan and check off tasks in the PR description.
-- Post benchmark numbers (before/after) for PRs 4â€“6.
+- Post benchmark numbers (before/after) for PRs 4-6.
 - Attach screenshots/GIFs for PRs touching UI.
