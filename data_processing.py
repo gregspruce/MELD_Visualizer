@@ -137,7 +137,7 @@ def generate_volume_mesh(df_active, color_col):
 
     # --- Vertex and Face Generation ---
     points = df_active[['XPos', 'YPos', 'ZPos']].values
-    geometries = df_active[['T_clipped', 'L', 'R']].rename(columns={'T_clipped': 'T', 'L': 'L', 'R': 'R'}).values
+    geometries = df_active[['T_clipped']].rename(columns={'T_clipped': 'T'}).values
     color_data = df_active[color_col].values
 
     all_vertices, all_faces, vertex_colors = [], [], []
@@ -154,8 +154,8 @@ def generate_volume_mesh(df_active, color_col):
             continue
 
         # Generate the vertices for the cross-sections at the start and end of the segment
-        verts1 = get_cross_section_vertices(p1, v_direction, g1[0], g1[1], g1[2], N=POINTS_PER_SECTION)
-        verts2 = get_cross_section_vertices(p2, v_direction, g2[0], g2[1], g2[2], N=POINTS_PER_SECTION)
+        verts1 = get_cross_section_vertices(p1, v_direction, g1[0], BEAD_LENGTH, BEAD_RADIUS, N=POINTS_PER_SECTION)
+        verts2 = get_cross_section_vertices(p2, v_direction, g2[0], BEAD_LENGTH, BEAD_RADIUS, N=POINTS_PER_SECTION)
         all_vertices.extend(verts1)
         all_vertices.extend(verts2)
 

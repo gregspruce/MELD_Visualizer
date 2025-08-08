@@ -182,6 +182,7 @@ def update_custom_and_mesh_plot_controls(layout_config):
 @callback(
     Output('save-config-alert', 'is_open'),
     Output('save-config-alert', 'children'),
+    Output('store-config-updated', 'data'),
     Input('save-config-button', 'n_clicks'),
     [State('config-theme-dropdown', 'value'), State('config-template-dropdown', 'value'),
      State('config-graph-1-dropdown', 'value'), State('config-graph-2-dropdown', 'value'),
@@ -199,10 +200,10 @@ def save_config_and_advise_restart(n_clicks, theme, template, g1_opts, g2_opts, 
         with open('config.json', 'w') as f:
             json.dump(new_config, f, indent=2)
         message = "Success! Your settings have been saved. Please restart the application to see the changes."
-        return True, message
+        return True, message, n_clicks
     except Exception as e:
         message = f"Error: Could not save settings. {e}"
-        return True, message
+        return True, message, no_update
 
 # --- Filter Synchronization Callback ---
 @callback(
@@ -286,9 +287,10 @@ def sync_filter_controls(slider_val, lower_in, upper_in, s_min_in, s_max_in, col
     Output("graph-1", "figure"),
     [Input('store-main-df', 'data'),
      Input("radio-buttons-1", "value"),
-     Input({'type': 'range-slider', 'index': 'zpos-1'}, "value")]
+     Input({'type': 'range-slider', 'index': 'zpos-1'}, "value"),
+     Input('store-config-updated', 'data')]
 )
-def update_graph_1(jsonified_df, col_chosen, slider_range):
+def update_graph_1(jsonified_df, col_chosen, slider_range, config_updated):
     """Updates the first main 3D scatter plot based on the selected color and ZPos filter."""
     if not all([jsonified_df, col_chosen, slider_range]): return create_empty_figure()
     df = pd.read_json(io.StringIO(jsonified_df), orient='split')
@@ -303,9 +305,10 @@ def update_graph_1(jsonified_df, col_chosen, slider_range):
     Output("graph-2", "figure"),
     [Input('store-main-df', 'data'),
      Input("radio-buttons-2", "value"),
-     Input({'type': 'range-slider', 'index': 'zpos-2'}, "value")]
+     Input({'type': 'range-slider', 'index': 'zpos-2'}, "value"),
+     Input('store-config-updated', 'data')]
 )
-def update_graph_2(jsonified_df, col_chosen, slider_range):
+def update_graph_2(jsonified_df, col_chosen, slider_range, config_updated):
     """Updates the second main 3D scatter plot based on the selected color and ZPos filter."""
     if not all([jsonified_df, col_chosen, slider_range]): return create_empty_figure()
     df = pd.read_json(io.StringIO(jsonified_df), orient='split')
