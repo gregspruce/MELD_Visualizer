@@ -99,26 +99,29 @@ def generate_volume_mesh(df_active, color_col):
         print(f"Error: Missing required columns for mesh generation: {', '.join(missing_cols)}")
         return None
 
-    # Constants for bead shape calculation
-    L = 2.0
-    R = L / 2.0
-    W_Bar_mm = 0.5 * 25.4
-    Area_M = W_Bar_mm**2
+    # --- Bead Geometry Constants ---
+    # These values define the physical properties of the extrusion material.
+    BEAD_LENGTH = 2.0  # Length of the rectangular part of the bead cross-section (mm)
+    BEAD_RADIUS = BEAD_LENGTH / 2.0 # Radius of the semi-circular ends (mm)
+    WIRE_DIAMETER_MM = 0.5 * INCH_TO_MM # Diameter of the feedstock wire (mm)
+    WIRE_AREA = WIRE_DIAMETER_MM**2 # Area of the feedstock wire (mm^2)
+    MAX_BEAD_THICKNESS = 1.0 * INCH_TO_MM # Safety clip for bead thickness (mm)
+    POINTS_PER_SECTION = 12 # Number of vertices in each cross-section circle
 
-    # Make a copy to avoid SettingWithCopyWarning, although the calling function already does.
-    df_calc = df_active.copy()
+    # --- Bead Geometry Calculation ---
+    # This section calculates the cross-sectional geometry of the bead at each point
+    # based on the principle of conservation of mass (volume in = volume out).
+    # Bead Area = (Feed Velocity * Wire Area) / Path Velocity
+    df_active = df_active.copy()
+    df_active['Bead_Area'] = (df_active['FeedVel'] * WIRE_AREA) / df_active['PathVel']
+    # The thickness T is derived from the area of the idealized bead shape (rectangle + circle)
+    df_active['T'] = (df_active['Bead_Area'] - (np.pi * BEAD_RADIUS**2)) / BEAD_LENGTH
+    df_active['T_clipped'] = df_active['T'].clip(0.0, MAX_BEAD_THICKNESS)
 
-    # Calculate bead geometry based on process parameters
-    df_calc['L'] = L
-    df_calc['R'] = R
-    df_calc['Bead_Area'] = (df_calc['FeedVel'] * Area_M) / df_calc['PathVel']
-    df_calc['T'] = (df_calc['Bead_Area'] - (np.pi * R**2)) / L
-    df_calc['T_clipped'] = df_calc['T'].clip(0.0, 25.4) # Clip to a reasonable max thickness
-
-    points = df_calc[['XPos', 'YPos', 'ZPos']].values
-    # No need to rename columns, just select them in the correct order for indexing.
-    geometries = df_calc[['T_clipped', 'L', 'R']].values
-    color_data = df_calc[color_col].values
+    # --- Vertex and Face Generation ---
+    points = df_active[['XPos', 'YPos', 'ZPos']].values
+    geometries = df_active[['T_clipped']].rename(columns={'T_clipped': 'T'}).values
+    color_data = df_active[color_col].values
 
     all_vertices, all_faces, vertex_colors = [], [], []
     vertex_offset = 0
@@ -133,8 +136,9 @@ def generate_volume_mesh(df_active, color_col):
         if np.linalg.norm(v_direction) < 1e-6:
             continue
 
-        verts1 = get_cross_section_vertices(p1, v_direction, g1[0], g1[1], g1[2], N=N_points_per_section)
-        verts2 = get_cross_section_vertices(p2, v_direction, g2[0], g2[1], g2[2], N=N_points_per_section)
+        # Generate the vertices for the cross-sections at the start and end of the segment
+        verts1 = get_cross_section_vertices(p1, v_direction, g1[0], BEAD_LENGTH, BEAD_RADIUS, N=POINTS_PER_SECTION)
+        verts2 = get_cross_section_vertices(p2, v_direction, g2[0], BEAD_LENGTH, BEAD_RADIUS, N=POINTS_PER_SECTION)
 
         all_vertices.extend(verts1)
         all_vertices.extend(verts2)

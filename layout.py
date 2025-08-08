@@ -166,6 +166,7 @@ def create_layout():
         dbc.Container([
             dcc.Store(id='store-main-df'), dcc.Store(id='store-layout-config'),
             dcc.Store(id='store-config-warnings'), dcc.Store(id='store-column-ranges'),
+            dcc.Store(id='store-config-updated'),
             build_header(),
             build_app_body_with_tabs(),
         ], fluid=True)
