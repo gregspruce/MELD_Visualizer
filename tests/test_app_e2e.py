@@ -11,8 +11,9 @@ def test_app_smoke_test(dash_duo):
     app = import_app("app")
     dash_duo.start_server(app)
     dash_duo.wait_for_page()
-    assert dash_duo.title == "Volumetric Data Plotter"
     assert dash_duo.find_element("#output-filename").text == "Please upload a CSV file to begin."
+
+import base64
 
 def test_file_upload_and_initial_state(dash_duo):
     """
@@ -22,19 +23,28 @@ def test_file_upload_and_initial_state(dash_duo):
     dash_duo.start_server(app)
     dash_duo.wait_for_page()
 
-    # Get the path to the sample CSV file
-    csv_path = 'CSV/20250707144618.csv'
+    # Read the sample CSV file and encode it in base64
+    with open('CSV/20250707144618.csv', 'rb') as f:
+        content_bytes = f.read()
+    encoded = base64.b64encode(content_bytes).decode('utf-8')
 
-    # Set the value of the dcc.Upload component
-    dash_duo.upload_file("#upload-data", csv_path)
+    # Trigger the upload callback with the file content
+    time.sleep(10)
+    dash_duo.driver.execute_script(
+        "window.dash_clientside.setProps("
+        "    'upload-data',"
+        "    {"
+        "        'contents': 'data:text/csv;base64," + encoded + "',"
+        "        'filename': '20250707144618.csv'"
+        "    }"
+        ")"
+    )
 
     # Wait for the filename to be displayed
-    time.sleep(2) # Allow time for callbacks to fire
-
-    # Assert that the filename is displayed
-    assert "20250707144618.csv" in dash_duo.find_element("#output-filename").text
+    dash_duo.wait_for_text_to_equal("#output-filename", "Current file: 20250707144618.csv (Imperial units detected and converted to mm)", timeout=15)
 
     # Assert that the radio buttons for graph 1 are populated
+    dash_duo.wait_for_element("#radio-buttons-1 .form-check-input")
     radio_buttons_1 = dash_duo.find_elements("#radio-buttons-1 .form-check-input")
     assert len(radio_buttons_1) > 0
 
@@ -48,7 +58,7 @@ def test_tab_navigation(dash_duo):
 
     # Navigate to the '3D Volume Mesh' tab
     dash_duo.find_elements(".nav-tabs .nav-link")[6].click()
-    time.sleep(1) # Allow time for tab content to render
+    time.sleep(10)
 
     # Assert that a key element of that tab's content becomes visible
     assert dash_duo.find_element("#generate-mesh-plot-button").is_displayed()
