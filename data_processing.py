@@ -5,25 +5,17 @@ import io
 import pandas as pd
 import numpy as np
 
-# --- Constants ---
-# A set of columns that are expected to be in inches and need conversion to mm.
-IMPERIAL_COLUMNS_TO_CONVERT = {'XPos', 'YPos', 'ZPos', 'FeedVel', 'PathVel', 'XVel', 'YVel', 'ZVel'}
-INCH_TO_MM = 25.4
-
-# --- Functions ---
 def parse_contents(contents, filename):
     """
-    Parses the contents of an uploaded CSV file, handling base64 decoding,
-    unit conversion, and time calculations.
+    Parses the contents of an uploaded CSV file.
 
     Args:
-        contents (str): The base64 encoded string of the file content from a dcc.Upload component.
+        contents (str): The base64 encoded string of the file content.
         filename (str): The name of the uploaded file.
 
     Returns:
-        tuple: A tuple containing (pd.DataFrame, str, bool) representing the
-               parsed data, an error message (or None), and a flag indicating
-               if unit conversion was performed.
+        tuple: A tuple containing (DataFrame, error_message, unit_conversion_flag).
+               The DataFrame is None if an error occurs.
     """
     if not contents:
         return None, "Error: No file content found.", False
@@ -39,49 +31,33 @@ def parse_contents(contents, filename):
         df['TimeInSeconds'] = (df['Time'] - df['Time'].min()).dt.total_seconds()
 
         converted_units = False
-        # Heuristic to detect if the data is in imperial units (inches) vs. metric (mm).
-        # If the max feed velocity is a small number (e.g., <= 100), it's likely inches/sec.
+        # Check for imperial units (inches/sec) and convert to metric (mm/sec)
         df_active_check = df[df['FeedVel'] > 0]
         if not df_active_check.empty and df_active_check['FeedVel'].max() <= 100:
             converted_units = True
-            for col in IMPERIAL_COLUMNS_TO_CONVERT:
-                if col in df.columns:
-                    df[col] *= INCH_TO_MM
+            cols_to_convert = ['XPos', 'YPos', 'ZPos', 'FeedVel', 'PathVel', 'XVel', 'YVel', 'ZVel']
+            for col in [c for c in cols_to_convert if c in df.columns]:
+                df[col] *= 25.4
         return df, None, converted_units
     except Exception as e:
-        return None, f"An unexpected error occurred while parsing the CSV: {e}", False
+        return None, f"An unexpected error occurred: {e}", False
 
 def get_cross_section_vertices(p, v_dir, T, L, R, N=12):
     """
     Calculates the vertices of a single cross-section for the mesh.
-    This defines the shape of the extruded bead at a single point, which is
-    modeled as a rectangle with a semi-circle at each end.
-
-    Args:
-        p (np.array): The center point of the cross-section.
-        v_dir (np.array): The direction vector of the toolpath.
-        T (float): The thickness of the bead (height of the rectangular part).
-        L (float): The length of the rectangular part of the bead.
-        R (float): The radius of the semi-circular ends of the bead.
-        N (int): The number of vertices to generate for the cross-section.
-
-    Returns:
-        np.array: A NumPy array of shape (N, 3) containing the vertex coordinates.
+    This defines the shape of the extruded bead at a single point.
     """
     if np.linalg.norm(v_dir) > 1e-9:
         v_dir = v_dir / np.linalg.norm(v_dir)
     else:
-        # Default to a safe direction if the direction vector is zero
+        # Default to a vertical direction if the direction vector is zero
         v_dir = np.array([0, 1, 0])
 
-    # Define the plane of the cross-section using two orthogonal vectors.
-    # h_vec is the horizontal vector in the XY plane, perpendicular to the direction.
     z_axis = np.array([0, 0, 1])
     h_vec = np.cross(v_dir, z_axis)
     if np.linalg.norm(h_vec) < 1e-6:
-        h_vec = np.array([1, 0, 0]) # Fallback for purely vertical toolpaths
+        h_vec = np.array([1, 0, 0]) # Fallback for vertical toolpaths
     h_vec = h_vec / np.linalg.norm(h_vec)
-    # u_vec is the "up" vector, perpendicular to both direction and horizontal.
     u_vec = np.cross(h_vec, v_dir)
 
     vertices = []
@@ -113,7 +89,14 @@ def generate_volume_mesh(df_active, color_col):
         dict: A dictionary containing 'vertices', 'faces', and 'vertex_colors'.
               Returns None if the data is insufficient for mesh generation.
     """
-    if df_active.empty or len(df_active) < 2:
+    if df_active.empty:
+        return None
+
+    # Check for required columns for geometry calculation
+    required_cols = {'XPos', 'YPos', 'ZPos', 'FeedVel', 'PathVel'}
+    if not required_cols.issubset(df_active.columns):
+        missing_cols = required_cols - set(df_active.columns)
+        print(f"Error: Missing required columns for mesh generation: {', '.join(missing_cols)}")
         return None
 
     # --- Bead Geometry Constants ---
@@ -142,39 +125,38 @@ def generate_volume_mesh(df_active, color_col):
 
     all_vertices, all_faces, vertex_colors = [], [], []
     vertex_offset = 0
+    N_points_per_section = 12 # Number of vertices in each cross-section circle
 
     for i in range(len(points) - 1):
-        # Get data for the start and end of the segment
         p1, p2 = points[i], points[i+1]
         g1, g2 = geometries[i], geometries[i+1]
         v_direction = p2 - p1
 
-        # Skip segment if the points are identical (no direction/movement)
+        # Skip if points are identical (no direction)
         if np.linalg.norm(v_direction) < 1e-6:
             continue
 
         # Generate the vertices for the cross-sections at the start and end of the segment
         verts1 = get_cross_section_vertices(p1, v_direction, g1[0], BEAD_LENGTH, BEAD_RADIUS, N=POINTS_PER_SECTION)
         verts2 = get_cross_section_vertices(p2, v_direction, g2[0], BEAD_LENGTH, BEAD_RADIUS, N=POINTS_PER_SECTION)
+
         all_vertices.extend(verts1)
         all_vertices.extend(verts2)
 
-        # Assign color data to the newly created vertices
-        vertex_colors.extend([color_data[i]] * POINTS_PER_SECTION)
-        vertex_colors.extend([color_data[i+1]] * POINTS_PER_SECTION)
+        # Assign color data to the vertices
+        vertex_colors.extend([color_data[i]] * N_points_per_section)
+        vertex_colors.extend([color_data[i+1]] * N_points_per_section)
 
-        # Create the triangular faces connecting the two cross-sections
-        for j in range(POINTS_PER_SECTION):
+        # Create faces connecting the two cross-sections
+        for j in range(N_points_per_section):
             v1 = vertex_offset + j
-            v2 = vertex_offset + (j + 1) % POINTS_PER_SECTION
-            v3 = vertex_offset + POINTS_PER_SECTION + j
-            v4 = vertex_offset + POINTS_PER_SECTION + (j + 1) % POINTS_PER_SECTION
-            # Create two triangles to form a quad between the vertices
+            v2 = vertex_offset + (j + 1) % N_points_per_section
+            v3 = vertex_offset + N_points_per_section + j
+            v4 = vertex_offset + N_points_per_section + (j + 1) % N_points_per_section
+            # Create two triangles for each quad
             all_faces.append([v1, v3, v4])
             all_faces.append([v1, v4, v2])
-
-        # Increment the offset for the next set of vertices
-        vertex_offset += 2 * POINTS_PER_SECTION
+        vertex_offset += 2 * N_points_per_section
 
     if not all_vertices:
         return None
