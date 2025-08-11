@@ -5,6 +5,9 @@ import io
 import pandas as pd
 import numpy as np
 
+# --- Constants ---
+INCH_TO_MM = 25.4
+
 def parse_contents(contents, filename):
     """
     Parses the contents of an uploaded CSV file.
