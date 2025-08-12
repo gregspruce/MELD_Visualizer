@@ -19,4 +19,9 @@ def pytest_setup_options():
     options.add_argument("--disable-dev-shm-usage")
     # Using a unique user data dir for each test run should prevent session conflicts
     options.add_argument("--user-data-dir=/tmp/chrome-user-data")
+    
+    # --- ADD THIS LINE ---
+    # Explicitly tell Selenium where to find the chromium binary.
+    options.binary_location = "/usr/bin/chromium-browser"
+    
     return options
