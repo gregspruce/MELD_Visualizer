@@ -44,9 +44,9 @@ The application was refactored from a single monolithic script into a modular st
 
 ## 4. Development Workflow
 
-1.  **Setup:** Create a Python virtual environment and install the required packages. A `requirements.txt` should be created and maintained.
+1.  **Setup:** Create a Python virtual environment and install all required packages from the `requirements.txt` file. This file is the single source of truth for all project dependencies.
     ```bash
-    pip install pandas numpy dash dash-bootstrap-components plotly
+    pip install -r requirements.txt
     ```
 2.  **Running the App:** Execute the main entry point.
     ```bash
@@ -92,7 +92,7 @@ This layer tests the data processing logic in isolation, without needing to run 
 This layer tests the running application from a user's perspective. It requires a browser automation tool. The recommended library is `dash.testing` (which builds on Selenium) as it is designed specifically for this purpose and includes powerful features like snapshot testing.
 
 **Setup:**
-*   `pip install pytest "dash[testing]"`
+*   All necessary packages, including `pytest` and `dash[testing]`, are installed via the main `requirements.txt` file. Ensure you have run `pip install -r requirements.txt` in your environment.
 
 **File to create:** `tests/test_app_e2e.py`
 
