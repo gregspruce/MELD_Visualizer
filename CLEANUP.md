@@ -1,33 +1,33 @@
-# Cleanup / Deletions
+# Cleanup checklist (tailored to current repo behavior)
 
-Given the updated test strategy and CI, these items are **no longer needed** (or should be moved):
+Based on recent installs and test runs, adjust the repo as follows:
 
-1) **dependencies**
-   - Remove `dash[testing]` from `requirements.txt`
-   - Remove `chromedriver-autoinstaller` from `requirements.txt`
-   - Keep runtime-only libs in `requirements.txt`
-   - Put pytest/selenium/etc. in `requirements-dev.txt` (already added)
+## Dependencies
+- **Move test tools out of `requirements.txt`:**
+  - Remove: `pytest`, `dash[testing]`, `chromedriver-autoinstaller`
+  - Keep: `pandas`, `numpy`, `dash`, `dash-bootstrap-components`, `plotly`
+- **Ensure `requirements-dev.txt` exists** with:
+  - `pytest==8.3.5`
+  - `pytest-timeout==2.3.1`
+  - `pytest-xdist==3.6.*`
+  - `selenium==4.23.*`
+  - `requests>=2.31`
 
-2) **files**
-   - Old placeholder E2E test: `tests/test_e2e_placeholder.py` (replaced by real E2E)
-   - Any previous `scripts/jules_setup.sh` or ad-hoc setup scripts you no longer reference
-   - Any top-level `conftest.py` that conflicts with `tests/conftest.py`
-   - Any legacy browser driver binaries checked into the repo (not needed with Selenium Manager)
+## Files likely safe to delete or replace
+- `tests/test_e2e_placeholder.py` (replaced by `tests/e2e/test_homepage_e2e.py`)
+- Any old setup scripts you no longer invoke (e.g., `scripts/jules_setup.sh`)
+- Any checked-in browser driver binaries (Selenium Manager handles drivers)
+- Any conflicting top-level `conftest.py` outside `tests/`
 
-3) **docs**
-   - Remove or update stale instructions referencing:
-     - `chromedriver_autoinstaller.install()`
-     - Running E2E without headless flags
-     - Installing Chrome/driver manually for each run
+## Keep / Add
+- `tests/test_suite.conf` (toggle)
+- `run_tests.sh` (sets env + reads toggle)
+- `.github/workflows/ci.yml` (split jobs; reads toggle)
+- `JULES_initial_setup_v3.sh` content in Jules’ Initial setup
 
-4) **git hygiene**
-   - Mark `run_tests.sh` as executable in git:
-     ```bash
-     git update-index --chmod=+x run_tests.sh
-     ```
-   - Ensure LF endings for shell scripts to avoid Windows issues:
-     ```bash
-     git config core.autocrlf input
-     ```
-
-If you want, I can perform a pass over your current repo tree and produce a targeted diff of what to delete/move based on what's actually present.
+## Windows notes
+- Ensure LF endings for `run_tests.sh` (use `dos2unix` or `git config core.autocrlf input`)
+- Mark executable:
+  ```bash
+  git update-index --chmod=+x run_tests.sh
+  ```
