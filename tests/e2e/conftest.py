@@ -69,7 +69,8 @@ def server_url():
     host = "127.0.0.1"
 
     def run():
-        dash_app.run_server(host=host, port=port, debug=False)
+        # Dash 2.0 and later use app.run(), not app.run_server
+        dash_app.run(host=host, port=port, debug=False)
 
     t = threading.Thread(target=run, daemon=True)
     t.start()
