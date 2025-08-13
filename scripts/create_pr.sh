@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BRANCH="${1:-ci-e2e-tabs}"
+BRANCH="${1:-ci-e2e-tabs-bootstrap}"
 git checkout -b "$BRANCH"
-
-# Ensure executable bit on scripts
-git update-index --chmod=+x run_tests.sh || true
-
 git add -A
-git commit -m "CI+E2E: localhost bind, tab assertions, and merged docs"
+git commit -m "UI: Load Bootstrap theme; CI/E2E: add tab assertions and docs notes"
 git push -u origin "$BRANCH"
 
 echo

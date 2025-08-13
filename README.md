@@ -193,7 +193,7 @@ This will create a `dist` folder containing `VolumetricPlotter.exe`. This execut
 
 ---
 
-## E2E Tabs Coverage
+## E2E Tabs Coverage & Theme Note
 The E2E suite asserts the application title (**Volumetric Data Plotter**) and verifies the presence & clickability of these tab labels:
 
 - Main 3D Plots
@@ -204,4 +204,4 @@ The E2E suite asserts the application title (**Volumetric Data Plotter**) and ve
 - 3D Volume Mesh
 - Settings
 
-If you rename UI text, update the list in `tests/e2e/test_tabs_e2e.py` accordingly.
+> **Note on styling:** The app loads a Bootstrap theme (from `config.py` if set, otherwise default) so `dash-bootstrap-components` widgets render correctly. If you see blue underlined links instead of tabs, your theme didn’t load—check network access or switch to a local CSS under `assets/`.
