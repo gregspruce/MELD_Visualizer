@@ -126,3 +126,25 @@ For any new feature or bug fix, the following workflow should be followed by an 
 1.  **Write New Tests:** Add new unit tests and/or E2E tests that specifically validate the new feature or prove the bug is fixed.
 2.  **Run All Tests:** Execute the entire test suite (`pytest tests/`).
 3.  **Verify No Regressions:** Ensure that all existing tests continue to pass. If an existing test fails, the new changes have caused a regression that must be fixed before the work can be considered complete.
+
+### Environment (Jules)
+
+1. Provision the VM and install dependencies:
+   ```bash
+   bash scripts/jules_setup.sh
+   ```
+2. Run tests with plugin autoload disabled:
+```bash
+bash scripts/run_tests.sh           # all tests
+bash scripts/run_tests.sh -k 'not e2e'  # unit tests only
+```
+
+Notes:
+
+Chrome is installed system-wide; Selenium 4’s Selenium Manager fetches a matching driver automatically.
+
+If tests still hang, run:
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --trace-config -k test_simple -q
+```
+to verify no external plugins are being loaded.
