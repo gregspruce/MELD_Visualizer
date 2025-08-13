@@ -1,2 +1,7 @@
-pytest==8.3.*
-pytest-timeout==2.3.*
+# Dev/test dependencies for MELD_Visualizer
+# Keep runtime deps in requirements.txt; test-only pins live here.
+pytest==8.3.5
+pytest-timeout==2.3.1
+pytest-xdist==3.6.*
+# Future E2E (uses Selenium Manager; no chromedriver pin needed)
+selenium==4.23.*
