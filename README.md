@@ -193,84 +193,15 @@ This will create a `dist` folder containing `VolumetricPlotter.exe`. This execut
 
 ---
 
-## Testing & Automation (Merged)
+## E2E Tabs Coverage
+The E2E suite asserts the application title (**Volumetric Data Plotter**) and verifies the presence & clickability of these tab labels:
 
-The repository is now **Jules-proof** and CI-ready while preserving all user functionality described above.
+- Main 3D Plots
+- 2D Time Plot
+- Custom 3D Plot
+- Data Table
+- 3D Toolpath Plot
+- 3D Volume Mesh
+- Settings
 
-### Test Suites
-
-Tests are split into **Unit/HTTP** and **E2E**:
-
-- **Unit/HTTP** (no browser): fast import checks, config parsing, root route smoke tests.
-- **E2E** (headless Chrome via Selenium 4): launches the app on a free port and verifies the page renders.
-
-Locations:
-
-```
-tests/
-├─ conftest.py
-├─ test_imports.py
-├─ test_config_schema.py
-├─ test_app_smoke.py
-└─ e2e/
-   ├─ conftest.py
-   └─ test_homepage_e2e.py
-```
-
-### Choosing What to Run
-
-Control which tests run using **`tests/test_suite.conf`**. Leave exactly **one** of these words uncommented:
-```
-unit
-# e2e
-# both
-# none
-```
-
-OR override without editing files:
-```bash
-TEST_SUITE=e2e bash run_tests.sh    # unit | e2e | both | none
-```
-
-### Running Tests Locally
-
-```bash
-python -m pip install -U pip
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-
-# Use the switch file:
-bash run_tests.sh
-
-# Or run directly:
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q -m "not e2e"   # unit only
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q -m "e2e"       # e2e only (Chrome required)
-```
-
-> Why `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`? It prevents random globally installed pytest plugins from interfering with test startup in shared machines/VMs.
-
-### Jules
-
-- Paste the contents of `JULES_initial_setup_v3.sh` into **Initial setup**.
-- If you want E2E on Jules, set **`E2E_SETUP=1`** near the top of the setup script so Chrome is installed *during snapshot*.
-- In the **Run** step:
-  ```bash
-  cd /app
-  bash run_tests.sh                 # respects tests/test_suite.conf
-  # or override: TEST_SUITE=both bash run_tests.sh
-  ```
-
-### GitHub Actions
-
-The workflow at `.github/workflows/ci.yml` mirrors this design:
-- A small job reads `tests/test_suite.conf` and decides which jobs to run.
-- **Unit** job (no Chrome) runs `-m "not e2e"`.
-- **E2E** job installs Google Chrome and runs `-m "e2e"`.
-
-No YAML edits required—commit the toggle file and push.
-
-### Developer Notes
-
-- Keep **runtime** deps in `requirements.txt` only.
-- Keep **test-only** deps in `requirements-dev.txt` (e.g., `pytest`, `selenium`, `pytest-timeout`, `pytest-xdist`).
-- E2E uses Selenium 4+ (Selenium Manager auto-downloads a matching chromedriver). No `chromedriver_autoinstaller` needed.
+If you rename UI text, update the list in `tests/e2e/test_tabs_e2e.py` accordingly.

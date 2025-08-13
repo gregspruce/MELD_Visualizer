@@ -1,7 +1,3 @@
-# MELD_Visualizer Agent Instructions (Merged)
-
-Below retains all original project and user/developer information, with an updated, **Jules-proof** testing and automation section.
-
 # MELD_Visualizer Agent Instructions (AGENTS.MD)
 
 This document provides instructions for AI agents (like Google's Jules) and human developers on how to understand, develop, and test the MELD_Visualizer application.
@@ -155,71 +151,5 @@ to verify no external plugins are being loaded.
 
 ---
 
-## 6. Updated Testing & Execution for Agents (Jules/CI Safe)
-
-This supersedes older references to `dash[testing]` inside `requirements.txt` or `chromedriver_autoinstaller` usage.
-
-### Dependency Policy
-- **requirements.txt** → runtime only.
-- **requirements-dev.txt** → test tooling (pytest, selenium, pytest-timeout, pytest-xdist, requests, etc.).
-
-### Test Layout & Markers
-- Unit/HTTP tests live under `tests/` and **do not** require a browser.
-- E2E tests live under `tests/e2e/` and are marked `@pytest.mark.e2e`.
-- The global `pytest.ini` defines the `e2e` marker and basic warning filters.
-
-### Selecting the Suite
-Agents should honor the repo toggle file **`tests/test_suite.conf`**. The first uncommented line is the selection: `unit`, `e2e`, `both`, or `none`.
-
-Agents MAY override temporarily with the `TEST_SUITE` environment variable for ad-hoc runs.
-
-### Commands Agents Should Use
-
-**Install:** (idempotent)
-```bash
-python -m pip install -U pip
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-```
-
-**Run tests via helper:** (auto-sets safe env flags)
-```bash
-bash run_tests.sh
-# override on demand:
-TEST_SUITE=unit bash run_tests.sh
-TEST_SUITE=e2e  bash run_tests.sh
-```
-
-**Direct pytest (if needed):**
-```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q -m "not e2e"   # unit only
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q -m "e2e"       # e2e only
-```
-
-### Jules Environment
-- **Initial setup:** use `JULES_initial_setup_v3.sh` from repo. To install Chrome for E2E, add:
-  ```bash
-  E2E_SETUP=1
-  ```
-  near the top before snapshot.
-- **Run:** `cd /app && bash run_tests.sh` (respects `tests/test_suite.conf`).
-
-### E2E Implementation Notes (Selenium 4)
-- Headless flags required in CI/VMs:
-  `--headless=new --no-sandbox --disable-dev-shm-usage --window-size=1280,800`
-- Selenium 4’s **Selenium Manager** fetches the appropriate chromedriver automatically when Chrome is present.
-- Tests self-skip if Chrome is not installed (useful for unit-only runs).
-
----
-
-## 7. Cleanup Guidance for Agents
-
-If you encounter the following, update the repo accordingly:
-
-- Remove `dash[testing]` and `chromedriver-autoinstaller` from `requirements.txt` (test deps belong in `requirements-dev.txt`).
-- Remove stale `tests/test_e2e_placeholder.py`.
-- Prefer `tests/e2e/test_*.py` with the `e2e` marker and our Selenium setup.
-- Avoid global `conftest.py` at repo root; use `tests/conftest.py` only.
-- Ensure shell scripts are executable and LF (`git update-index --chmod=+x run_tests.sh`).
-
-All other original instructions (app usage, architecture, PyInstaller, etc.) remain valid.
+### Agent Notes: Tab Assertions
+Agents should keep E2E tab checks aligned with the current UI copy. The canonical tab labels are asserted in `tests/e2e/test_tabs_e2e.py`. If a label changes, update the list and keep selectors text-based to minimize coupling to specific components.
