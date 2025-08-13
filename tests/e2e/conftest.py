@@ -11,9 +11,7 @@ import pytest
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 
-# Skip whole e2e suite if Chrome is not present
 def _chrome_bin():
     for name in ("google-chrome", "google-chrome-stable", "chrome", "chromium", "chromium-browser"):
         path = shutil.which(name)
@@ -31,13 +29,11 @@ def _free_port():
     return port
 
 def _import_app():
-    # Try app import patterns
     for name in ("app", "MELD_Visualizer.app", "meld_visualizer.app", "src.app"):
         try:
             return importlib.import_module(name)
         except ModuleNotFoundError:
             continue
-    # Last resort: find any app.py
     for p in Path.cwd().rglob("app.py"):
         try:
             spec = importlib.util.spec_from_file_location("discovered_app", p)
@@ -59,9 +55,8 @@ def server_url():
     elif mod and hasattr(mod, "app"):
         dash_app = getattr(mod, "app")
     else:
-        # minimal fallback app
         from dash import Dash, html
-        dash_app = Dash(__name__, suppress_callback_exceptions=True)
+        dash_app = Dash(__name__, suppress_callback_exceptions=True, title="Volumetric Data Plotter")
         dash_app.layout = html.Div([html.H1("MELD Visualizer (Fallback)"),
                                     html.P("Auto-generated app because `app.py` could not be imported.")])
 
@@ -69,7 +64,6 @@ def server_url():
     host = "127.0.0.1"
 
     def run():
-        # Dash 2.0 and later use app.run(), not app.run_server
         dash_app.run(host=host, port=port, debug=False)
 
     t = threading.Thread(target=run, daemon=True)
