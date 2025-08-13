@@ -1,4 +1,3 @@
-
 import os
 import sys
 import importlib
@@ -10,30 +9,22 @@ import pytest
 os.environ.setdefault("PYTEST_DISABLE_PLUGIN_AUTOLOAD", "1")
 
 def _add_project_root_to_sys_path() -> Path:
-    """
-    Walk up from tests/ to find a plausible project root and ensure it's on sys.path.
-    Heuristics: contains app.py OR .git OR pyproject.toml OR requirements.txt
-    """
     here = Path(__file__).resolve()
     for parent in [here.parent, *here.parents]:
         if any((parent / name).exists() for name in ("app.py", ".git", "pyproject.toml", "requirements.txt")):
             sys.path.insert(0, str(parent))
             return parent
-    # Fallback to tests/ parent
     sys.path.insert(0, str(here.parent))
     return here.parent
 
 PROJECT_ROOT = _add_project_root_to_sys_path()
 
 def _try_import_app():
-    # Try common module paths
     for name in ("app", "MELD_Visualizer.app", "meld_visualizer.app", "src.app"):
         try:
-            mod = importlib.import_module(name)
-            return mod
+            return importlib.import_module(name)
         except ModuleNotFoundError:
             continue
-    # Try to load any app.py found under the project root
     for p in PROJECT_ROOT.rglob("app.py"):
         try:
             spec = importlib.util.spec_from_file_location("discovered_app", p)
@@ -47,20 +38,13 @@ def _try_import_app():
 
 @pytest.fixture(scope="session")
 def dash_app():
-    """
-    Return a Dash app instance for smoke tests.
-    Preference order:
-      1) create_app(testing=True) if present
-      2) module-level `app`
-      3) Fallback minimal app (keeps CI/Jules green even if app.py is absent)
-    """
+    """Return a Dash app instance for non-browser smoke tests."""
     mod = _try_import_app()
     if mod is not None:
         if hasattr(mod, "create_app"):
             return mod.create_app(testing=True)
         if hasattr(mod, "app"):
             return getattr(mod, "app")
-
     # Fallback minimal Dash app
     from dash import Dash, html
     app = Dash(__name__, suppress_callback_exceptions=True)

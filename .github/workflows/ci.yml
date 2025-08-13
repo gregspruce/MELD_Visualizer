@@ -8,20 +8,41 @@ on:
   workflow_dispatch:
 
 jobs:
-  tests:
+  unit-tests:
+    name: Unit tests
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.13"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.13"
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Run unit tests
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        run: |
+          pytest -q -m "not e2e"
+
+  e2e-tests:
+    name: E2E tests (Chrome)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
           cache: 'pip'
           cache-dependency-path: |
             requirements.txt
@@ -46,21 +67,9 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-      - name: Versions (sanity)
-        run: |
-          python - <<'PY'
-          import importlib
-          for m in ("dash","pytest","selenium","plotly","pandas","numpy"):
-              try:
-                  mod=importlib.import_module(m)
-                  print(m, getattr(mod,"__version__","?"))
-              except Exception as e:
-                  print(m, "<not installed>", e)
-          PY
-
-      - name: Run tests
+      - name: Run E2E tests
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         run: |
           export CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || true)"
-          pytest -q
+          pytest -q -m "e2e"

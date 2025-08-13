@@ -1,4 +1,3 @@
-
 def test_root_responds(dash_app):
     server = dash_app.server
     client = server.test_client()

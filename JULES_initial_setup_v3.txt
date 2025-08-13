@@ -1,0 +1,52 @@
+# === MELD_Visualizer — Jules Initial Setup (E2E-ready) v3 ===
+# Paste into the Jules "Initial setup" box. Does NOT run tests.
+set -euxo pipefail
+cd /app
+
+# ----- privilege helper (root/non-root) -----
+if [ "$(id -u)" -ne 0 ]; then SUDO="sudo"; else SUDO=""; fi
+
+# ----- system deps & Google Chrome (Ubuntu/Debian base) -----
+$SUDO apt-get update
+$SUDO apt-get install -y wget gnupg ca-certificates
+
+if [ ! -f /etc/apt/sources.list.d/google-chrome.list ]; then
+  wget -qO- https://dl.google.com/linux/linux_signing_key.pub | $SUDO gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" |     $SUDO tee /etc/apt/sources.list.d/google-chrome.list >/dev/null
+  $SUDO apt-get update
+fi
+
+# Install Chrome only if missing
+if ! command -v google-chrome >/dev/null 2>&1 && ! command -v google-chrome-stable >/dev/null 2>&1; then
+  $SUDO apt-get install -y google-chrome-stable
+fi
+
+# Resolve CHROME_BIN for later test runs (ok if empty when you don't run E2E)
+CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || true)"
+if [ -n "${CHROME_BIN}" ]; then "$CHROME_BIN" --version || true; else echo "Chrome not found (that's OK for unit/http tests)"; fi
+
+# ----- Python deps -----
+python -m pip install -U pip
+if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+# ----- helper test runner with TEST_SUITE switch -----
+cat > /app/run_tests.sh <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+cd /app
+export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+export CHROME_BIN="${CHROME_BIN:-$(command -v google-chrome || command -v google-chrome-stable || true)}"
+SUITE="${TEST_SUITE:-both}"
+case "$SUITE" in
+  unit) ARGS=(-m "unit and not e2e");;
+  e2e)  ARGS=(-m "e2e");;
+  both|"") ARGS=();;
+  none) echo "TEST_SUITE=none -> skipping tests"; exit 0;;
+  *) echo "Unknown TEST_SUITE '$SUITE' -> running both"; ARGS=();;
+esac
+pytest -q "${ARGS[@]}"
+SH
+chmod +x /app/run_tests.sh
+
+echo "Setup complete. Use TEST_SUITE=unit|e2e|both|none with bash /app/run_tests.sh"
