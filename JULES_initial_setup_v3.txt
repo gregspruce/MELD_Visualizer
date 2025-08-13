@@ -3,6 +3,8 @@
 set -euxo pipefail
 cd /app
 
+E2E_SETUP=1
+
 # ----- privilege helper (root/non-root) -----
 if [ "$(id -u)" -ne 0 ]; then SUDO="sudo"; else SUDO=""; fi
 
