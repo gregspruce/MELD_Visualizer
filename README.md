@@ -91,9 +91,6 @@ The application is broken into logical modules to promote maintainability and se
 /
 ├── CSV/
 │   └── (sample data files)
-├── tests/
-│   ├── test_data_processing.py
-│   └── test_app_e2e.py
 ├── app.py                  # Main entry point, runs the server
 ├── layout.py               # Defines the UI layout (the "view")
 ├── callbacks.py            # Contains all app interactivity (the "controller")
@@ -119,15 +116,8 @@ Running the app with `python app.py` starts it in **Debug Mode**. This enables *
 
 ### 6. Testing
 
-The project includes a test suite using `pytest`. The tests are located in the `tests/` directory and are separated into unit tests and end-to-end (E2E) tests.
+TBD
 
--   **Unit Tests:** `tests/test_data_processing.py` tests the data manipulation functions in isolation.
--   **E2E Tests:** `tests/test_app_e2e.py` tests the full application from a user's perspective.
-
-To run the tests, execute `pytest` in the root directory:
-```bash
-pytest
-```
 For more detailed information on the testing strategy, see the `agents.md` file.
 
 ### 7. Building a Standalone Executable
