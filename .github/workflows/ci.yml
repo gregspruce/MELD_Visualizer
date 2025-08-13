@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install Google Chrome
+        run: |
+          set -eux
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg ca-certificates
+          if [ ! -f /etc/apt/sources.list.d/google-chrome.list ]; then
+            wget -qO- https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg
+            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" |               sudo tee /etc/apt/sources.list.d/google-chrome.list >/dev/null
+            sudo apt-get update
+          fi
+          sudo apt-get install -y google-chrome-stable
+          (google-chrome --version || google-chrome-stable --version) || true
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Versions (sanity)
+        run: |
+          python - <<'PY'
+          import importlib
+          for m in ("dash","pytest","selenium","plotly","pandas","numpy"):
+              try:
+                  mod=importlib.import_module(m)
+                  print(m, getattr(mod,"__version__","?"))
+              except Exception as e:
+                  print(m, "<not installed>", e)
+          PY
+
+      - name: Run tests
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        run: |
+          export CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || true)"
+          pytest -q
