@@ -23,7 +23,11 @@ def _register_callbacks(app):
         pass
 
 def create_app(testing: bool = False) -> Dash:
-    app = Dash(__name__, suppress_callback_exceptions=True)
+    app = Dash(
+        __name__,
+        suppress_callback_exceptions=True,
+        title="Volumetric Data Plotter"  # Set app title
+    )
     app.layout = _build_layout(app)
     _register_callbacks(app)
     return app
@@ -34,4 +38,5 @@ if __name__ == "__main__":
     host = os.environ.get("HOST", "0.0.0.0")
     port = int(os.environ.get("PORT", "8050"))
     debug = os.environ.get("DEBUG", "0") in ("1", "true", "True")
-    app.run_server(host=host, port=port, debug=debug)
+    # Use app.run for modern Dash
+    app.run(host=host, port=port, debug=debug)

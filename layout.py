@@ -157,10 +157,11 @@ def build_app_body_with_tabs():
         dbc.Tab(label="Settings", children=[build_config_tab()])
     ])
 
-def create_layout():
+def get_layout(app):
     """
     Creates the master layout for the entire application.
     This function is called by app.py.
+    The 'app' argument is unused but required by the dynamic loader.
     """
     return html.Div([
         dbc.Container([
