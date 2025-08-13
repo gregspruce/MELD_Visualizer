@@ -8,8 +8,39 @@ on:
   workflow_dispatch:
 
 jobs:
+  resolve-suite:
+    name: Resolve test suite
+    runs-on: ubuntu-latest
+    outputs:
+      suite: ${{ steps.read.outputs.suite }}
+      run_unit: ${{ steps.read.outputs.run_unit }}
+      run_e2e: ${{ steps.read.outputs.run_e2e }}
+      run_both: ${{ steps.read.outputs.run_both }}
+      run_none: ${{ steps.read.outputs.run_none }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: |
+          set -euo pipefail
+          SUITE="unit"
+          if [ -f tests/test_suite.conf ]; then
+            SUITE="$(grep -E '^[[:space:]]*[^#]+' tests/test_suite.conf | head -n1 | awk '{print $1}')"
+            SUITE="${SUITE:-unit}"
+          fi
+          echo "suite=$SUITE" >> "$GITHUB_OUTPUT"
+          case "$SUITE" in
+            unit)  echo "run_unit=true" >> "$GITHUB_OUTPUT"; echo "run_e2e=false" >> "$GITHUB_OUTPUT"; echo "run_both=false" >> "$GITHUB_OUTPUT"; echo "run_none=false" >> "$GITHUB_OUTPUT" ;;
+            e2e)   echo "run_unit=false" >> "$GITHUB_OUTPUT"; echo "run_e2e=true"  >> "$GITHUB_OUTPUT"; echo "run_both=false" >> "$GITHUB_OUTPUT"; echo "run_none=false" >> "$GITHUB_OUTPUT" ;;
+            both)  echo "run_unit=false" >> "$GITHUB_OUTPUT"; echo "run_e2e=false" >> "$GITHUB_OUTPUT"; echo "run_both=true"  >> "$GITHUB_OUTPUT"; echo "run_none=false" >> "$GITHUB_OUTPUT" ;;
+            none)  echo "run_unit=false" >> "$GITHUB_OUTPUT"; echo "run_e2e=false" >> "$GITHUB_OUTPUT"; echo "run_both=false" >> "$GITHUB_OUTPUT"; echo "run_none=true"  >> "$GITHUB_OUTPUT" ;;
+            *)     echo "Unknown suite '$SUITE'"; exit 2 ;;
+          esac
+          echo "Using suite: $SUITE"
+
   unit-tests:
     name: Unit tests
+    needs: resolve-suite
+    if: ${{ needs.resolve-suite.outputs.run_unit == 'true' || needs.resolve-suite.outputs.run_both == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +67,8 @@ jobs:
 
   e2e-tests:
     name: E2E tests (Chrome)
+    needs: resolve-suite
+    if: ${{ needs.resolve-suite.outputs.run_e2e == 'true' || needs.resolve-suite.outputs.run_both == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
