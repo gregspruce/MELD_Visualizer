@@ -1,32 +1,40 @@
-import pytest
-from selenium.webdriver.chrome.options import Options
-import sys
 import os
-import uuid
-import chromedriver_autoinstaller
+import pytest
 
-# Add the project root to the path to allow imports from the 'app' module
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-# Set an environment variable to indicate that we are running via pytest
-os.environ['RUNNING_VIA_PYTEST'] = 'true'
+# Only set this here as a safety net; scripts/run_tests.sh already exports it.
+os.environ.setdefault("PYTEST_DISABLE_PLUGIN_AUTOLOAD", "1")
 
-# Automatically find the installed Chrome and download the correct chromedriver
-chromedriver_autoinstaller.install()
+# Optional: only import selenium if E2E tests actually need it
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    _HAVE_SELENIUM = True
+except Exception:
+    _HAVE_SELENIUM = False
 
-@pytest.hookimpl(tryfirst=True)
-def pytest_setup_options():
+
+@pytest.fixture(scope="session")
+def browser():
     """
-    Adds Chrome options for running in a headless/CI environment.
+    Headless Chrome fixture using Selenium 4's Selenium Manager (auto driver).
+    Skips gracefully if selenium isn't installed.
     """
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    
-    # Explicitly point to the Google Chrome binary (NOT chromium)
-    options.binary_location = "/usr/bin/google-chrome"
-    
-    # Keep the unique user data directory to prevent test conflicts
-    options.add_argument(f"--user-data-dir=/tmp/chrome-user-data-{uuid.uuid4()}")
-    
-    return options
+    if not _HAVE_SELENIUM:
+        pytest.skip("Selenium not installed; skipping browser-based tests.")
+
+    opts = Options()
+    # Use the modern headless mode for stability
+    opts.add_argument("--headless=new")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
+    opts.add_argument("--disable-gpu")
+    opts.add_argument("--window-size=1280,800")
+
+    # If a custom chrome path is set, honor it
+    chrome_bin = os.environ.get("CHROME_BIN")
+    if chrome_bin:
+        opts.binary_location = chrome_bin
+
+    driver = webdriver.Chrome(options=opts)
+    yield driver
+    driver.quit()
