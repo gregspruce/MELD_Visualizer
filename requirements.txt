@@ -3,6 +3,3 @@ numpy
 dash
 dash-bootstrap-components
 plotly
-pytest
-dash[testing]
-chromedriver-autoinstaller

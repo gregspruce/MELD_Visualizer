@@ -1,43 +1,38 @@
-# --- app.py ---
 
 import os
-from threading import Timer
-import webbrowser
-from dash import Dash
+from dash import Dash, html
 
-# Import app configuration and layout creation function
-from config import APP_CONFIG, THEMES
-from layout import create_layout
+def _build_layout(app):
+    try:
+        import layout as layout_mod
+        if hasattr(layout_mod, "get_layout"):
+            return layout_mod.get_layout(app)
+        if hasattr(layout_mod, "layout"):
+            return layout_mod.layout
+    except Exception:
+        pass
+    return html.Div([html.H1("MELD Visualizer"), html.P("App layout placeholder")])
 
-# --- App Initialization ---
-# This is the central Dash app instance. It's imported by callbacks.py.
-app = Dash(
-    __name__,
-    external_stylesheets=[THEMES.get(APP_CONFIG['default_theme'])],
-    suppress_callback_exceptions=True,
-    prevent_initial_callbacks=True
-)
-# Set the app title
-app.title = "Volumetric Data Plotter"
+def _register_callbacks(app):
+    try:
+        import callbacks as callbacks_mod
+        if hasattr(callbacks_mod, "register_callbacks"):
+            callbacks_mod.register_callbacks(app)
+        elif hasattr(callbacks_mod, "init_callbacks"):
+            callbacks_mod.init_callbacks(app)
+    except Exception:
+        pass
 
-# Assign the layout to the app
-# The function create_layout() is called from layout.py
-app.layout = create_layout()
+def create_app(testing: bool = False) -> Dash:
+    app = Dash(__name__, suppress_callback_exceptions=True)
+    app.layout = _build_layout(app)
+    _register_callbacks(app)
+    return app
 
-# This import is what registers the callbacks.
-# It must be done AFTER the app is initialized and the layout is set.
-import callbacks
+app = create_app(testing=False)
 
-# --- Main Execution ---
-def open_browser():
-    """Opens the default web browser to the Dash app's URL."""
-    webbrowser.open_new("http://127.0.0.1:8050")
-
-if __name__ == '__main__':
-    # The Timer is used to delay opening the browser, ensuring the server has started.
-    # The WERKZEUG check prevents the browser from opening twice in debug mode.
-    if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
-        Timer(1, open_browser).start()
-
-    # Run the Dash app server
-    app.run(debug=True, port=8050)
+if __name__ == "__main__":
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", "8050"))
+    debug = os.environ.get("DEBUG", "0") in ("1", "true", "True")
+    app.run_server(host=host, port=port, debug=debug)
