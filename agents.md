@@ -151,5 +151,6 @@ to verify no external plugins are being loaded.
 
 ---
 
-### Agent Notes: Tab Assertions
-Agents should keep E2E tab checks aligned with the current UI copy. The canonical tab labels are asserted in `tests/e2e/test_tabs_e2e.py`. If a label changes, update the list and keep selectors text-based to minimize coupling to specific components.
+### Agent Notes: Tabs + Theme
+- Tabs are asserted in `tests/e2e/test_tabs_e2e.py`. Update labels there if UI copy changes.
+- The app resolves a Bootstrap theme via `config.APP_CONFIG['theme']` / `THEMES`, falling back to `dbc.themes.BOOTSTRAP`. Agents running offline should consider a local CSS file under `assets/`.

@@ -35,7 +35,6 @@ jobs:
             none)  echo "run_unit=false" >> "$GITHUB_OUTPUT"; echo "run_e2e=false" >> "$GITHUB_OUTPUT"; echo "run_both=false" >> "$GITHUB_OUTPUT"; echo "run_none=true"  >> "$GITHUB_OUTPUT" ;;
             *)     echo "Unknown suite '$SUITE'"; exit 2 ;;
           esac
-          echo "Using suite: $SUITE"
 
   unit-tests:
     name: Unit tests

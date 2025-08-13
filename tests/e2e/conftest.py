@@ -37,9 +37,9 @@ def _import_app():
     for p in Path.cwd().rglob("app.py"):
         try:
             spec = importlib.util.spec_from_file_location("discovered_app", p)
-            mod = importlib.util.module_from_spec(spec)
+            mod = importlib.module_from_spec(spec)  # type: ignore[attr-defined]
             assert spec.loader is not None
-            spec.loader.exec_module(mod)
+            spec.loader.exec_module(mod)  # type: ignore[assignment]
             return mod
         except Exception:
             continue
