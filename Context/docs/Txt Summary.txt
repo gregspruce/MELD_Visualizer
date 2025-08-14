@@ -1,0 +1,12 @@
+* App is a **Dash** UI with tabs (Main 3D, 2D Time Plot, Custom 3D, Data Table, 3D Toolpath, 3D Volume Mesh, G-code Visualization, Settings).
+* A new **G-code Visualization** tab allows uploading a `.nc` program file to simulate the intended toolpath and volume mesh.
+* Correct tab styling requires **Bootstrap CSS**; we load a theme via `external_stylesheets`. If offline, drop `bootstrap.min.css` into `assets/`.
+* Tests are split:
+
+  * **Unit/HTTP** (no browser).
+  * **E2E** (Selenium 4; Chrome required).
+* Toggle which suites run using `tests/test_suite.conf` or env `TEST_SUITE`.
+* Always run pytest with `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` to avoid VM noise.
+* Local dev binds to `127.0.0.1:8050`. Change only if you intend LAN exposure.
+* Jules: optional `E2E_SETUP=1` in Initial setup to install Chrome; Run step executes `run_tests.sh`.
+* CI: workflow reads the same switch; has Unit and E2E jobs.

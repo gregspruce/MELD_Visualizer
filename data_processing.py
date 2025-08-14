@@ -2,6 +2,7 @@
 
 import base64
 import io
+import re  # <-- Added import for regular expressions
 import pandas as pd
 import numpy as np
 
@@ -44,6 +45,135 @@ def parse_contents(contents, filename):
         return df, None, converted_units
     except Exception as e:
         return None, f"An unexpected error occurred: {e}", False
+
+def parse_gcode_file(contents, filename):
+    """
+    Parses the contents of an uploaded G-code (.nc) file and simulates the toolpath.
+    This creates a DataFrame compatible with the existing plotting functions.
+
+    Args:
+        contents (str): The base64 encoded string of the file content.
+        filename (str): The name of the uploaded file.
+
+    Returns:
+        tuple: A tuple containing (DataFrame, error_message, unit_conversion_flag).
+               The DataFrame is None if an error occurs.
+    """
+    if not contents:
+        return None, "Error: No file content found.", False
+
+    _, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    try:
+        gcode_text = decoded.decode('utf-8')
+        lines = io.StringIO(gcode_text).readlines()
+    except Exception as e:
+        return None, f"An error occurred while decoding the file: {e}", False
+
+    # Regex to find G-code words (e.g., G1, X10.5, S4200)
+    gcode_word_re = re.compile(r'([A-Z])([-+]?\d*\.?\d+)')
+
+    # Machine state
+    state = {
+        'current_pos': {'X': 0.0, 'Y': 0.0, 'Z': 0.0},
+        'feed_vel': 0.0,      # Material feed velocity (from M34 S...)
+        'path_vel': 0.0,      # Tool head velocity (from G1 F...)
+        'extrusion_on': False,
+        'time_counter': 0.0,
+        'gcode_mode': 0,      # 0 for G0 (rapid), 1 for G1 (linear feed)
+    }
+    path_points = []
+    
+    # Add an initial point at the origin to start the path
+    initial_point = {
+        'XPos': state['current_pos']['X'], 'YPos': state['current_pos']['Y'], 'ZPos': state['current_pos']['Z'],
+        'FeedVel': 0, 'PathVel': 0, 'TimeInSeconds': 0,
+    }
+    path_points.append(initial_point)
+
+    try:
+        for line_num, line in enumerate(lines, 1):
+            line = line.strip()
+            # Strip comments and ignore empty lines/metadata
+            if '(' in line:
+                line = line[:line.find('(')].strip()
+            if not line or line.startswith('%'):
+                continue
+
+            words = dict(gcode_word_re.findall(line.upper()))
+            
+            # Handle state-changing M-Codes and G-Codes
+            if 'M' in words:
+                m_code = int(float(words['M']))
+                if m_code == 34:
+                    state['extrusion_on'] = True
+                    if 'S' in words:
+                        # Per documentation: S value is mm/min x 10
+                        state['feed_vel'] = float(words['S']) / 10.0
+                elif m_code == 35:
+                    state['extrusion_on'] = False
+
+            if 'G' in words:
+                g_code = int(float(words['G']))
+                if g_code in [0, 1]:
+                    state['gcode_mode'] = g_code
+                    
+                    # This is a movement command, so we generate a new point in the path
+                    target_pos = state['current_pos'].copy()
+                    
+                    # Update target position based on modal X, Y, Z, and F values
+                    if 'X' in words: target_pos['X'] = float(words['X'])
+                    if 'Y' in words: target_pos['Y'] = float(words['Y'])
+                    if 'Z' in words: target_pos['Z'] = float(words['Z'])
+                    if 'F' in words: state['path_vel'] = float(words['F'])
+
+                    p1 = np.array(list(state['current_pos'].values()))
+                    p2 = np.array(list(target_pos.values()))
+                    distance = np.linalg.norm(p2 - p1)
+
+                    time_segment_seconds = 0
+                    if distance > 1e-9 and state['path_vel'] > 1e-9:
+                        # F is in mm/min, so we convert segment time to seconds
+                        time_segment_seconds = (distance / state['path_vel']) * 60.0
+                    state['time_counter'] += time_segment_seconds
+
+                    # Extrusion only occurs during G1 moves
+                    current_feed = state['feed_vel'] if state['extrusion_on'] and state['gcode_mode'] == 1 else 0
+
+                    # Create the new data point for our DataFrame
+                    new_point = {
+                        'XPos': target_pos['X'],
+                        'YPos': target_pos['Y'],
+                        'ZPos': target_pos['Z'],
+                        'FeedVel': current_feed,
+                        'PathVel': state['path_vel'],
+                        'TimeInSeconds': state['time_counter']
+                    }
+                    path_points.append(new_point)
+
+                    # Update the machine's current position for the next iteration
+                    state['current_pos'] = target_pos
+
+    except Exception as e:
+        return None, f"An error occurred while parsing G-code on line {line_num}: {e}", False
+
+    if len(path_points) <= 1:
+        return None, "Error: No valid G-code movement commands (G0/G1) were found.", False
+
+    df = pd.DataFrame(path_points)
+    
+    # Add synthetic Date/Time columns for compatibility with the 2D time plotter
+    start_time = pd.to_datetime('2025-01-01T00:00:00')
+    df['Time'] = df['TimeInSeconds'].apply(lambda s: start_time + pd.to_timedelta(s, unit='s'))
+    df['Date'] = df['Time'].dt.strftime('%Y-%m-%d')
+    
+    # Add placeholder columns that exist in the CSV but not G-code, for compatibility
+    for col in ['SpinVel', 'ToolTemp', 'SpinTrq', 'SpinPwr', 'FeedTrq', 'FRO']:
+        if col not in df.columns:
+            df[col] = 0
+
+    return df, f"Successfully parsed G-code file: {filename}", False
+
 
 def get_cross_section_vertices(p, v_dir, T, L, R, N=12):
     """

@@ -145,6 +145,46 @@ def build_mesh_plot_tab():
         dcc.Loading(id="loading-mesh-plot", type="circle", children=dcc.Graph(id='mesh-plot-3d', style={'height': SCATTER_3D_HEIGHT}))
     ])
 
+# --- New G-code Visualization Tab ---
+def build_gcode_tab():
+    """Builds the layout for the new G-code visualization tab."""
+    return html.Div(className="mt-4", children=[
+        html.H4("G-code Program Visualization"),
+        dbc.Alert(id='gcode-filename-alert', color="info", is_open=False, className="w-75 mx-auto"),
+        dcc.Upload(
+            id='upload-gcode',
+            children=html.Div(['Drag and Drop or ', html.A('Select a G-code File (.nc)')]),
+            style={
+                'width': '100%', 'height': '60px', 'lineHeight': '60px',
+                'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
+                'textAlign': 'center', 'margin': '10px 0'
+            }
+        ),
+        dbc.Row([
+            dbc.Col(
+                dbc.RadioItems(
+                    id='gcode-view-selector',
+                    options=[
+                        {'label': 'Simulated Toolpath', 'value': 'toolpath'},
+                        {'label': 'Simulated Volume Mesh', 'value': 'mesh'},
+                    ],
+                    value='toolpath',
+                    inline=True
+                ),
+                width="auto"
+            ),
+            dbc.Col(
+                dbc.Button("Generate Visualization", id="generate-gcode-viz-button", color="primary", className="mb-3"),
+                width="auto"
+            )
+        ], align="center", justify="start", className="mb-3"),
+        dcc.Loading(
+            id="loading-gcode-plot",
+            type="circle",
+            children=dcc.Graph(id='gcode-graph', style={'height': SCATTER_3D_HEIGHT})
+        )
+    ])
+
 def build_app_body_with_tabs():
     """Constructs the main tab structure of the app."""
     return dbc.Tabs([
@@ -154,6 +194,7 @@ def build_app_body_with_tabs():
         dbc.Tab(label="Data Table", children=[html.Div(className="mt-4", children=[build_data_table()])]),
         dbc.Tab(label="3D Toolpath Plot", children=[build_line_plot_tab()]),
         dbc.Tab(label="3D Volume Mesh", children=[build_mesh_plot_tab()]),
+        dbc.Tab(label="G-code Visualization", children=[build_gcode_tab()]),  # <-- New Tab Added Here
         dbc.Tab(label="Settings", children=[build_config_tab()])
     ])
 
@@ -165,9 +206,10 @@ def get_layout(app):
     """
     return html.Div([
         dbc.Container([
-            dcc.Store(id='store-main-df'), dcc.Store(id='store-layout-config'),
-            dcc.Store(id='store-config-warnings'), dcc.Store(id='store-column-ranges'),
-            dcc.Store(id='store-config-updated'),
+            # Add the new store for G-code data
+            dcc.Store(id='store-main-df'), dcc.Store(id='store-gcode-df'),
+            dcc.Store(id='store-layout-config'), dcc.Store(id='store-config-warnings'),
+            dcc.Store(id='store-column-ranges'), dcc.Store(id='store-config-updated'),
             build_header(),
             build_app_body_with_tabs(),
         ], fluid=True)

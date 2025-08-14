@@ -1,6 +1,6 @@
 # Dash Volumetric Plotter
 
-Welcome to the Dash Volumetric Plotter, a powerful and interactive data visualization tool designed for analyzing 3D process data. This application allows users to upload CSV data, explore it through various 3D and 2D plots, and customize the visualization to uncover insights.
+Welcome to the Dash Volumetric Plotter, a powerful and interactive data visualization tool designed for analyzing 3D process data. This application allows users to upload CSV data from a manufacturing process or the original G-code (.nc) file to visualize, compare, and understand the build.
 
 This guide explains how to run the application, customize its appearance, and understand its structure for future development.
 
@@ -18,15 +18,23 @@ To run the application, you must have Python and the required packages installed
     ```bash
     pip install -r requirements.txt
     ```
-    (If a `requirements.txt` file is not available, you can install the packages individually: `pip install pandas numpy dash dash-bootstrap-components plotly`)
-
 2.  **Start the application:** In the same terminal, run the main `app.py` file:
     ```bash
     python app.py
     ```
 3.  The application will automatically open in your default web browser.
 
-### 2. Configuration (`config.json`)
+### 2. Using the Visualization Tabs
+
+*   **CSV Data Tabs (Main 3D, 2D Time Plot, etc.):** Upload a CSV file using the main "Drag and Drop" area. These tabs will populate with the actual, logged data from the machine.
+*   **G-code Visualization Tab:**
+    1.  Navigate to the **"G-code Visualization"** tab.
+    2.  Use its dedicated upload box to select a G-code program file (typically with a `.nc` extension).
+    3.  A success message will appear once the file is parsed.
+    4.  Select either the "Simulated Toolpath" or "Simulated Volume Mesh" view.
+    5.  Click the **"Generate Visualization"** button to see the plot. This allows you to see the *intended* path and shape as defined by the program.
+
+### 3. Configuration (`config.json`)
 
 Settings can be changed either by using the "Settings" tab within the running application or by directly editing the `config.json` file.
 
@@ -90,24 +98,24 @@ The application is broken into logical modules to promote maintainability and se
 ```
 /
 ├── CSV/
-│   └── (sample data files)
+│ └── (sample data files)
 ├── tests/
-│   ├── test_data_processing.py
-│   └── test_app_e2e.py
-├── app.py                  # Main entry point, runs the server
-├── layout.py               # Defines the UI layout (the "view")
-├── callbacks.py            # Contains all app interactivity (the "controller")
-├── data_processing.py      # Data parsing and mesh generation logic
-├── config.py               # Handles loading and managing configuration
-├── config.json             # User-facing configuration file
-├── agents.md               # Detailed instructions for AI agents/developers
-└── README.md               # This file
+│ ├── test_data_processing.py
+│ └── test_app_e2e.py
+├── app.py # Main entry point, runs the server
+├── layout.py # Defines the UI layout (the "view")
+├── callbacks.py # Contains all app interactivity (the "controller")
+├── data_processing.py # Data parsing (CSV & G-code) and mesh generation logic
+├── config.py # Handles loading and managing configuration
+├── config.json # User-facing configuration file
+├── agents.md # Detailed instructions for AI agents/developers
+└── README.md # This file
 ```
 
 -   `app.py`: The main entry point. It initializes the Dash app, brings all pieces together, and runs the server. **This is the file you execute.**
 -   `layout.py`: Contains all functions that create the visual components and structure of the app (the "view").
 -   `callbacks.py`: Contains all the `@callback` functions that define the app's interactivity and logic (the "controller").
--   `data_processing.py`: Contains helper functions for data manipulation, such as parsing the CSV and performing complex mesh generation calculations.
+-   `data_processing.py`: Contains helper functions for data manipulation, such as parsing CSV files (parse_contents), parsing G-code files     (parse_gcode_file), and performing complex mesh generation calculations (generate_volume_mesh).
 -   `config.py`: Handles loading the `config.json` file, defines theme constants, and centralizes configuration variables used by the app at runtime.
 -   `config.json`: The user-facing configuration file. Stores defaults for themes and graph options.
 
@@ -202,6 +210,7 @@ The E2E suite asserts the application title (**Volumetric Data Plotter**) and ve
 - Data Table
 - 3D Toolpath Plot
 - 3D Volume Mesh
+- G-code Visualization
 - Settings
 
 > **Note on styling:** The app loads a Bootstrap theme (from `config.py` if set, otherwise default) so `dash-bootstrap-components` widgets render correctly. If you see blue underlined links instead of tabs, your theme didn’t load—check network access or switch to a local CSS under `assets/`.

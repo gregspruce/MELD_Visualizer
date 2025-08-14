@@ -8,13 +8,14 @@ The MELD_Visualizer is a web application built with Python and Dash for the inte
 
 ### Core Features:
 *   **CSV Data Upload:** Parses and processes specific MELD data formats.
+*   **G-code Program Upload:** Parses `.nc` files to simulate the intended toolpath and volume mesh.
 *   **Interactive 3D Scatter Plots:** Two main plots with configurable color mapping and Z-axis filtering.
 *   **Customizable 3D Scatter Plot:** A tab allowing the user to select any data column for the X, Y, Z, color, and filter axes.
 *   **2D Time-Series Plot:** Visualizes data parameters against time, with filtering capabilities.
 *   **3D Toolpath Plot:** Renders the physical path of the machine tool during active extrusion.
 *   **3D Volume Mesh Generation:** Creates a 3D mesh representing the volume of the deposited material, with color mapped to a selected data parameter.
 *   **Configurable UI:** The application's theme and default plot options can be configured via a "Settings" tab and are saved in `config.json`.
-
+*   
 ---
 
 ## 2. Core Technologies
@@ -35,7 +36,7 @@ The application was refactored from a single monolithic script into a modular st
 *   `app.py`: **Main Entry Point.** Initializes the Dash app instance, assigns the layout, imports the callbacks to register them, and runs the web server. **This is the file to execute to start the application.**
 *   `layout.py`: **The "View".** Contains all functions that create the visual components and structure of the app. It defines the entire UI layout and the IDs of each component.
 *   `callbacks.py`: **The "Controller".** Contains all the `@callback` functions that define the app's interactivity and logic. It orchestrates the flow of data between the UI (layout) and the data processing backend.
-*   `data_processing.py`: **The "Model"/Backend Logic.** Contains pure Python functions for data manipulation. This includes parsing CSV files (`parse_contents`) and all complex geometry calculations for the mesh plot (`generate_volume_mesh`). This module is deliberately insulated from any Dash-specific code.
+*   `data_processing.py`: **The "Model"/Backend Logic.** Contains pure Python functions for data manipulation. This includes parsing CSV files (`parse_contents`), parsing G-code toolpath files (`parse_gcode_file`), and all complex geometry calculations for the mesh plot (`generate_volume_mesh`). This module is deliberately insulated from any Dash-specific code.
 *   `config.py`: **Runtime Configuration.** Handles loading the `config.json` file, defines theme constants, and centralizes configuration variables used by the app at runtime.
 *   `config.json`: **User Configuration File.** Stores user-facing settings like the default theme and the list of columns to display in graph dropdowns. This file is intended to be modified by the end-user (via the Settings tab) or a developer.
 *   `CSV/`: **Sample Data.** This directory contains sample input CSV files that the application is designed to ingest. These should be used for all testing.
@@ -77,11 +78,18 @@ This layer tests the data processing logic in isolation, without needing to run 
     *   Check that the `TimeInSeconds` column is created and is numeric.
     *   Check that unit conversion is correctly applied (e.g., `ZPos` values are multiplied by 25.4).
     *   Test edge cases: malformed CSV, empty file content.
-2.  **Test `get_cross_section_vertices`:**
+2.  **Test `parse_gcode_file` (G-code):**
+    *   Use a sample `.nc` file.
+    *   Verify the function returns a non-empty Pandas DataFrame with the correct columns (`XPos`, `YPos`, `ZPos`, `FeedVel`, `PathVel`, `TimeInSeconds`).
+    *   Assert that `G0` moves result in a `FeedVel` of 0.
+    *   Assert that `M34 S<value>` correctly sets `FeedVel` to `value / 10.0` on subsequent `G1` moves.
+    *   Assert that `M35` sets `FeedVel` to 0 on subsequent `G1` moves.
+    *   Verify that the calculated `TimeInSeconds` column is monotonically increasing.
+3.  **Test `get_cross_section_vertices`:**
     *   Provide known inputs (point, direction vector, T, L, R).
     *   Assert that the function returns a NumPy array of the correct shape (`(12, 3)` for default N).
     *   Assert that the calculated vertex positions are mathematically correct for a simple case (e.g., direction `[0, 1, 0]`).
-3.  **Test `generate_volume_mesh`:**
+4.  **Test `generate_volume_mesh`:**
     *   Create a small, sample DataFrame mimicking active extrusion data.
     *   Call the function and assert that it returns a dictionary containing `vertices`, `faces`, and `vertex_colors`.
     *   Assert that the output arrays are not empty and have the correct dimensions.
@@ -113,11 +121,21 @@ This layer tests the running application from a user's perspective. It requires 
     *   Programmatically click on each tab in the `dbc.Tabs` component.
     *   For each tab, assert that a key, unique element of that tab's content becomes visible.
     *   Example: Click "3D Volume Mesh" tab -> Assert `#generate-mesh-plot-button` is visible and enabled.
+    *   Example: Click "G-code Visualization" tab -> Assert `#upload-gcode` is visible.
 5.  **Button-based Generation:**
     *   Navigate to the "3D Toolpath Plot" tab.
     *   Click the `#generate-line-plot-button` button.
     *   Wait for the loading spinner to disappear.
     *   Assert that the `figure` property of the `#line-plot-3d` graph is not empty.
+6.  **G-code Tab Workflow:**
+    *   Navigate to the "G-code Visualization" tab.
+    *   Upload a sample `.nc` file to the `#upload-gcode` component.
+    *   Assert the `#gcode-filename-alert` becomes visible and shows the filename.
+    *   Click the `#generate-gcode-viz-button`.
+    *   Wait for the loading spinner to disappear and assert the `figure` property of `#gcode-graph` is not empty.
+    *   Click the "Simulated Volume Mesh" radio button.
+    *   Click the `#generate-gcode-viz-button` again.
+    *   Assert the `figure` property of `#gcode-graph` is updated and contains `go.Mesh3d` data.
 
 ### Regression Testing Workflow
 

@@ -15,7 +15,7 @@ from app import app
 # Import shared configuration and constants
 from config import APP_CONFIG, PLOTLY_TEMPLATE, TABLE_STYLE_DARK, TABLE_STYLE_LIGHT
 # Import data processing functions
-from data_processing import parse_contents, generate_volume_mesh
+from data_processing import parse_contents, generate_volume_mesh, parse_gcode_file
 
 
 def create_empty_figure(message="Upload a file and configure options."):
@@ -453,3 +453,82 @@ def update_mesh_plot(n_clicks, jsonified_df, color_col, cmin, cmax):
         scene=dict(xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)', aspectmode='data')
     )
     return fig
+
+# --- NEW G-CODE VISUALIZATION CALLBACKS ---
+
+@callback(
+    Output('store-gcode-df', 'data'),
+    Output('gcode-filename-alert', 'children'),
+    Output('gcode-filename-alert', 'is_open'),
+    Input('upload-gcode', 'contents'),
+    State('upload-gcode', 'filename'),
+    prevent_initial_call=True
+)
+def handle_gcode_upload(contents, filename):
+    """
+    Triggered on G-code file upload. This function parses the file and stores
+    the resulting DataFrame in the dedicated dcc.Store.
+    """
+    if contents is None:
+        raise PreventUpdate
+
+    df, message, _ = parse_gcode_file(contents, filename)
+    if df is None:
+        return no_update, message, True # Show error message
+
+    return df.to_json(date_format='iso', orient='split'), message, True
+
+@callback(
+    Output('gcode-graph', 'figure'),
+    Input('generate-gcode-viz-button', 'n_clicks'),
+    [State('store-gcode-df', 'data'),
+     State('gcode-view-selector', 'value')],
+    prevent_initial_call=True
+)
+def update_gcode_visualization(n_clicks, jsonified_df, view_mode):
+    """
+    Generates the G-code visualization (either toolpath or mesh) when the
+    'Generate Visualization' button is clicked.
+    """
+    if n_clicks is None or jsonified_df is None:
+        return create_empty_figure("Please upload a G-code file and click 'Generate'.")
+
+    df = pd.read_json(io.StringIO(jsonified_df), orient='split')
+    df_active = df[df['FeedVel'] > 0].copy()
+
+    if df_active.empty:
+        return create_empty_figure("No active extrusion moves (M34) found in G-code file.")
+
+    if view_mode == 'toolpath':
+        fig = go.Figure(data=[go.Scatter3d(
+            x=df_active['XPos'], y=df_active['YPos'], z=df_active['ZPos'],
+            mode='lines+markers', marker=dict(size=2), line=dict(width=4)
+        )])
+        fig.update_layout(
+            title='Simulated 3D Toolpath (Active Extrusion Only)', template=PLOTLY_TEMPLATE,
+            scene=dict(xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)', aspectmode='data')
+        )
+        return fig
+
+    elif view_mode == 'mesh':
+        # Reuse the existing mesh generation logic with a simulated color column
+        # Since G-code doesn't have process data, we'll color by Z-height as a sensible default.
+        color_col = 'ZPos'
+        mesh_data = generate_volume_mesh(df_active, color_col)
+
+        if mesh_data is None:
+            return create_empty_figure("Could not generate mesh from the G-code data.")
+
+        fig = go.Figure(data=[go.Mesh3d(
+            x=mesh_data['vertices'][:, 0], y=mesh_data['vertices'][:, 1], z=mesh_data['vertices'][:, 2],
+            i=mesh_data['faces'][:, 0], j=mesh_data['faces'][:, 1], k=mesh_data['faces'][:, 2],
+            colorscale='Viridis', intensity=mesh_data['vertex_colors'],
+            colorbar=dict(title=color_col), showscale=True
+        )])
+        fig.update_layout(
+            title='Simulated 3D Volume Mesh from G-code', template=PLOTLY_TEMPLATE,
+            scene=dict(xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)', aspectmode='data')
+        )
+        return fig
+
+    return create_empty_figure("Invalid view selected.")
