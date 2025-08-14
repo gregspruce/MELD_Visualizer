@@ -129,7 +129,22 @@ def build_line_plot_tab():
     """Builds the layout for the '3D Toolpath Plot' tab."""
     return html.Div(className="mt-4", children=[
         html.H4("3D Toolpath Plot (Active Extrusion)"),
-        dbc.Button("Generate Toolpath Plot", id="generate-line-plot-button", color="primary", className="mb-3"),
+        dbc.Row([
+            dbc.Col(
+                dbc.InputGroup(
+                    [
+                        dbc.InputGroupText("Z-Axis Stretch Factor"),
+                        dbc.Input(id='line-plot-z-stretch-input', type='number', value=1.0, min=0.1, step=0.1),
+                    ],
+                    className="mb-3",
+                ),
+                width="auto"
+            ),
+            dbc.Col(
+                dbc.Button("Generate Toolpath Plot", id="generate-line-plot-button", color="primary", className="mb-3"),
+                width="auto"
+            )
+        ], align="center"),
         dcc.Loading(id="loading-line-plot", type="circle", children=dcc.Graph(id='line-plot-3d', style={'height': SCATTER_3D_HEIGHT}))
     ])
 
@@ -141,11 +156,25 @@ def build_mesh_plot_tab():
             dbc.Col([html.H6("Color by"), dcc.Dropdown(id='mesh-plot-color-dropdown')], width=4),
             dbc.Col(create_color_scale_controls('mesh-plot'), width=8)
         ], className="mb-3"),
-        dbc.Button("Generate Volume Mesh", id="generate-mesh-plot-button", color="primary", className="mb-3"),
+        dbc.Row([
+            dbc.Col(
+                dbc.InputGroup(
+                    [
+                        dbc.InputGroupText("Z-Axis Stretch Factor"),
+                        dbc.Input(id='mesh-plot-z-stretch-input', type='number', value=1.0, min=0.1, step=0.1),
+                    ],
+                    className="mb-3",
+                ),
+                width="auto"
+            ),
+            dbc.Col(
+                dbc.Button("Generate Volume Mesh", id="generate-mesh-plot-button", color="primary", className="mb-3"),
+                width="auto"
+            )
+        ], align="center"),
         dcc.Loading(id="loading-mesh-plot", type="circle", children=dcc.Graph(id='mesh-plot-3d', style={'height': SCATTER_3D_HEIGHT}))
     ])
 
-# --- New G-code Visualization Tab ---
 def build_gcode_tab():
     """Builds the layout for the new G-code visualization tab."""
     return html.Div(className="mt-4", children=[
@@ -170,6 +199,16 @@ def build_gcode_tab():
                     ],
                     value='toolpath',
                     inline=True
+                ),
+                width="auto"
+            ),
+            dbc.Col(
+                dbc.InputGroup(
+                    [
+                        dbc.InputGroupText("Z-Axis Stretch Factor"),
+                        dbc.Input(id='gcode-z-stretch-input', type='number', value=2.0, min=0.1, step=0.1),
+                    ],
+                    className="mb-3",
                 ),
                 width="auto"
             ),

@@ -8,3 +8,4 @@
 - E2E asserts title, upload control, and tab labels.
 - Implemented G-code parser to produce a DataFrame compatible with existing mesh/toolpath generation logic, maximizing code reuse.
 - G-code mesh is colored by Z-position as a sensible default, since process data is unavailable in the source file.
+- The 3D plot Z-axis scaling is a direct, user-configurable "stretch factor" (e.g., 2 = 2x taller Z-axis) for intuitive control.

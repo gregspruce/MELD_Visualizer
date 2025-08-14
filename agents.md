@@ -9,6 +9,7 @@ The MELD_Visualizer is a web application built with Python and Dash for the inte
 ### Core Features:
 *   **CSV Data Upload:** Parses and processes specific MELD data formats.
 *   **G-code Program Upload:** Parses `.nc` files to simulate the intended toolpath and volume mesh.
+*   **User-Configurable 3D Scaling:** All 3D plot tabs feature a "Z-Axis Stretch Factor" to improve visualization of layer details.
 *   **Interactive 3D Scatter Plots:** Two main plots with configurable color mapping and Z-axis filtering.
 *   **Customizable 3D Scatter Plot:** A tab allowing the user to select any data column for the X, Y, Z, color, and filter axes.
 *   **2D Time-Series Plot:** Visualizes data parameters against time, with filtering capabilities.
@@ -130,6 +131,9 @@ This layer tests the running application from a user's perspective. It requires 
 6.  **G-code Tab Workflow:**
     *   Navigate to the "G-code Visualization" tab.
     *   Upload a sample `.nc` file to the `#upload-gcode` component.
+    *   Change the value in the `#gcode-z-stretch-input` to `3.0`.
+    *   Click the `#generate-gcode-viz-button`.
+    *   Assert that the `figure` layout's `scene.aspectratio.z` property is now `3.0`.
     *   Assert the `#gcode-filename-alert` becomes visible and shows the filename.
     *   Click the `#generate-gcode-viz-button`.
     *   Wait for the loading spinner to disappear and assert the `figure` property of `#gcode-graph` is not empty.

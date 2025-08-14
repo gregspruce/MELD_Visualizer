@@ -379,10 +379,11 @@ def update_data_table(jsonified_df):
 @callback(
     Output('line-plot-3d', 'figure'),
     Input('generate-line-plot-button', 'n_clicks'),
-    State('store-main-df', 'data'),
+    [State('store-main-df', 'data'),
+     State('line-plot-z-stretch-input', 'value')], # <-- ADDED State input
     prevent_initial_call=True
 )
-def update_line_plot(n_clicks, jsonified_df):
+def update_line_plot(n_clicks, jsonified_df, z_stretch_factor):
     """Generates the 3D toolpath line plot from active extrusion data."""
     if n_clicks is None or jsonified_df is None:
         return create_empty_figure("Upload a file and click 'Generate'.")
@@ -393,13 +394,22 @@ def update_line_plot(n_clicks, jsonified_df):
     if df_active.empty:
         return create_empty_figure("No active printing data found (FeedVel > 0).")
 
+    # --- NEW: Dynamic aspect ratio logic ---
+    if not z_stretch_factor or float(z_stretch_factor) <= 0:
+        z_stretch_factor = 1.0
+    aspect_ratio = dict(x=1, y=1, z=float(z_stretch_factor))
+
     fig = go.Figure(data=[go.Scatter3d(
         x=df_active['XPos'], y=df_active['YPos'], z=df_active['ZPos'],
         mode='lines+markers', marker=dict(size=2), line=dict(width=4)
     )])
     fig.update_layout(
         title='3D Toolpath Visualization (Active Extrusion Only)', template=PLOTLY_TEMPLATE,
-        scene=dict(xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)', aspectmode='data')
+        scene=dict(
+            xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)',
+            aspectmode='data' if z_stretch_factor == 1.0 else 'manual', # Use 'data' for true scale, 'manual' for stretch
+            aspectratio=aspect_ratio
+        )
     )
     return fig
 
@@ -422,10 +432,11 @@ def update_color_range_for_mesh_plot(color_col, ranges):
     [State('store-main-df', 'data'),
      State('mesh-plot-color-dropdown', 'value'),
      State({'type': 'color-min-input', 'index': 'mesh-plot'}, 'value'),
-     State({'type': 'color-max-input', 'index': 'mesh-plot'}, 'value')],
+     State({'type': 'color-max-input', 'index': 'mesh-plot'}, 'value'),
+     State('mesh-plot-z-stretch-input', 'value')], # <-- ADDED State input
     prevent_initial_call=True
 )
-def update_mesh_plot(n_clicks, jsonified_df, color_col, cmin, cmax):
+def update_mesh_plot(n_clicks, jsonified_df, color_col, cmin, cmax, z_stretch_factor):
     """Generates the 3D volume mesh plot by calling the data processing function."""
     if n_clicks is None or jsonified_df is None or color_col is None:
         return create_empty_figure("Upload a file, select a color, and click 'Generate'.")
@@ -435,11 +446,15 @@ def update_mesh_plot(n_clicks, jsonified_df, color_col, cmin, cmax):
     if df_active.empty:
         return create_empty_figure("No active printing data for mesh generation.")
 
-    # Delegate complex mesh calculation to the data_processing module
     mesh_data = generate_volume_mesh(df_active, color_col)
 
     if mesh_data is None:
         return create_empty_figure("Could not generate mesh from the data.")
+
+    # --- NEW: Dynamic aspect ratio logic ---
+    if not z_stretch_factor or float(z_stretch_factor) <= 0:
+        z_stretch_factor = 1.0
+    aspect_ratio = dict(x=1, y=1, z=float(z_stretch_factor))
 
     fig = go.Figure(data=[go.Mesh3d(
         x=mesh_data['vertices'][:, 0], y=mesh_data['vertices'][:, 1], z=mesh_data['vertices'][:, 2],
@@ -450,7 +465,11 @@ def update_mesh_plot(n_clicks, jsonified_df, color_col, cmin, cmax):
     )])
     fig.update_layout(
         title='3D Mesh Visualization of the Print', template=PLOTLY_TEMPLATE,
-        scene=dict(xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)', aspectmode='data')
+        scene=dict(
+            xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)',
+            aspectmode='data' if z_stretch_factor == 1.0 else 'manual', # Use 'data' for true scale, 'manual' for stretch
+            aspectratio=aspect_ratio
+        )
     )
     return fig
 
@@ -482,10 +501,11 @@ def handle_gcode_upload(contents, filename):
     Output('gcode-graph', 'figure'),
     Input('generate-gcode-viz-button', 'n_clicks'),
     [State('store-gcode-df', 'data'),
-     State('gcode-view-selector', 'value')],
+     State('gcode-view-selector', 'value'),
+     State('gcode-z-stretch-input', 'value')],
     prevent_initial_call=True
 )
-def update_gcode_visualization(n_clicks, jsonified_df, view_mode):
+def update_gcode_visualization(n_clicks, jsonified_df, view_mode, z_stretch_factor):
     """
     Generates the G-code visualization (either toolpath or mesh) when the
     'Generate Visualization' button is clicked.
@@ -499,6 +519,11 @@ def update_gcode_visualization(n_clicks, jsonified_df, view_mode):
     if df_active.empty:
         return create_empty_figure("No active extrusion moves (M34) found in G-code file.")
 
+    # --- CORRECTED: Use the stretch factor directly for the z-value ---
+    if not z_stretch_factor or float(z_stretch_factor) <= 0:
+        z_stretch_factor = 1.0
+    custom_aspect_ratio = dict(x=1, y=1, z=float(z_stretch_factor))
+
     if view_mode == 'toolpath':
         fig = go.Figure(data=[go.Scatter3d(
             x=df_active['XPos'], y=df_active['YPos'], z=df_active['ZPos'],
@@ -506,13 +531,15 @@ def update_gcode_visualization(n_clicks, jsonified_df, view_mode):
         )])
         fig.update_layout(
             title='Simulated 3D Toolpath (Active Extrusion Only)', template=PLOTLY_TEMPLATE,
-            scene=dict(xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)', aspectmode='data')
+            scene=dict(
+                xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)',
+                aspectmode='manual',
+                aspectratio=custom_aspect_ratio
+            )
         )
         return fig
 
     elif view_mode == 'mesh':
-        # Reuse the existing mesh generation logic with a simulated color column
-        # Since G-code doesn't have process data, we'll color by Z-height as a sensible default.
         color_col = 'ZPos'
         mesh_data = generate_volume_mesh(df_active, color_col)
 
@@ -527,7 +554,11 @@ def update_gcode_visualization(n_clicks, jsonified_df, view_mode):
         )])
         fig.update_layout(
             title='Simulated 3D Volume Mesh from G-code', template=PLOTLY_TEMPLATE,
-            scene=dict(xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)', aspectmode='data')
+            scene=dict(
+                xaxis_title='X Position (mm)', yaxis_title='Y Position (mm)', zaxis_title='Z Position (mm)',
+                aspectmode='manual',
+                aspectratio=custom_aspect_ratio
+            )
         )
         return fig
 

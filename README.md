@@ -32,7 +32,17 @@ To run the application, you must have Python and the required packages installed
     2.  Use its dedicated upload box to select a G-code program file (typically with a `.nc` extension).
     3.  A success message will appear once the file is parsed.
     4.  Select either the "Simulated Toolpath" or "Simulated Volume Mesh" view.
-    5.  Click the **"Generate Visualization"** button to see the plot. This allows you to see the *intended* path and shape as defined by the program.
+    5.  Click the **"Generate Visualization"** button to see the plot.
+
+#### **Controlling 3D Plot Scaling**
+
+On the "3D Toolpath Plot", "3D Volume Mesh", and "G-code Visualization" tabs, you will find a **"Z-Axis Stretch Factor"** input.
+
+*   **Function:** This control allows you to visually stretch or compress the Z-axis of the 3D plots. This is useful for making the layer details of a flat part more visible.
+*   **Usage:**
+    *   A value of **1.0** represents a true-to-scale plot where X, Y, and Z axes are scaled according to their data ranges.
+    *   A value **greater than 1.0** (e.g., `2.0`) will stretch the Z-axis, making the plot appear taller.
+    *   A value **less than 1.0** (e.g., `0.5`) will compress the Z-axis, making it appear flatter.
 
 ### 3. Configuration (`config.json`)
 
