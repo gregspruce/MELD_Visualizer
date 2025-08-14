@@ -81,3 +81,7 @@ if __name__ == "__main__":
     if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
         Timer(1, open_browser).start()
     app.run(host=host, port=port, debug=debug)
+
+#to run with debug
+#$env:DEBUG="1"
+#python app.py
