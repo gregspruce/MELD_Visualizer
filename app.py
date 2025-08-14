@@ -1,4 +1,6 @@
 import os
+from threading import Timer
+import webbrowser
 from dash import Dash, html
 import dash_bootstrap_components as dbc
 
@@ -65,9 +67,17 @@ def create_app(testing: bool = False) -> Dash:
 # Module-level app
 app = create_app(testing=False)
 
+def open_browser():
+    """Opens the default web browser to the Dash app's URL."""
+    webbrowser.open_new("http://127.0.0.1:8050")
+
 if __name__ == "__main__":
     # Bind ONLY to local interface
     host = "127.0.0.1"
     port = 8050
     debug = os.environ.get("DEBUG", "0") in ("1", "true", "True")
+        # The Timer is used to delay opening the browser, ensuring the server has started.
+    # The WERKZEUG check prevents the browser from opening twice in debug mode.
+    if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
+        Timer(1, open_browser).start()
     app.run(host=host, port=port, debug=debug)
