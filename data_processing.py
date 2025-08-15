@@ -24,6 +24,14 @@ def parse_contents(contents, filename):
     if not contents:
         return None, "Error: No file content found.", False
 
+    # Import security utilities for file validation
+    from security_utils import FileValidator, ErrorHandler
+    
+    # Validate file upload for security
+    is_valid, error_msg = FileValidator.validate_file_upload(contents, filename)
+    if not is_valid:
+        return None, error_msg, False
+
     _, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     try:
@@ -62,6 +70,14 @@ def parse_gcode_file(contents, filename):
     if not contents:
         return None, "Error: No file content found.", False
 
+    # Import security utilities for file validation
+    from security_utils import FileValidator
+    
+    # Validate file upload for security
+    is_valid, error_msg = FileValidator.validate_file_upload(contents, filename)
+    if not is_valid:
+        return None, error_msg, False
+
     _, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     try:
@@ -70,8 +86,16 @@ def parse_gcode_file(contents, filename):
     except Exception as e:
         return None, f"An error occurred while decoding the file: {e}", False
 
-    # Regex to find G-code words (e.g., G1, X10.5, S4200)
-    gcode_word_re = re.compile(r'([A-Z])([-+]?\d*\.?\d+)')
+    # Import security utilities for safe G-code parsing
+    from security_utils import InputValidator, secure_parse_gcode
+    
+    # First sanitize the content to prevent ReDoS
+    sanitized_lines, error = secure_parse_gcode(decoded.decode('utf-8', errors='ignore'))
+    if error:
+        return None, error, False
+    
+    # Safe regex pattern with bounded repetition
+    gcode_word_re = re.compile(r'([A-Z])([-+]?\d{0,10}\.?\d{0,6})')
 
     # Machine state
     state = {
@@ -92,15 +116,13 @@ def parse_gcode_file(contents, filename):
     path_points.append(initial_point)
 
     try:
-        for line_num, line in enumerate(lines, 1):
-            line = line.strip()
-            # Strip comments and ignore empty lines/metadata
-            if '(' in line:
-                line = line[:line.find('(')].strip()
-            if not line or line.startswith('%'):
+        # Use sanitized lines instead of raw lines
+        for line_num, line in enumerate(sanitized_lines, 1):
+            # Line is already sanitized and uppercased
+            if not line:
                 continue
 
-            words = dict(gcode_word_re.findall(line.upper()))
+            words = dict(gcode_word_re.findall(line))
             
             # Handle state-changing M-Codes and G-Codes
             if 'M' in words:

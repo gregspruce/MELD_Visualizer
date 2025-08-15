@@ -11,6 +11,9 @@ def _resolve_external_stylesheets():
     Reads config.APP_CONFIG['theme'] / THEMES mapping when present,
     falls back to dbc.themes.BOOTSTRAP.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     theme = dbc.themes.BOOTSTRAP
     try:
         from config import APP_CONFIG, THEMES  # optional; present in this repo
@@ -25,12 +28,19 @@ def _resolve_external_stylesheets():
                 theme = val or theme
         elif key and hasattr(dbc.themes, key):
             theme = getattr(dbc.themes, key)
-    except Exception:
-        pass
+    except ImportError as e:
+        logger.warning(f"Config module not found, using default theme: {e}")
+    except KeyError as e:
+        logger.warning(f"Theme configuration key not found, using default: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error loading theme configuration: {e}")
     return [theme]
 
 def _build_layout(app):
     """Prefer layout.get_layout(app), then layout.create_layout(), then layout.layout."""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
         import layout as layout_mod
         if hasattr(layout_mod, "get_layout"):
@@ -39,19 +49,30 @@ def _build_layout(app):
             return layout_mod.create_layout()
         if hasattr(layout_mod, "layout"):
             return layout_mod.layout
-    except Exception:
-        pass
+    except ImportError as e:
+        logger.error(f"Failed to import layout module: {e}")
+    except AttributeError as e:
+        logger.error(f"Layout module missing expected attributes: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error loading layout: {e}")
     return html.Div([html.H1(APP_TITLE), html.P("Fallback layout: layout.py not found or failed to load.")])
 
 def _register_callbacks(app):
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
         import callbacks as callbacks_mod
         if hasattr(callbacks_mod, "register_callbacks"):
             callbacks_mod.register_callbacks(app)
         elif hasattr(callbacks_mod, "init_callbacks"):
             callbacks_mod.init_callbacks(app)
-    except Exception:
-        pass
+        # If neither function exists, callbacks are registered via decorators
+        logger.info("Callbacks module loaded successfully")
+    except ImportError as e:
+        logger.error(f"Failed to import callbacks module: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error registering callbacks: {e}")
 
 def create_app(testing: bool = False) -> Dash:
     app = Dash(

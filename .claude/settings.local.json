@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python -m pytest tests/ --cov=. --cov-report=term-missing -m \"not e2e\")",
+      "Bash(python:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "outputStyle": "Explanatory"
+}

@@ -11,7 +11,7 @@ from dash import (Input, Output, State, callback, no_update, MATCH, ctx, html)
 from dash.exceptions import PreventUpdate
 
 # Import the main app instance
-from app import app
+# App instance will be passed to register_callbacks function
 # Import shared configuration and constants
 from config import APP_CONFIG, PLOTLY_TEMPLATE, TABLE_STYLE_DARK, TABLE_STYLE_LIGHT
 # Import data processing functions
@@ -192,18 +192,22 @@ def update_custom_and_mesh_plot_controls(layout_config):
 def save_config_and_advise_restart(n_clicks, theme, template, g1_opts, g2_opts, y_2d_opts, color_2d_opts):
     """Saves the current UI settings from the 'Settings' tab to config.json."""
     if not n_clicks: raise PreventUpdate
+    # Import security utilities for safe configuration handling
+    from security_utils import ConfigurationManager
+    
     new_config = {
         "default_theme": theme, "plotly_template": template, "graph_1_options": g1_opts,
         "graph_2_options": g2_opts, "plot_2d_y_options": y_2d_opts, "plot_2d_color_options": color_2d_opts,
     }
-    try:
-        with open('config.json', 'w') as f:
-            json.dump(new_config, f, indent=2)
+    
+    # Use secure configuration saving
+    success, message = ConfigurationManager.save_config(new_config)
+    
+    if success:
         message = "Success! Your settings have been saved. Please restart the application to see the changes."
         return True, message, n_clicks
-    except Exception as e:
-        message = f"Error: Could not save settings. {e}"
-        return True, message, no_update
+    else:
+        return True, f"Error: {message}", no_update
 
 # --- Filter Synchronization Callback ---
 @callback(
