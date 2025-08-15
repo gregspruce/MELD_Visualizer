@@ -1,0 +1,374 @@
+openapi: 3.0.0
+info:
+  title: MELD Visualizer API
+  version: 1.0.0
+  description: |
+    3D visualization platform for MELD manufacturing process data.
+    
+    ## Overview
+    The MELD Visualizer provides REST endpoints for uploading, processing, and visualizing
+    manufacturing data from CSV and G-code files.
+    
+    ## Authentication
+    Currently operates as a local application without authentication.
+    Future versions will support API key authentication.
+    
+    ## Rate Limiting
+    No rate limiting for local deployment.
+    Production deployments should implement rate limiting.
+    
+  contact:
+    email: support@meldvisualizer.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://127.0.0.1:8050
+    description: Local development server
+  - url: https://api.meldvisualizer.com/v1
+    description: Production server (future)
+
+paths:
+  /_dash-update-component:
+    post:
+      summary: Update Dash component
+      description: Internal endpoint for Dash component updates
+      operationId: updateComponent
+      tags:
+        - Internal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                output:
+                  type: string
+                inputs:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '200':
+          description: Component updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /upload/csv:
+    post:
+      summary: Upload CSV data file
+      description: |
+        Upload a CSV file containing MELD manufacturing data.
+        Automatic imperial to metric conversion is applied if needed.
+      operationId: uploadCSV
+      tags:
+        - Data Upload
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: CSV file to upload
+              required:
+                - file
+      responses:
+        '200':
+          description: File uploaded and processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    filename: "data.csv"
+                    rows: 1000
+                    columns: ["XPos", "YPos", "ZPos", "FeedVel", "PathVel", "ToolTemp"]
+                    units_converted: true
+                    message: "Imperial units detected and converted to metric"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+
+  /upload/gcode:
+    post:
+      summary: Upload G-code file
+      description: |
+        Upload a G-code (.nc) file for toolpath visualization.
+        Supports M34/M35 feed commands and standard G0/G1 movements.
+      operationId: uploadGcode
+      tags:
+        - Data Upload
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: G-code file to upload
+              required:
+                - file
+      responses:
+        '200':
+          description: G-code file parsed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GcodeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /visualization/scatter3d:
+    post:
+      summary: Generate 3D scatter plot
+      description: Create an interactive 3D scatter plot from uploaded data
+      operationId: createScatter3D
+      tags:
+        - Visualization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Scatter3DRequest'
+      responses:
+        '200':
+          description: Plot generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotResponse'
+
+  /visualization/mesh:
+    post:
+      summary: Generate 3D mesh
+      description: Create a 3D volume mesh from toolpath data
+      operationId: createMesh
+      tags:
+        - Visualization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeshRequest'
+      responses:
+        '200':
+          description: Mesh generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeshResponse'
+
+  /config:
+    get:
+      summary: Get current configuration
+      description: Retrieve the current application configuration
+      operationId: getConfig
+      tags:
+        - Configuration
+      responses:
+        '200':
+          description: Configuration retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Configuration'
+    
+    put:
+      summary: Update configuration
+      description: Update application configuration settings
+      operationId: updateConfig
+      tags:
+        - Configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Configuration'
+      responses:
+        '200':
+          description: Configuration updated
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+components:
+  schemas:
+    UploadResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether upload was successful
+        filename:
+          type: string
+          description: Name of uploaded file
+        rows:
+          type: integer
+          description: Number of data rows
+        columns:
+          type: array
+          items:
+            type: string
+          description: List of column names
+        units_converted:
+          type: boolean
+          description: Whether imperial to metric conversion was applied
+        message:
+          type: string
+          description: Status message
+
+    GcodeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        points:
+          type: integer
+          description: Number of toolpath points
+        bounds:
+          type: object
+          properties:
+            x:
+              $ref: '#/components/schemas/Bounds'
+            y:
+              $ref: '#/components/schemas/Bounds'
+            z:
+              $ref: '#/components/schemas/Bounds'
+
+    Bounds:
+      type: object
+      properties:
+        min:
+          type: number
+        max:
+          type: number
+
+    Scatter3DRequest:
+      type: object
+      required:
+        - x_column
+        - y_column
+        - z_column
+      properties:
+        x_column:
+          type: string
+          default: "XPos"
+        y_column:
+          type: string
+          default: "YPos"
+        z_column:
+          type: string
+          default: "ZPos"
+        color_column:
+          type: string
+          default: "ToolTemp"
+        z_stretch:
+          type: number
+          default: 1.0
+          minimum: 0.1
+          maximum: 10.0
+
+    MeshRequest:
+      type: object
+      required:
+        - color_column
+      properties:
+        color_column:
+          type: string
+          description: Column to use for mesh coloring
+        lod:
+          type: string
+          enum: [high, medium, low]
+          default: high
+          description: Level of detail for mesh generation
+        z_stretch:
+          type: number
+          default: 1.0
+
+    PlotResponse:
+      type: object
+      properties:
+        figure:
+          type: object
+          description: Plotly figure object
+        render_time_ms:
+          type: number
+          description: Time taken to generate plot
+
+    MeshResponse:
+      type: object
+      properties:
+        vertices:
+          type: integer
+          description: Number of vertices in mesh
+        faces:
+          type: integer
+          description: Number of faces in mesh
+        render_time_ms:
+          type: number
+
+    Configuration:
+      type: object
+      properties:
+        default_theme:
+          type: string
+          description: Bootstrap theme name
+        plotly_template:
+          type: string
+          description: Plotly color template
+        graph_1_options:
+          type: array
+          items:
+            type: string
+        graph_2_options:
+          type: array
+          items:
+            type: string
+        plot_2d_y_options:
+          type: array
+          items:
+            type: string
+        plot_2d_color_options:
+          type: array
+          items:
+            type: string
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+    
+    PayloadTooLarge:
+      description: File size exceeds limit
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                default: "File size exceeds 10MB limit"

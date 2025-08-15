@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MELD Visualizer API Playground</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .endpoint-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        .endpoint-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .method-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .method-get { background-color: #61affe; color: white; }
+        .method-post { background-color: #49cc90; color: white; }
+        .method-put { background-color: #fca130; color: white; }
+        .method-delete { background-color: #f93e3e; color: white; }
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .response-area {
+            background-color: #f4f4f4;
+            border-radius: 4px;
+            padding: 1rem;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .tab-content {
+            padding: 1rem;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        .status-success { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .status-pending { background-color: #ffc107; }
+        .sidebar {
+            position: sticky;
+            top: 20px;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1 class="mb-0">MELD Visualizer API Playground</h1>
+            <p class="mb-0 mt-2">Interactive API documentation and testing</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="sidebar">
+                    <h5 class="mb-3">API Endpoints</h5>
+                    <div class="nav flex-column nav-pills">
+                        <a class="nav-link active" data-bs-toggle="pill" href="#upload">Upload</a>
+                        <a class="nav-link" data-bs-toggle="pill" href="#visualization">Visualization</a>
+                        <a class="nav-link" data-bs-toggle="pill" href="#config">Configuration</a>
+                        <a class="nav-link" data-bs-toggle="pill" href="#examples">Examples</a>
+                    </div>
+                    <hr>
+                    <div class="mt-4">
+                        <h6>Server Status</h6>
+                        <p><span class="status-indicator status-pending" id="server-status"></span><span id="server-text">Checking...</span></p>
+                        <input type="text" class="form-control form-control-sm mt-2" id="base-url" value="http://127.0.0.1:8050" placeholder="Base URL">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="tab-content">
+                    <!-- Upload Tab -->
+                    <div class="tab-pane fade show active" id="upload">
+                        <h3>Upload Endpoints</h3>
+                        
+                        <!-- CSV Upload -->
+                        <div class="endpoint-card p-3 mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="method-badge method-post">POST</span>
+                                    <code class="ms-2">/upload/csv</code>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="testCSVUpload()">Try it</button>
+                            </div>
+                            <p>Upload a CSV file containing MELD manufacturing data.</p>
+                            
+                            <h6>Request Body</h6>
+                            <div class="code-block">
+Content-Type: multipart/form-data
+
+file: [CSV file]</div>
+                            
+                            <h6>Sample Request</h6>
+                            <input type="file" class="form-control mb-2" id="csv-file" accept=".csv">
+                            
+                            <h6>Response</h6>
+                            <div class="response-area" id="csv-response">Response will appear here...</div>
+                        </div>
+
+                        <!-- G-code Upload -->
+                        <div class="endpoint-card p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="method-badge method-post">POST</span>
+                                    <code class="ms-2">/upload/gcode</code>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="testGcodeUpload()">Try it</button>
+                            </div>
+                            <p>Upload a G-code (.nc) file for toolpath visualization.</p>
+                            
+                            <h6>Request Body</h6>
+                            <div class="code-block">
+Content-Type: multipart/form-data
+
+file: [G-code file]</div>
+                            
+                            <h6>Sample Request</h6>
+                            <input type="file" class="form-control mb-2" id="gcode-file" accept=".nc">
+                            
+                            <h6>Response</h6>
+                            <div class="response-area" id="gcode-response">Response will appear here...</div>
+                        </div>
+                    </div>
+
+                    <!-- Visualization Tab -->
+                    <div class="tab-pane fade" id="visualization">
+                        <h3>Visualization Endpoints</h3>
+                        
+                        <!-- 3D Scatter -->
+                        <div class="endpoint-card p-3 mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="method-badge method-post">POST</span>
+                                    <code class="ms-2">/visualization/scatter3d</code>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="testScatter3D()">Try it</button>
+                            </div>
+                            <p>Generate a 3D scatter plot from uploaded data.</p>
+                            
+                            <h6>Request Body</h6>
+                            <div class="row">
+                                <div class="col-md-4 mb-2">
+                                    <label>X Column</label>
+                                    <input type="text" class="form-control" id="scatter-x" value="XPos">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label>Y Column</label>
+                                    <input type="text" class="form-control" id="scatter-y" value="YPos">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label>Z Column</label>
+                                    <input type="text" class="form-control" id="scatter-z" value="ZPos">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label>Color Column</label>
+                                    <input type="text" class="form-control" id="scatter-color" value="ToolTemp">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label>Z Stretch</label>
+                                    <input type="number" class="form-control" id="scatter-stretch" value="1.0" step="0.1">
+                                </div>
+                            </div>
+                            
+                            <h6>Response</h6>
+                            <div class="response-area" id="scatter-response">Response will appear here...</div>
+                        </div>
+
+                        <!-- Mesh Generation -->
+                        <div class="endpoint-card p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="method-badge method-post">POST</span>
+                                    <code class="ms-2">/visualization/mesh</code>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="testMesh()">Try it</button>
+                            </div>
+                            <p>Generate a 3D mesh from toolpath data.</p>
+                            
+                            <h6>Request Body</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label>Color Column</label>
+                                    <input type="text" class="form-control" id="mesh-color" value="ToolTemp">
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label>LOD</label>
+                                    <select class="form-control" id="mesh-lod">
+                                        <option value="high">High</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="low">Low</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label>Z Stretch</label>
+                                    <input type="number" class="form-control" id="mesh-stretch" value="1.0" step="0.1">
+                                </div>
+                            </div>
+                            
+                            <h6>Response</h6>
+                            <div class="response-area" id="mesh-response">Response will appear here...</div>
+                        </div>
+                    </div>
+
+                    <!-- Configuration Tab -->
+                    <div class="tab-pane fade" id="config">
+                        <h3>Configuration Endpoints</h3>
+                        
+                        <!-- Get Config -->
+                        <div class="endpoint-card p-3 mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="method-badge method-get">GET</span>
+                                    <code class="ms-2">/config</code>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="getConfig()">Try it</button>
+                            </div>
+                            <p>Retrieve the current application configuration.</p>
+                            
+                            <h6>Response</h6>
+                            <div class="response-area" id="config-get-response">Response will appear here...</div>
+                        </div>
+
+                        <!-- Update Config -->
+                        <div class="endpoint-card p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="method-badge method-put">PUT</span>
+                                    <code class="ms-2">/config</code>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="updateConfig()">Try it</button>
+                            </div>
+                            <p>Update application configuration settings.</p>
+                            
+                            <h6>Request Body</h6>
+                            <textarea class="form-control mb-2" id="config-body" rows="8">{
+    "default_theme": "Cerulean",
+    "plotly_template": "plotly_white",
+    "graph_1_options": ["XPos", "YPos", "ZPos"],
+    "graph_2_options": ["ToolTemp", "FeedVel"]
+}</textarea>
+                            
+                            <h6>Response</h6>
+                            <div class="response-area" id="config-put-response">Response will appear here...</div>
+                        </div>
+                    </div>
+
+                    <!-- Examples Tab -->
+                    <div class="tab-pane fade" id="examples">
+                        <h3>Code Examples</h3>
+                        
+                        <div class="endpoint-card p-3 mt-4">
+                            <h5>Python</h5>
+                            <pre class="code-block"><code class="language-python">import requests
+
+# Upload CSV file
+with open('data.csv', 'rb') as f:
+    files = {'file': f}
+    response = requests.post('http://127.0.0.1:8050/upload/csv', files=files)
+    print(response.json())
+
+# Generate 3D scatter plot
+data = {
+    'x_column': 'XPos',
+    'y_column': 'YPos',
+    'z_column': 'ZPos',
+    'color_column': 'ToolTemp',
+    'z_stretch': 1.0
+}
+response = requests.post('http://127.0.0.1:8050/visualization/scatter3d', json=data)
+print(response.json())</code></pre>
+                        </div>
+
+                        <div class="endpoint-card p-3">
+                            <h5>JavaScript (fetch)</h5>
+                            <pre class="code-block"><code class="language-javascript">// Upload CSV file
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+fetch('http://127.0.0.1:8050/upload/csv', {
+    method: 'POST',
+    body: formData
+})
+.then(response => response.json())
+.then(data => console.log(data));
+
+// Generate 3D scatter plot
+fetch('http://127.0.0.1:8050/visualization/scatter3d', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        x_column: 'XPos',
+        y_column: 'YPos',
+        z_column: 'ZPos',
+        color_column: 'ToolTemp',
+        z_stretch: 1.0
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data));</code></pre>
+                        </div>
+
+                        <div class="endpoint-card p-3">
+                            <h5>cURL</h5>
+                            <pre class="code-block"><code class="language-bash"># Upload CSV file
+curl -X POST http://127.0.0.1:8050/upload/csv \
+  -F "file=@data.csv"
+
+# Generate 3D scatter plot
+curl -X POST http://127.0.0.1:8050/visualization/scatter3d \
+  -H "Content-Type: application/json" \
+  -d '{
+    "x_column": "XPos",
+    "y_column": "YPos",
+    "z_column": "ZPos",
+    "color_column": "ToolTemp",
+    "z_stretch": 1.0
+  }'
+
+# Get configuration
+curl http://127.0.0.1:8050/config</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    
+    <script>
+        // Check server status
+        function checkServerStatus() {
+            const baseUrl = document.getElementById('base-url').value;
+            const statusIndicator = document.getElementById('server-status');
+            const statusText = document.getElementById('server-text');
+            
+            fetch(baseUrl)
+                .then(response => {
+                    statusIndicator.className = 'status-indicator status-success';
+                    statusText.textContent = 'Connected';
+                })
+                .catch(error => {
+                    statusIndicator.className = 'status-indicator status-error';
+                    statusText.textContent = 'Disconnected';
+                });
+        }
+        
+        // Check status on load and every 5 seconds
+        checkServerStatus();
+        setInterval(checkServerStatus, 5000);
+        
+        // API test functions
+        function getBaseUrl() {
+            return document.getElementById('base-url').value;
+        }
+        
+        function formatResponse(data) {
+            if (typeof data === 'object') {
+                return JSON.stringify(data, null, 2);
+            }
+            return data;
+        }
+        
+        async function testCSVUpload() {
+            const fileInput = document.getElementById('csv-file');
+            const responseArea = document.getElementById('csv-response');
+            
+            if (!fileInput.files[0]) {
+                responseArea.textContent = 'Please select a CSV file first';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            responseArea.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${getBaseUrl()}/upload/csv`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                responseArea.textContent = formatResponse(data);
+            } catch (error) {
+                responseArea.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testGcodeUpload() {
+            const fileInput = document.getElementById('gcode-file');
+            const responseArea = document.getElementById('gcode-response');
+            
+            if (!fileInput.files[0]) {
+                responseArea.textContent = 'Please select a G-code file first';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            responseArea.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${getBaseUrl()}/upload/gcode`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                responseArea.textContent = formatResponse(data);
+            } catch (error) {
+                responseArea.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testScatter3D() {
+            const responseArea = document.getElementById('scatter-response');
+            
+            const requestData = {
+                x_column: document.getElementById('scatter-x').value,
+                y_column: document.getElementById('scatter-y').value,
+                z_column: document.getElementById('scatter-z').value,
+                color_column: document.getElementById('scatter-color').value,
+                z_stretch: parseFloat(document.getElementById('scatter-stretch').value)
+            };
+            
+            responseArea.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${getBaseUrl()}/visualization/scatter3d`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                const data = await response.json();
+                responseArea.textContent = formatResponse(data);
+            } catch (error) {
+                responseArea.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testMesh() {
+            const responseArea = document.getElementById('mesh-response');
+            
+            const requestData = {
+                color_column: document.getElementById('mesh-color').value,
+                lod: document.getElementById('mesh-lod').value,
+                z_stretch: parseFloat(document.getElementById('mesh-stretch').value)
+            };
+            
+            responseArea.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${getBaseUrl()}/visualization/mesh`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                const data = await response.json();
+                responseArea.textContent = formatResponse(data);
+            } catch (error) {
+                responseArea.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function getConfig() {
+            const responseArea = document.getElementById('config-get-response');
+            responseArea.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${getBaseUrl()}/config`);
+                const data = await response.json();
+                responseArea.textContent = formatResponse(data);
+            } catch (error) {
+                responseArea.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function updateConfig() {
+            const responseArea = document.getElementById('config-put-response');
+            const configBody = document.getElementById('config-body').value;
+            
+            responseArea.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`${getBaseUrl()}/config`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: configBody
+                });
+                const data = await response.text();
+                responseArea.textContent = data || 'Configuration updated successfully';
+            } catch (error) {
+                responseArea.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Update base URL on change
+        document.getElementById('base-url').addEventListener('change', checkServerStatus);
+    </script>
+</body>
+</html>
