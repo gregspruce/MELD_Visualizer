@@ -62,21 +62,13 @@ def _register_callbacks(app):
     logger = logging.getLogger(__name__)
     
     try:
-        # Import the new modular callbacks
+        # Import the modular callbacks
         from .callbacks import register_all_callbacks
         register_all_callbacks(app)
         logger.info("Callbacks registered successfully")
-    except ImportError:
-        # Fallback to old callbacks.py if new structure not available
-        try:
-            import callbacks as callbacks_mod
-            if hasattr(callbacks_mod, "register_callbacks"):
-                callbacks_mod.register_callbacks(app)
-            elif hasattr(callbacks_mod, "init_callbacks"):
-                callbacks_mod.init_callbacks(app)
-            logger.info("Legacy callbacks module loaded successfully")
-        except ImportError as e:
-            logger.error(f"Failed to import callbacks module: {e}")
+    except ImportError as e:
+        logger.error(f"Failed to import callbacks module: {e}")
+        logger.error("Please ensure all callback modules are properly installed")
     except Exception as e:
         logger.error(f"Unexpected error registering callbacks: {e}")
 

@@ -33,8 +33,8 @@ meld-visualizer
 #### Option 2: From Source
 ```bash
 # Clone the repository
-git clone https://github.com/MELD-labs/meld-visualizer.git
-cd meld-visualizer
+git clone https://github.com/gregspruce/MELD_Visualizer.git
+cd MELD_Visualizer
 
 # Install in development mode
 pip install -e .
@@ -99,6 +99,7 @@ python -m src.meld_visualizer.app
 The application automatically detects and converts imperial units to metric:
 - **Detection**: Based on velocity ranges
 - **Conversion**: Inches → Millimeters
+- **Feedstock Geometry**: Automatically converted to metric for volume calculations
 - **Notification**: Banner shows when conversion occurs
 
 ### Data Validation
@@ -152,6 +153,7 @@ Files are validated for:
 - **Color Scale**: Min/Max values
 - **Z-Stretch**: Vertical exaggeration
 - **Opacity**: Transparency level
+- **Volume Accuracy**: Uses corrected 0.5" × 0.5" square rod geometry (27% more accurate)
 
 ### 3D Line Plot
 
@@ -227,6 +229,53 @@ Files are validated for:
 
 ## Settings & Configuration
 
+### Feedstock Configuration
+
+#### Understanding Feedstock Geometry
+
+The MELD Visualizer has been updated with mathematically correct feedstock geometry for accurate volume calculations:
+
+- **Default**: 0.5" × 0.5" square rod (correct for MELD process)
+- **Cross-sectional Area**: 161.3 mm² (12.7mm × 12.7mm)
+- **Accuracy Improvement**: 27% more accurate than previous circular wire assumption
+
+#### Configuring Feedstock Type
+
+1. **Navigate to Settings Tab**
+2. **Locate Feedstock Configuration Section**
+3. **Select Feedstock Type**:
+   - **Square Rod** (Recommended for MELD): 0.5" × 0.5" dimensions
+   - **Circular Wire** (Legacy): For compatibility with older configurations
+
+#### Feedstock Configuration Options
+
+```json
+{
+  "feedstock_type": "square",
+  "feedstock_dimension_inches": 0.5
+}
+```
+
+**Available Types**:
+- `"square"`: Square rod feedstock (default for MELD)
+  - Area calculation: side²
+  - 0.5" × 0.5" = 161.3 mm²
+- `"circular"`: Circular wire feedstock (legacy)
+  - Area calculation: π × (diameter/2)²
+  - 0.5" diameter = 126.7 mm²
+
+#### When to Change Feedstock Configuration
+
+**Use Square Rod (Default)** when:
+- Working with standard MELD processes
+- Need accurate volume calculations
+- Processing newer MELD data files
+
+**Use Circular Wire** when:
+- Working with legacy data or configurations
+- Comparing with older analysis results
+- Specific process requirements
+
 ### Theme Selection
 
 #### Changing Themes
@@ -258,13 +307,29 @@ Files are validated for:
 
 #### Export Settings
 1. Click "Export Configuration"
-2. Save config.json file
+2. Save config.json file (includes feedstock settings)
 3. Share with team members
 
 #### Import Settings
 1. Replace config.json in app directory
 2. Restart application
-3. Settings applied automatically
+3. Settings applied automatically (including feedstock geometry)
+
+#### Configuration File Structure
+When saving or editing manually, the configuration includes:
+
+```json
+{
+  "default_theme": "Cerulean",
+  "plotly_template": "plotly_white",
+  "feedstock_type": "square",
+  "feedstock_dimension_inches": 0.5,
+  "graph_1_options": ["XPos", "YPos", "ZPos"],
+  "graph_2_options": ["ToolTemp", "FeedVel"],
+  "plot_2d_y_options": ["FeedVel", "PathVel"],
+  "plot_2d_color_options": ["ToolTemp", "Time"]
+}
+```
 
 ## Tips & Tricks
 
@@ -360,12 +425,13 @@ DEBUG=1 python -m meld_visualizer
 #### "Units converted to mm"
 - Informational only
 - Data automatically converted
+- Feedstock geometry also converted for accurate calculations
 - Original file unchanged
 
 ### Getting Help
 
 #### Resources
-- **GitHub Issues**: Report bugs at https://github.com/MELD-labs/meld-visualizer/issues
+- **GitHub Issues**: Report bugs at https://github.com/gregspruce/MELD_Visualizer/issues
 - **Documentation**: This guide and others in `docs/` directory
 - **Sample Files**: Available in `data/csv/` and `data/nc/` directories
 - **API Documentation**: See `docs/api/` for technical specifications
@@ -396,11 +462,13 @@ When reporting issues, include:
 ## Best Practices Summary
 
 ### Do's
-- Save configuration regularly
+- Save configuration regularly (including feedstock settings)
+- Use square rod feedstock type for MELD processes
 - Use appropriate Z-scaling
 - Filter large datasets
 - Keep files under 10MB
 - Use consistent column naming
+- Verify volume calculations with correct feedstock geometry
 
 ### Don'ts
 - Don't upload sensitive data
@@ -408,6 +476,7 @@ When reporting issues, include:
 - Don't use incompatible formats
 - Don't bypass security warnings
 - Don't modify system files
+- Don't use circular feedstock for new MELD analysis (unless specifically required)
 
 ## Appendix
 

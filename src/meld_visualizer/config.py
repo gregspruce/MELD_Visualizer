@@ -40,7 +40,8 @@ def load_config():
     default_config = {
         "default_theme": "Cerulean (Default)", "plotly_template": "plotly_white",
         "graph_1_options": ["YPos", "ZPos", "SpinVel"], "graph_2_options": ["XPos", "ZPos", "SpinVel"],
-        "plot_2d_y_options": ["XPos", "YPos", "ZPos"], "plot_2d_color_options": ["FRO", "ToolTemp"]
+        "plot_2d_y_options": ["XPos", "YPos", "ZPos"], "plot_2d_color_options": ["FRO", "ToolTemp"],
+        "feedstock_type": "square", "feedstock_dimension_inches": 0.5
     }
     try:
         import os

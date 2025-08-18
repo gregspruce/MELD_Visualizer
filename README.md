@@ -13,6 +13,8 @@ A powerful 3D visualization platform for MELD (Manufacturing using Extreme Layer
 ### Core Capabilities
 - **3D Visualization**: Interactive scatter plots, mesh generation, and toolpath rendering
 - **File Support**: CSV data files and G-code (.nc) programs  
+- **Accurate Volume Calculations**: Mathematically correct feedstock geometry (0.5" × 0.5" square rod)
+- **Feedstock Configuration**: Supports both square rod and circular wire feedstock types
 - **Automatic Unit Conversion**: Imperial to metric conversion with detection
 - **Real-time Filtering**: Range-based and custom column filtering
 - **Multi-theme Support**: 20+ Bootstrap themes with matching Plotly templates
@@ -21,10 +23,16 @@ A powerful 3D visualization platform for MELD (Manufacturing using Extreme Layer
 
 ### Visualization Types
 - 3D Scatter Plots with customizable coloring
-- 3D Volume Mesh generation from toolpaths
+- 3D Volume Mesh generation from toolpaths (27% more accurate volume calculations)
 - 3D Line Plots for path analysis
 - 2D Time Series plots
 - Z-axis scaling for layer visibility
+
+### Key Technical Improvements
+- **Corrected Feedstock Geometry**: Now uses accurate 0.5" × 0.5" square rod geometry (161.3mm²)
+- **Volume Accuracy**: 27% improvement over previous circular wire assumption (126.7mm²)
+- **Configuration Support**: Runtime-configurable feedstock types and dimensions
+- **Backward Compatibility**: Legacy configurations continue to work seamlessly
 
 This guide explains how to run the application, customize its appearance, and understand its structure for future development.
 
@@ -52,8 +60,8 @@ meld-visualizer
 **Option 2: Development Installation**
 ```bash
 # Clone the repository
-git clone https://github.com/MELD-labs/meld-visualizer.git
-cd meld-visualizer
+git clone https://github.com/gregspruce/MELD_Visualizer.git
+cd MELD_Visualizer
 
 # Install in development mode with dev dependencies
 pip install -e ".[dev]"
@@ -101,6 +109,24 @@ On the "3D Toolpath Plot", "3D Volume Mesh", and "G-code Visualization" tabs, yo
 Settings can be changed either by using the "Settings" tab within the running application or by directly editing the `config/config.json` file.
 
 **IMPORTANT:** After saving any changes (either in the file or in the app), you must **close and restart the application** for your changes to take effect.
+
+#### **Feedstock Geometry Configuration**
+
+The application supports different feedstock types with accurate geometry calculations:
+
+- **Key:** `feedstock_type`
+- **Options:** 
+  - `"square"` (default) - 0.5" × 0.5" square rod (161.3mm²)
+  - `"circular"` - Circular wire (legacy support)
+- **Dimension:** `feedstock_dimension_inches` (default: 0.5)
+
+*Example for square rod (recommended for MELD):*
+```json
+{
+  "feedstock_type": "square",
+  "feedstock_dimension_inches": 0.5
+}
+```
 
 #### **Changing the Application Theme**
 
@@ -216,10 +242,11 @@ meld_visualizer/
 -   **`src/meld_visualizer/app.py`**: Main entry point. Initializes the Dash app, loads all modules, and starts the server.
 -   **`src/meld_visualizer/core/layout.py`**: UI components and structure (View layer).
 -   **`src/meld_visualizer/callbacks/`**: Modular callback system (Controller layer) with separate files for different functionality areas.
--   **`src/meld_visualizer/core/data_processing.py`**: Data parsing, mesh generation, and G-code processing (Model layer).
+-   **`src/meld_visualizer/core/data_processing.py`**: Data parsing, mesh generation, and G-code processing with corrected feedstock geometry (Model layer).
 -   **`src/meld_visualizer/services/`**: Business logic services including caching, data processing, and file handling.
 -   **`src/meld_visualizer/config.py`**: Configuration management and theme handling.
--   **`config/config.json`**: User-configurable settings file (themes, plot options, column mappings).
+-   **`src/meld_visualizer/constants.py`**: Feedstock geometry constants and configuration types.
+-   **`config/config.json`**: User-configurable settings file (themes, plot options, column mappings, feedstock geometry).
 -   **`pyproject.toml`**: Modern Python packaging configuration with dependencies and metadata.
 
 ### 5. Development Workflow
@@ -227,8 +254,8 @@ meld_visualizer/
 #### Development Setup
 ```bash
 # Clone the repository
-git clone https://github.com/MELD-labs/meld-visualizer.git
-cd meld-visualizer
+git clone https://github.com/gregspruce/MELD_Visualizer.git
+cd MELD_Visualizer
 
 # Install in development mode with dev dependencies
 pip install -e ".[dev]"

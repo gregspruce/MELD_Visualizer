@@ -19,8 +19,12 @@
       "Bash(timeout:*)",
       "Bash(where:*)",
       "Bash(bash:*)",
-      "Bash(git merge:*)",
-      "Bash(git commit:*)"
+      "Bash(git checkout:*)",
+      "mcp__ide__executeCode",
+      "Bash(pytest:*)",
+      "Bash(set PYTHONPATH=C:VSCodeMELDMELD_Visualizersrc)",
+      "Bash(git add:*)",
+      "Bash(git push:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [

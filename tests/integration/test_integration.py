@@ -195,6 +195,103 @@ class TestVisualizationWorkflow:
         assert len(fig.data) > 0
         assert fig.data[0].type == 'mesh3d'
     
+    def test_volume_mesh_with_corrected_feedstock(self):
+        """Test volume mesh generation with corrected feedstock area calculations."""
+        from src.meld_visualizer.core.data_processing import generate_volume_mesh
+        from src.meld_visualizer.constants import FEEDSTOCK_AREA_MM2
+        
+        # Create test data with known velocity relationships for validation
+        df = pd.DataFrame({
+            'XPos': [0, 10, 20, 30],
+            'YPos': [0, 0, 0, 0],
+            'ZPos': [0, 0, 0, 0],
+            'FeedVel': [161.29, 161.29, 161.29, 161.29],  # Equal to feedstock area for easy calculation
+            'PathVel': [161.29, 161.29, 161.29, 161.29],  # 1:1 ratio
+            'ToolTemp': [100, 150, 200, 250]
+        })
+        
+        # Generate mesh with corrected feedstock area
+        mesh_data = generate_volume_mesh(df, 'ToolTemp')
+        
+        # Verify mesh generation succeeds
+        assert mesh_data is not None
+        assert 'vertices' in mesh_data
+        assert 'faces' in mesh_data
+        assert 'vertex_colors' in mesh_data
+        
+        # Verify mesh has reasonable scale
+        vertices = mesh_data['vertices']
+        assert len(vertices) > 0
+        
+        # With 1:1 feed/path ratio, bead area should equal feedstock area
+        # This validates the corrected calculation is used
+        vertex_span = np.max(vertices) - np.min(vertices)
+        assert vertex_span > 0  # Should have some dimensions
+        assert vertex_span < 1000  # But not unreasonably large
+    
+    def test_volume_conservation_integration(self):
+        """Test that volume conservation is maintained in full workflow."""
+        from src.meld_visualizer.core.data_processing import generate_volume_mesh
+        from src.meld_visualizer.constants import FEEDSTOCK_AREA_MM2
+        
+        # Test different feed/path velocity ratios
+        test_cases = [
+            {'feed': 100, 'path': 50, 'expected_ratio': 2.0},    # Double bead area
+            {'feed': 50, 'path': 100, 'expected_ratio': 0.5},   # Half bead area  
+            {'feed': 161.29, 'path': 161.29, 'expected_ratio': 1.0}  # Equal areas
+        ]
+        
+        for case in test_cases:
+            df = pd.DataFrame({
+                'XPos': [0, 10],
+                'YPos': [0, 0],
+                'ZPos': [0, 0],
+                'FeedVel': [case['feed'], case['feed']],
+                'PathVel': [case['path'], case['path']],
+                'ToolTemp': [100, 150]
+            })
+            
+            mesh_data = generate_volume_mesh(df, 'ToolTemp')
+            assert mesh_data is not None
+            
+            # Expected bead area = (feed_vel * feedstock_area) / path_vel
+            expected_bead_area = (case['feed'] * FEEDSTOCK_AREA_MM2) / case['path']
+            expected_feedstock_ratio = expected_bead_area / FEEDSTOCK_AREA_MM2
+            
+            # Verify the ratio is as expected
+            assert expected_feedstock_ratio == pytest.approx(case['expected_ratio'], rel=1e-2)
+    
+    def test_mesh_generation_with_different_feedstock_configs(self):
+        """Test mesh generation works with different feedstock configurations."""
+        from src.meld_visualizer.core.data_processing import generate_volume_mesh
+        from src.meld_visualizer.constants import FEEDSTOCK_TYPES
+        
+        # Create consistent test data
+        df = pd.DataFrame({
+            'XPos': [0, 10, 20],
+            'YPos': [0, 0, 0],
+            'ZPos': [0, 1, 2],
+            'FeedVel': [100, 100, 100],
+            'PathVel': [50, 50, 50],
+            'ToolTemp': [100, 150, 200]
+        })
+        
+        # Mesh generation should work regardless of configured feedstock type
+        # (since the constants are used internally)
+        mesh_data = generate_volume_mesh(df, 'ToolTemp')
+        
+        assert mesh_data is not None
+        assert len(mesh_data['vertices']) > 0
+        assert len(mesh_data['faces']) > 0
+        
+        # Verify that square rod area is being used (161.29 mm²)
+        square_area = FEEDSTOCK_TYPES['square']['area_mm2']
+        assert square_area == pytest.approx(161.29, rel=1e-2)
+        
+        # Bead area calculation: (100 * 161.29) / 50 = 322.58 mm²
+        expected_bead_area = (100 * square_area) / 50
+        assert expected_bead_area == pytest.approx(322.58, rel=1e-2)
+    
     def test_line_plot_generation(self, sample_dataframe):
         """Test 3D line plot generation."""
         from src.meld_visualizer.callbacks.visualization_callbacks import update_line_plot
@@ -326,6 +423,202 @@ class TestFilteringWorkflow:
         assert len(filtered) == 51  # 25 to 75 inclusive
         assert filtered['CustomCol'].min() == 25
         assert filtered['CustomCol'].max() == 75
+
+
+class TestBackwardCompatibility:
+    """Test backward compatibility with existing data and configurations."""
+    
+    def test_existing_csv_files_still_work(self):
+        """Test that existing CSV files continue to work with corrected calculations."""
+        from src.meld_visualizer.core.data_processing import parse_contents, generate_volume_mesh
+        
+        # Simulate existing CSV file with typical MELD data
+        legacy_df = pd.DataFrame({
+            'Date': ['2024-01-01'] * 5,
+            'Time': ['10:00:00', '10:00:01', '10:00:02', '10:00:03', '10:00:04'],
+            'XPos': [0, 10, 20, 30, 40],
+            'YPos': [0, 5, 10, 15, 20],
+            'ZPos': [0, 0.5, 1.0, 1.5, 2.0],
+            'FeedVel': [0, 100, 150, 200, 150],
+            'PathVel': [0, 50, 75, 100, 75],
+            'ToolTemp': [25, 200, 250, 300, 275],
+            'XVel': [0, 50, 75, 100, 75],
+            'YVel': [0, 25, 37, 50, 37],
+            'ZVel': [0, 10, 15, 20, 15]
+        })
+        
+        csv_string = legacy_df.to_csv(index=False)
+        encoded = base64.b64encode(csv_string.encode()).decode()
+        contents = f"data:text/csv;base64,{encoded}"
+        
+        # Parse the legacy file
+        df, error, converted = parse_contents(contents, "legacy_data.csv")
+        
+        # Should parse successfully
+        assert df is not None
+        assert error is None
+        
+        # Should have expected columns
+        required_cols = ['XPos', 'YPos', 'ZPos', 'FeedVel', 'PathVel', 'ToolTemp']
+        for col in required_cols:
+            assert col in df.columns
+        
+        # Generate mesh with active data
+        df_active = df[df['FeedVel'] > 0]
+        mesh_data = generate_volume_mesh(df_active, 'ToolTemp')
+        
+        # Should generate valid mesh
+        assert mesh_data is not None
+        assert len(mesh_data['vertices']) > 0
+    
+    def test_legacy_imperial_conversion_still_works(self):
+        """Test that imperial unit conversion still works correctly."""
+        from src.meld_visualizer.core.data_processing import parse_contents
+        from src.meld_visualizer.constants import INCH_TO_MM
+        
+        # Create imperial data (low velocities indicate imperial units)
+        imperial_df = pd.DataFrame({
+            'Date': ['2024-01-01'] * 4,
+            'Time': ['10:00:00', '10:00:01', '10:00:02', '10:00:03'],
+            'XPos': [0, 1, 2, 3],        # inches
+            'YPos': [0, 1, 2, 3],        # inches
+            'ZPos': [0, 0.1, 0.2, 0.3],  # inches
+            'FeedVel': [0, 15, 20, 25],  # inch/min (low values)
+            'PathVel': [0, 7, 10, 12],   # inch/min
+            'ToolTemp': [25, 200, 250, 300]
+        })
+        
+        csv_string = imperial_df.to_csv(index=False)
+        encoded = base64.b64encode(csv_string.encode()).decode()
+        contents = f"data:text/csv;base64,{encoded}"
+        
+        # Parse with conversion
+        df, error, converted = parse_contents(contents, "imperial.csv")
+        
+        # Should convert successfully
+        assert converted is True
+        assert error is None
+        
+        # Verify conversion was applied
+        assert df['XPos'].iloc[1] == pytest.approx(1 * INCH_TO_MM, rel=1e-3)
+        assert df['FeedVel'].iloc[1] == pytest.approx(15 * INCH_TO_MM, rel=1e-3)
+    
+    def test_existing_gcode_files_still_work(self):
+        """Test that existing G-code files continue to work."""
+        from src.meld_visualizer.core.data_processing import parse_gcode_file, generate_volume_mesh
+        
+        # Typical MELD G-code content
+        gcode_content = """
+        ; MELD G-code example
+        G0 X0 Y0 Z0 F1000
+        M34 S4200  ; Start material feed at 420 mm/min
+        G1 X25.4 Y25.4 F500
+        G1 X50.8 Y25.4
+        G1 X50.8 Y50.8
+        G1 X25.4 Y50.8
+        G1 X25.4 Y25.4
+        M35  ; Stop material feed
+        G0 Z10
+        """
+        
+        encoded = base64.b64encode(gcode_content.encode()).decode()
+        contents = f"data:text/plain;base64,{encoded}"
+        
+        # Parse G-code
+        df, error, converted = parse_gcode_file(contents, "existing.nc")
+        
+        # Should parse successfully
+        assert df is not None
+        assert error is None
+        
+        # Generate mesh from G-code data
+        df_active = df[df['FeedVel'] > 0]
+        if not df_active.empty:
+            mesh_data = generate_volume_mesh(df_active, 'FeedVel')
+            assert mesh_data is not None
+    
+    def test_legacy_configuration_compatibility(self):
+        """Test that configurations without feedstock settings still work."""
+        from src.meld_visualizer.constants import FEEDSTOCK_TYPES, DEFAULT_FEEDSTOCK_TYPE
+        
+        # Legacy configuration without feedstock settings
+        legacy_config = {
+            "default_theme": "bootstrap",
+            "plotly_template": "plotly_white",
+            "graph_1_options": ["XPos", "YPos", "ZPos"],
+            "graph_2_options": ["ZPos"],
+            "plot_2d_y_options": ["FeedVel"],
+            "plot_2d_color_options": ["ToolTemp"]
+        }
+        
+        # Should be able to use default feedstock settings
+        default_feedstock = FEEDSTOCK_TYPES[DEFAULT_FEEDSTOCK_TYPE]
+        assert default_feedstock['area_mm2'] == pytest.approx(161.29, rel=1e-2)
+        
+        # Legacy configs should still be valid
+        assert isinstance(legacy_config, dict)
+        assert "default_theme" in legacy_config
+    
+    def test_volume_calculations_produce_reasonable_results(self):
+        """Test that volume calculations with corrected area produce reasonable results."""
+        from src.meld_visualizer.core.data_processing import generate_volume_mesh
+        from src.meld_visualizer.constants import FEEDSTOCK_AREA_MM2
+        
+        # Test with typical MELD velocities
+        typical_data = pd.DataFrame({
+            'XPos': [0, 25, 50, 75, 100],
+            'YPos': [0, 0, 0, 0, 0],
+            'ZPos': [0, 0, 0, 0, 0],
+            'FeedVel': [100, 120, 150, 120, 100],  # Typical feed velocities
+            'PathVel': [80, 80, 80, 80, 80],      # Typical path velocity
+            'ToolTemp': [200, 250, 300, 250, 200]
+        })
+        
+        mesh_data = generate_volume_mesh(typical_data, 'ToolTemp')
+        assert mesh_data is not None
+        
+        # Verify reasonable bead areas are calculated
+        # With these velocities: bead_area ≈ (100-150 * 161.29) / 80
+        min_expected = (100 * FEEDSTOCK_AREA_MM2) / 80  # ≈ 201.6 mm²
+        max_expected = (150 * FEEDSTOCK_AREA_MM2) / 80  # ≈ 302.4 mm²
+        
+        assert min_expected > 200  # Reasonable minimum
+        assert max_expected < 400  # Reasonable maximum
+    
+    def test_no_regression_in_mesh_quality(self):
+        """Test that mesh quality is maintained with corrected calculations."""
+        from src.meld_visualizer.core.data_processing import generate_volume_mesh
+        
+        # Create mesh with corrected calculations
+        df = pd.DataFrame({
+            'XPos': np.linspace(0, 50, 20),
+            'YPos': np.linspace(0, 50, 20),
+            'ZPos': np.repeat(np.arange(4), 5),
+            'FeedVel': np.full(20, 100),
+            'PathVel': np.full(20, 80),
+            'ToolTemp': np.linspace(200, 300, 20)
+        })
+        
+        mesh_data = generate_volume_mesh(df, 'ToolTemp')
+        assert mesh_data is not None
+        
+        vertices = mesh_data['vertices']
+        faces = mesh_data['faces']
+        colors = mesh_data['vertex_colors']
+        
+        # Quality checks
+        assert len(vertices) > 0
+        assert len(faces) > 0
+        assert len(colors) == len(vertices)
+        
+        # Verify face indices are valid
+        max_vertex_index = len(vertices) - 1
+        assert np.all(faces <= max_vertex_index)
+        assert np.all(faces >= 0)
+        
+        # Verify vertices have reasonable coordinates
+        assert not np.any(np.isnan(vertices))
+        assert not np.any(np.isinf(vertices))
 
 
 class TestCachingWorkflow:

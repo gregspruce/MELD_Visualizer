@@ -404,7 +404,7 @@ pytest -v -s --tb=long > test_output.log 2>&1
 ```
 
 ### Community Resources
-- **GitHub Issues**: https://github.com/MELD-labs/meld-visualizer/issues
+- **GitHub Issues**: https://github.com/gregspruce/MELD_Visualizer/issues
 - **Documentation**: See `docs/` directory for comprehensive guides
 - **Sample Files**: Use files in `data/csv/` and `data/nc/` for testing
 - **Development Guide**: See `docs/agents.md` for detailed development instructions

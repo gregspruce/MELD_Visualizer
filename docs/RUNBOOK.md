@@ -23,8 +23,8 @@ python -m pip install -U pip
 ### Method 1: Modern Development Setup (Recommended)
 ```bash
 # Clone repository
-git clone https://github.com/MELD-labs/meld-visualizer.git
-cd meld-visualizer
+git clone https://github.com/gregspruce/MELD_Visualizer.git
+cd MELD_Visualizer
 
 # Install with all development dependencies
 pip install -e ".[dev]"
