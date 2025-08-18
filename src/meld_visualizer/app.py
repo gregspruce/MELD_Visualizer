@@ -19,7 +19,7 @@ def _resolve_external_stylesheets():
         from .config import APP_CONFIG, THEMES  # optional; present in this repo
         key = None
         if isinstance(APP_CONFIG, dict):
-            key = APP_CONFIG.get("theme") or APP_CONFIG.get("bootstrap_theme")
+            key = APP_CONFIG.get("default_theme") or APP_CONFIG.get("theme") or APP_CONFIG.get("bootstrap_theme")
         if key and isinstance(THEMES, dict) and key in THEMES:
             val = THEMES[key]
             if isinstance(val, str) and (val.startswith("http://") or val.startswith("https://")):
@@ -81,6 +81,11 @@ def create_app(testing: bool = False) -> Dash:
     )
     app.layout = _build_layout(app)
     _register_callbacks(app)
+    
+    # Enable hot-reload for themes and config
+    from .utils.hot_reload import register_hot_reload_callbacks
+    register_hot_reload_callbacks(app)
+    
     return app
 
 # Module-level app

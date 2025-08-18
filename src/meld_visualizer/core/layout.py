@@ -243,12 +243,21 @@ def get_layout(app):
     This function is called by app.py.
     The 'app' argument is unused but required by the dynamic loader.
     """
+    from ..utils.hot_reload import create_theme_injection_component
+    
     return html.Div([
+        # Hot-reload components for dynamic theme/config updates
+        create_theme_injection_component(),
+        
         dbc.Container([
             # Add the new store for G-code data
             dcc.Store(id='store-main-df'), dcc.Store(id='store-gcode-df'),
             dcc.Store(id='store-layout-config'), dcc.Store(id='store-config-warnings'),
             dcc.Store(id='store-column-ranges'), dcc.Store(id='store-config-updated'),
+            
+            # Theme update feedback message
+            html.Div(id='theme-update-message', style={'display': 'none'}),
+            
             build_header(),
             build_app_body_with_tabs(),
         ], fluid=True)

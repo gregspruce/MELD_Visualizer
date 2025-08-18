@@ -90,8 +90,11 @@ def register_config_callbacks(app=None):
         success, message = ConfigurationManager.save_config(new_config)
         
         if success:
-            logger.info("Configuration saved successfully")
-            return True, SUCCESS_CONFIG_SAVED, n_clicks
+            logger.info("Configuration saved successfully - triggering hot-reload")
+            # Update the global APP_CONFIG for immediate effect
+            from .. import config
+            config.APP_CONFIG.update(new_config)
+            return True, f"{SUCCESS_CONFIG_SAVED} Theme and options updated dynamically!", n_clicks
         else:
             logger.error(f"Failed to save configuration: {message}")
             return True, f"Error: {message}", no_update

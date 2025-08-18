@@ -69,3 +69,6 @@ def load_config():
 APP_CONFIG = load_config()
 PLOTLY_TEMPLATE = APP_CONFIG.get("plotly_template", "plotly_white")
 SCATTER_3D_HEIGHT = '80vh'
+
+# Initialize current theme for the application
+CURRENT_THEME = APP_CONFIG.get("default_theme", "Cerulean (Default)")
