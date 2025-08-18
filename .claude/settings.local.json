@@ -18,7 +18,9 @@
       "Bash(sed:*)",
       "Bash(timeout:*)",
       "Bash(where:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(git merge:*)",
+      "Bash(git commit:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
