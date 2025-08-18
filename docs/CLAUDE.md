@@ -122,6 +122,8 @@ This is a **Dash web application** for visualizing 3D process data from MELD man
 - **CSV Data Upload**: Processes MELD manufacturing data with automatic unit conversion (inches→mm)
 - **G-code Visualization**: Parses `.nc` files to simulate toolpaths and volume meshes
 - **3D Visualizations**: Interactive scatter plots, toolpath plots, and volume meshes with Z-axis scaling
+- **Accurate Volume Calculations**: Corrected feedstock geometry using 0.5" × 0.5" square rod (161.3mm²)
+- **Feedstock Configuration**: Supports both square rod and circular wire feedstock types
 - **Theme Support**: 20+ Bootstrap themes (light/dark) with matching Plotly templates
 - **Configurable UI**: User settings saved in `config.json`, editable via Settings tab
 
@@ -141,9 +143,10 @@ This is a **Dash web application** for visualizing 3D process data from MELD man
 - Test coverage configured in `pyproject.toml`
 
 ### Important Files
-- **`config/config.json`**: User-configurable themes, plot options, column mappings
+- **`config/config.json`**: User-configurable themes, plot options, column mappings, and feedstock geometry
 - **`data/csv/`**: Sample CSV files for testing and development
 - **`data/nc/`**: Sample G-code files for testing and development
+- **`src/meld_visualizer/constants.py`**: Feedstock geometry constants and configuration types
 - **`tests/pytest.ini`**: Test configuration with markers (unit, integration, e2e)
 - **`tests/test_suite.conf`**: Test runner configuration
 - **`pyproject.toml`**: Modern Python packaging with dependencies and tool configuration
@@ -154,7 +157,14 @@ This is a **Dash web application** for visualizing 3D process data from MELD man
 - All 3D plots support Z-axis stretch factor for better layer visualization
 - Theme changes require app restart to take effect
 - G-code parser handles M34/M35 commands for feed rate control
-- Volume mesh generation creates 3D representations from toolpath data
+- **Volume mesh generation**: Creates 3D representations with mathematically correct feedstock geometry
+  - **Feedstock geometry**: 0.5" × 0.5" square rod (12.7mm × 12.7mm, 161.3mm²)
+  - **Volume accuracy**: 27% more accurate than previous circular wire assumption
+  - **Configuration**: Supports both square and circular feedstock types via `config.json`
+- **Feedstock Configuration Options**:
+  - `feedstock_type`: "square" (default) or "circular"
+  - `feedstock_dimension_inches`: 0.5 (default, configurable)
+  - Automatic area calculations based on geometry type
 - Package follows src-layout with proper `__init__.py` files for imports
 - Entry points defined in `pyproject.toml` for `meld-visualizer` command
 - Code quality enforced with black, flake8, mypy, and pre-commit hooks

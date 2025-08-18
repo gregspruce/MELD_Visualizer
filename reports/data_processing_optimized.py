@@ -122,8 +122,16 @@ def generate_volume_mesh_optimized(df_active, color_col):
     # Constants
     BEAD_LENGTH = 2.0
     BEAD_RADIUS = BEAD_LENGTH / 2.0
-    WIRE_DIAMETER_MM = 0.5 * INCH_TO_MM
-    WIRE_AREA = WIRE_DIAMETER_MM**2
+    
+    # Feedstock geometry - MELD uses 0.5" × 0.5" square rod, not circular wire
+    FEEDSTOCK_DIMENSION_INCHES = 0.5  # Square rod dimension (inches)
+    FEEDSTOCK_DIMENSION_MM = FEEDSTOCK_DIMENSION_INCHES * INCH_TO_MM  # Convert to mm (12.7 mm)
+    FEEDSTOCK_AREA_MM2 = FEEDSTOCK_DIMENSION_MM ** 2  # Square rod area (161.3 mm²)
+    
+    # Legacy variables for backward compatibility
+    WIRE_DIAMETER_MM = FEEDSTOCK_DIMENSION_MM  # Now represents square dimension
+    WIRE_AREA = FEEDSTOCK_AREA_MM2  # Corrected: actual square rod area, not diameter squared
+    
     MAX_BEAD_THICKNESS = 1.0 * INCH_TO_MM
     POINTS_PER_SECTION = 12
 

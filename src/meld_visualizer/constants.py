@@ -20,7 +20,30 @@ ANGLE_STEP_DEGREES = 30  # Angular step for mesh generation
 POINTS_PER_SECTION = int(360 / ANGLE_STEP_DEGREES)
 MAX_BEAD_THICKNESS_MM = 1.0 * INCH_TO_MM  # Maximum bead thickness
 BEAD_THICKNESS_RATIO = 0.8  # Ratio of actual to maximum thickness
-WIRE_DIAMETER_MM = 0.5 * INCH_TO_MM  # Wire feed diameter
+
+# Feedstock Geometry Constants
+# MELD uses 0.5" × 0.5" square rod feedstock, not circular wire
+FEEDSTOCK_DIMENSION_INCHES = 0.5  # Square rod dimension (inches)
+FEEDSTOCK_DIMENSION_MM = FEEDSTOCK_DIMENSION_INCHES * INCH_TO_MM  # Convert to mm
+FEEDSTOCK_AREA_MM2 = FEEDSTOCK_DIMENSION_MM ** 2  # Square rod area (mm²)
+
+# Legacy constants for backward compatibility
+WIRE_DIAMETER_MM = FEEDSTOCK_DIMENSION_MM  # For backward compatibility (now represents square dimension)
+
+# Feedstock type configuration
+FEEDSTOCK_TYPES = {
+    'square': {
+        'dimension_mm': FEEDSTOCK_DIMENSION_MM,
+        'area_mm2': FEEDSTOCK_AREA_MM2,
+        'description': 'Square rod feedstock (0.5" × 0.5")'
+    },
+    'circular': {
+        'diameter_mm': FEEDSTOCK_DIMENSION_MM,
+        'area_mm2': 3.14159 * (FEEDSTOCK_DIMENSION_MM / 2) ** 2,
+        'description': 'Circular wire feedstock (0.5" diameter)'
+    }
+}
+DEFAULT_FEEDSTOCK_TYPE = 'square'  # MELD uses square rod
 
 # File Processing Limits
 MAX_FILE_SIZE_MB = 10  # Maximum upload file size
@@ -77,6 +100,13 @@ GCODE_FEED_OFF_CMD = 'M35'  # Material feed off
 GCODE_RAPID_MOVE = 'G0'  # Rapid positioning
 GCODE_LINEAR_MOVE = 'G1'  # Linear interpolation
 GCODE_COMMENT_CHARS = ['(', ';']  # Comment indicators
+
+# Security Configuration
+SAFE_CONFIG_KEYS = {
+    'default_theme', 'plotly_template', 'graph_1_options', 
+    'graph_2_options', 'plot_2d_y_options', 'plot_2d_color_options',
+    'feedstock_type', 'feedstock_dimension_inches'
+}
 
 # Error Messages
 ERROR_NO_FILE = "Please upload a file to begin."

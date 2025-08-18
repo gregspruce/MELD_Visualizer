@@ -23,5 +23,7 @@
     "ToolTemp",
     "SpinPwr",
     "TimeInSeconds"
-  ]
+  ],
+  "feedstock_type": "square",
+  "feedstock_dimension_inches": 0.5
 }
