@@ -12,8 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Installation
 ```bash
 # Clone repository
-git clone https://github.com/MELD-labs/meld-visualizer.git
-cd meld-visualizer
+git clone https://github.com/gregspruce/MELD_Visualizer.git
+cd MELD_Visualizer
 
 # Install in development mode (recommended)
 pip install -e ".[dev]"

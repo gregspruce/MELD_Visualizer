@@ -70,8 +70,8 @@ The application follows modern Python packaging standards with a clean, modular 
 #### 1. Repository Clone and Setup
 ```bash
 # Clone the repository
-git clone https://github.com/MELD-labs/meld-visualizer.git
-cd meld-visualizer
+git clone https://github.com/gregspruce/MELD_Visualizer.git
+cd MELD_Visualizer
 
 # Verify Python version (3.8+ required)
 python --version

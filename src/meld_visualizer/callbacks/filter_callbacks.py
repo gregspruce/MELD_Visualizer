@@ -7,7 +7,7 @@ import logging
 from dash import Input, Output, State, callback, no_update, ctx, MATCH
 from dash.exceptions import PreventUpdate
 
-from security_utils import InputValidator
+from ..utils.security_utils import InputValidator
 
 logger = logging.getLogger(__name__)
 

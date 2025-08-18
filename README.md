@@ -60,8 +60,8 @@ meld-visualizer
 **Option 2: Development Installation**
 ```bash
 # Clone the repository
-git clone https://github.com/MELD-labs/meld-visualizer.git
-cd meld-visualizer
+git clone https://github.com/gregspruce/MELD_Visualizer.git
+cd MELD_Visualizer
 
 # Install in development mode with dev dependencies
 pip install -e ".[dev]"
@@ -254,8 +254,8 @@ meld_visualizer/
 #### Development Setup
 ```bash
 # Clone the repository
-git clone https://github.com/MELD-labs/meld-visualizer.git
-cd meld-visualizer
+git clone https://github.com/gregspruce/MELD_Visualizer.git
+cd MELD_Visualizer
 
 # Install in development mode with dev dependencies
 pip install -e ".[dev]"

@@ -33,8 +33,8 @@ meld-visualizer
 #### Option 2: From Source
 ```bash
 # Clone the repository
-git clone https://github.com/MELD-labs/meld-visualizer.git
-cd meld-visualizer
+git clone https://github.com/gregspruce/MELD_Visualizer.git
+cd MELD_Visualizer
 
 # Install in development mode
 pip install -e .
@@ -431,7 +431,7 @@ DEBUG=1 python -m meld_visualizer
 ### Getting Help
 
 #### Resources
-- **GitHub Issues**: Report bugs at https://github.com/MELD-labs/meld-visualizer/issues
+- **GitHub Issues**: Report bugs at https://github.com/gregspruce/MELD_Visualizer/issues
 - **Documentation**: This guide and others in `docs/` directory
 - **Sample Files**: Available in `data/csv/` and `data/nc/` directories
 - **API Documentation**: See `docs/api/` for technical specifications
