@@ -1,0 +1,105 @@
+{
+  "project_name": "MELD Visualizer",
+  "repository": "https://github.com/gregspruce/MELD_Visualizer",
+  "main_entry": "src/meld_visualizer/app.py",
+  "current_version": "1.0.0",
+  "last_major_fix": "2025-08-18 - Volume calculation correction (27% accuracy improvement)",
+  
+  "critical_constants": {
+    "FEEDSTOCK_DIMENSION_INCHES": 0.5,
+    "FEEDSTOCK_DIMENSION_MM": 12.7,
+    "FEEDSTOCK_AREA_MM2": 161.29,
+    "FEEDSTOCK_GEOMETRY": "SQUARE_ROD"
+  },
+  
+  "architecture": {
+    "pattern": "MVC-like",
+    "view": "layout.py",
+    "controller": "callbacks/",
+    "model": "data_processing.py",
+    "config": "config.py"
+  },
+  
+  "tech_stack": {
+    "framework": "Dash >= 2.14.0",
+    "ui": "dash-bootstrap-components",
+    "visualization": "plotly",
+    "data": "pandas, numpy",
+    "testing": "pytest, selenium"
+  },
+  
+  "quick_commands": {
+    "run": "python app.py",
+    "test_unit": "pytest -m 'not e2e'",
+    "test_e2e": "pytest -m 'e2e'",
+    "test_all": "pytest",
+    "build": "pyinstaller VolumetricPlotter.spec"
+  },
+  
+  "recent_fixes": [
+    {
+      "date": "2025-08-18",
+      "type": "CRITICAL",
+      "description": "Fixed volume calculation from circular to square geometry",
+      "impact": "27% accuracy improvement"
+    },
+    {
+      "date": "2025-08-18",
+      "type": "CRITICAL",
+      "description": "Fixed import errors blocking app startup",
+      "files_affected": "Multiple callback modules"
+    },
+    {
+      "date": "2025-08-18",
+      "type": "DOCUMENTATION",
+      "description": "Corrected all GitHub repository URLs",
+      "old": "MELD-labs/meld-visualizer",
+      "new": "gregspruce/MELD_Visualizer"
+    }
+  ],
+  
+  "known_issues": [
+    "Hot-reloading doesn't work for config.json changes",
+    "Theme changes require app restart",
+    "Legacy configuration compatibility"
+  ],
+  
+  "future_features": [
+    "Enhanced G-code parsing",
+    "Real-time data streaming",
+    "WebSocket support",
+    "Export functionality"
+  ],
+  
+  "file_structure": {
+    "src/meld_visualizer/": "Main package directory",
+    "src/meld_visualizer/callbacks/": "Modular callback handlers",
+    "src/meld_visualizer/utils/": "Utility functions and validators",
+    "tests/": "Unit tests",
+    "tests/e2e/": "End-to-end tests",
+    "CSV/": "Sample data files",
+    "config.json": "User configuration"
+  },
+  
+  "testing_markers": {
+    "unit": "Unit tests only",
+    "integration": "Integration tests",
+    "e2e": "End-to-end browser tests"
+  },
+  
+  "agent_context": {
+    "last_context_update": "2025-08-18",
+    "context_version": "1.0",
+    "specialized_agents_used": [
+      "repository_restructuring",
+      "error_detective",
+      "code_reviewer",
+      "database_optimizer"
+    ],
+    "critical_discoveries": [
+      "Wire diameter calculation error (21.5% underestimation)",
+      "Import path issues after restructuring",
+      "Hallucinated GitHub URLs in documentation"
+    ]
+  }
+}

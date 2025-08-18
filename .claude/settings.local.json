@@ -24,7 +24,9 @@
       "Bash(pytest:*)",
       "Bash(set PYTHONPATH=C:VSCodeMELDMELD_Visualizersrc)",
       "Bash(git add:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git branch:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
