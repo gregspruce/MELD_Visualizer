@@ -1,7 +1,7 @@
 Files likely safe to remove now (if present):
 
 1) `tests/test_e2e_placeholder.py` — replaced by real E2E under `tests/e2e/`.
-2) Any `scripts/jules_setup.sh`/`scripts/run_tests.sh` from earlier iterations — superseded by `JULES_initial_setup_v3.sh` and top-level `run_tests.sh`.
+2) Any legacy setup scripts from earlier iterations — superseded by current setup process and top-level `run_tests.sh`.
 3) `chromedriver_autoinstaller` usage — Selenium 4+ manages drivers itself. Remove from code and `requirements.txt`.
 4) `dash[testing]` in `requirements.txt` — move test tooling to `requirements-dev.txt`.
 5) Any checked-in WebDriver binaries — not needed with Selenium Manager.

@@ -5,11 +5,11 @@ _Last updated: 2025-08-14T14:03:20Z_
 AI-agnostic summary so any assistant/human can continue work on the MELD_Visualizer (Dash) repo.
 
 ## High-level history
-- Pytest hung in Jules → disabled global plugin autoload + fixed imports.
+- Pytest hung in testing environment → disabled global plugin autoload + fixed imports.
 - Added app factory + robust layout loader; separated runtime vs test deps.
 - Added Selenium 4 E2E; Chrome installed only when needed.
 - Introduced test-suite switch (file/env) + `run_tests.sh`.
-- Split CI jobs and Jules setup; used `E2E_SETUP=1` for Chrome in snapshot.
+- Split CI jobs; used `E2E_SETUP=1` for Chrome installation when needed.
 - Synced PR: title set to "Volumetric Data Plotter", use `app.run(...)`.
 - Fixed tabs rendering by restoring Bootstrap CSS via `external_stylesheets`.
 - Bind to 127.0.0.1:8050 by default.

@@ -1,6 +1,6 @@
-# MELD_Visualizer Agent Instructions (AGENTS.MD)
+# MELD Visualizer Development Guide (agents.md)
 
-This document provides instructions for AI agents (like Google's Jules) and human developers on how to understand, develop, and test the MELD_Visualizer application.
+This document provides comprehensive instructions for AI agents (especially Claude Code) and human developers on how to understand, develop, and test the MELD_Visualizer application.
 
 ## 1. Project Overview
 
@@ -65,29 +65,87 @@ The application follows modern Python packaging standards with a clean, modular 
 
 ## 4. Development Workflow
 
-### Development Setup:
-```bash
-# Method 1: Modern development installation (Recommended)
-pip install -e ".[dev]"  # Install with dev dependencies
+### Development Setup (Claude Code Workflow):
 
-# Method 2: Legacy approach (still supported)
+#### 1. Repository Clone and Setup
+```bash
+# Clone the repository
+git clone https://github.com/MELD-labs/meld-visualizer.git
+cd meld-visualizer
+
+# Verify Python version (3.8+ required)
+python --version
+
+# Update pip to latest version
+python -m pip install -U pip
+```
+
+#### 2. Installation Methods
+
+**Method 1: Modern Development Installation (Recommended for Claude Code)**
+```bash
+# Install with all development dependencies
+pip install -e ".[dev]"
+
+# This installs:
+# - Production dependencies
+# - Development tools (black, flake8, mypy)
+# - Testing frameworks (pytest, coverage)
+# - Build tools (build, PyInstaller)
+```
+
+**Method 2: Legacy Installation (Fallback)**
+```bash
+# Install dependencies separately
 pip install -r requirements.txt         # Production dependencies
 pip install -r requirements-dev.txt     # Development dependencies
 ```
 
-### Running the Application:
+#### 3. Verification
 ```bash
-# Method 1: Using the installed command
-meld-visualizer
+# Verify installation worked
+python -c "import meld_visualizer; print('✓ Import successful')"
 
-# Method 2: Running as a Python module
-python -m meld_visualizer
-
-# Method 3: From source (development)
-python -m src.meld_visualizer.app
+# Check available commands
+meld-visualizer --help  # Should show help if command is registered
 ```
 
-The application runs in Debug Mode by default, enabling **hot-reloading** for most `.py` file changes.
+### Running the Application:
+
+#### Development Modes
+```bash
+# Method 1: Using installed command (recommended)
+meld-visualizer
+
+# Method 2: Running as Python module
+python -m meld_visualizer
+
+# Method 3: From source (for debugging imports)
+python -m src.meld_visualizer.app
+
+# All methods bind to http://127.0.0.1:8050
+```
+
+#### Debug Configuration
+```bash
+# Enable explicit debug mode with environment variable
+DEBUG=1 meld-visualizer
+
+# Or set in shell session
+export DEBUG=1
+meld-visualizer
+
+# Debug mode enables:
+# - Hot reloading for .py files
+# - Detailed error messages
+# - Development server features
+```
+
+### Hot Reloading Behavior
+The application runs in Debug Mode by default, enabling **hot-reloading**:
+- **Automatic**: Most `.py` file changes trigger reload
+- **Manual restart required**: Changes to `config/config.json` or `src/meld_visualizer/config.py`
+- **Browser refresh**: UI updates appear automatically
 
 ### Making Changes:
 *   **UI appearance/structure**: Modify functions in `src/meld_visualizer/core/layout.py`
@@ -125,22 +183,83 @@ A comprehensive multi-layered testing strategy ensures stability and prevents re
 *   **`tests/pytest.ini`**: Test configuration with markers
 *   **`tests/test_suite.conf`**: Test runner configuration
 
-### Running Tests:
+### Running Tests (Claude Code Best Practices):
+
+#### Quick Test Commands
 ```bash
-# Run all tests
+# Run all tests (recommended for initial check)
 pytest
 
-# Run specific categories
-pytest -m "unit"        # Unit tests only
-pytest -m "integration" # Integration tests only  
-pytest -m "e2e"         # End-to-end tests only
-pytest -m "not e2e"     # Exclude E2E tests
-
-# Run with coverage
+# Run tests with coverage (for comprehensive analysis)
 pytest --cov=src/meld_visualizer --cov-report=html
 
-# Using test runner script
-scripts/run_tests.sh
+# View coverage report
+open reports/htmlcov/index.html  # macOS
+start reports/htmlcov/index.html # Windows
+```
+
+#### Test Categories (Use with -m flag)
+```bash
+# Unit tests only (fast, no browser automation)
+pytest -m "unit"
+
+# Integration tests (service interactions)
+pytest -m "integration"
+
+# End-to-end tests (requires Chrome browser)
+pytest -m "e2e"
+
+# Exclude E2E tests (for quick feedback)
+pytest -m "not e2e"
+```
+
+#### Test Runner Script (Alternative)
+```bash
+# Configure in tests/test_suite.conf first
+# Options: unit|e2e|both|none
+bash scripts/run_tests.sh
+
+# Override configuration temporarily
+TEST_SUITE=unit bash scripts/run_tests.sh
+TEST_SUITE=e2e bash scripts/run_tests.sh
+TEST_SUITE=both bash scripts/run_tests.sh
+```
+
+#### Debugging Tests
+```bash
+# Run with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/unit/test_data_processing.py -v
+
+# Run specific test function
+pytest tests/unit/test_data_processing.py::test_parse_contents -v
+
+# Stop on first failure
+pytest -x
+
+# Debug failing tests with pdb
+pytest --pdb
+
+# Disable plugin autoload (if tests hang)
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q -m "not e2e"
+```
+
+#### E2E Testing Setup
+```bash
+# Ensure Chrome is available for E2E tests
+# On Ubuntu/Debian:
+sudo apt-get update && sudo apt-get install -y google-chrome-stable
+
+# On macOS:
+brew install --cask google-chrome
+
+# On Windows: Download and install Chrome from Google
+
+# Verify Chrome installation
+google-chrome --version  # Linux
+Chrome --version         # macOS/Windows
 ```
 
 ### Layer 1: Unit & Functional Testing
@@ -229,30 +348,86 @@ For any new feature or bug fix, the following workflow should be followed by an 
     ```
 3.  **Verify No Regressions:** Ensure that all existing tests continue to pass. If an existing test fails, the new changes have caused a regression that must be fixed before the work can be considered complete.
 
-### Environment (Jules)
-
-1. Provision the VM and install dependencies:
-   ```bash
-   bash scripts/jules_setup.sh
-   ```
-2. Run tests with plugin autoload disabled:
-```bash
-bash scripts/run_tests.sh           # all tests
-bash scripts/run_tests.sh -k 'not e2e'  # unit tests only
-```
-
-Notes:
-
-Chrome is installed system-wide; Selenium 4’s Selenium Manager fetches a matching driver automatically.
-
-If tests still hang, run:
-```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --trace-config -k test_simple -q
-```
-to verify no external plugins are being loaded.
 
 ---
 
-### Agent Notes: Tabs + Theme
-- Tabs are asserted in `tests/e2e/test_tabs_e2e.py`. Update labels there if UI copy changes.
-- The app resolves a Bootstrap theme via `config.APP_CONFIG['theme']` / `THEMES`, falling back to `dbc.themes.BOOTSTRAP`. Agents running offline should consider a local CSS file under `assets/`.
+---
+
+## Claude Code Specific Workflow
+
+### For Claude Code Agents
+
+#### 1. Project Analysis
+When working on this project, Claude Code should:
+1. **Read key files first**: Start with `docs/CLAUDE.md`, this file (`agents.md`), and `README.md`
+2. **Understand architecture**: Review `src/meld_visualizer/` structure using modular callback system
+3. **Check configuration**: Examine `config/config.json` and `pyproject.toml` for dependencies
+4. **Identify test strategy**: Review `tests/` directory structure and `pytest.ini` markers
+
+#### 2. Development Best Practices
+```bash
+# Always start with a fresh environment check
+python --version && pip --version
+
+# Install in development mode for immediate feedback
+pip install -e ".[dev]"
+
+# Run application to verify setup
+meld-visualizer
+
+# Run tests to ensure baseline functionality
+pytest -m "not e2e"  # Skip E2E initially for speed
+```
+
+#### 3. Code Modification Workflow
+1. **Before making changes**: Run `pytest -m "unit"` to establish baseline
+2. **Make incremental changes**: Modify one module at a time
+3. **Test frequently**: Use hot-reloading to see changes immediately
+4. **Run specific tests**: Test only the modules you've modified
+5. **Full test suite**: Run complete tests before committing
+
+#### 4. Common Debugging Steps
+```bash
+# If app won't start
+DEBUG=1 python -m meld_visualizer
+
+# If tests fail unexpectedly
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -v
+
+# If imports are broken
+python -c "import sys; print('\n'.join(sys.path))"
+python -c "import meld_visualizer; print(meld_visualizer.__file__)"
+
+# If configuration issues
+python -c "from meld_visualizer.config import load_config; print(load_config())"
+```
+
+#### 5. File Change Patterns
+- **UI changes**: Modify `src/meld_visualizer/core/layout.py` → automatic reload
+- **Logic changes**: Modify files in `src/meld_visualizer/callbacks/` → automatic reload  
+- **Data processing**: Modify `src/meld_visualizer/core/data_processing.py` → automatic reload
+- **Configuration**: Modify `config/config.json` → **requires restart**
+- **Dependencies**: Modify `pyproject.toml` → **requires reinstall**
+
+#### 6. Quality Assurance
+```bash
+# Before committing, run quality checks
+black src/ tests/           # Format code
+flake8 src/ tests/          # Check style
+mypy src/                   # Type checking
+pytest --cov=src/meld_visualizer  # Test with coverage
+```
+
+### Agent Notes: UI Components
+- **Tabs**: Asserted in `tests/e2e/test_tabs_e2e.py`. Update labels there if UI copy changes
+- **Themes**: App resolves Bootstrap theme via `config.APP_CONFIG['theme']`, falls back to `dbc.themes.BOOTSTRAP`
+- **Offline development**: Consider local CSS file under `assets/` if external CDN access is limited
+- **Component IDs**: Use pattern matching IDs like `{'type': 'component-type', 'index': 'identifier'}`
+- **Callbacks**: All use `@callback` decorator with Input/Output/State patterns
+
+### Testing Strategy for Agents
+1. **Unit tests first**: Fast feedback on data processing functions
+2. **Integration tests**: Verify service interactions work correctly  
+3. **E2E tests last**: Comprehensive but slow browser automation
+4. **Coverage reports**: Use to identify untested code paths
+5. **Performance tests**: Monitor for regressions in large file handling

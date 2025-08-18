@@ -54,10 +54,10 @@ pip install -r requirements.txt
 python -m src.meld_visualizer.app
 ```
 
-#### Option 2: Standalone Executable
+#### Option 4: Standalone Executable
 1. Download the latest release from GitHub
 2. Extract the ZIP file
-3. Run `VolumetricPlotter.exe` (Windows) or `VolumetricPlotter` (macOS/Linux)
+3. Run `MELD-Visualizer.exe` (Windows) or `MELD-Visualizer` (macOS/Linux)
 
 ### First Launch
 1. Open your browser and navigate to `http://127.0.0.1:8050`
@@ -316,7 +316,9 @@ python --version  # Should be 3.8+
 pip install -r requirements.txt --upgrade
 
 # Run in debug mode
-DEBUG=1 python app.py
+DEBUG=1 meld-visualizer
+# OR
+DEBUG=1 python -m meld_visualizer
 ```
 
 #### File Upload Fails

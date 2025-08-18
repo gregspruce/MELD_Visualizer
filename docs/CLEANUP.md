@@ -15,7 +15,7 @@ Based on recent installs and test runs, adjust the repo as follows:
 
 ## Files likely safe to delete or replace
 - `tests/test_e2e_placeholder.py` (replaced by `tests/e2e/test_homepage_e2e.py`)
-- Any old setup scripts you no longer invoke (e.g., `scripts/jules_setup.sh`)
+- Any old setup scripts you no longer invoke
 - Any checked-in browser driver binaries (Selenium Manager handles drivers)
 - Any conflicting top-level `conftest.py` outside `tests/`
 
@@ -23,7 +23,7 @@ Based on recent installs and test runs, adjust the repo as follows:
 - `tests/test_suite.conf` (toggle)
 - `run_tests.sh` (sets env + reads toggle)
 - `.github/workflows/ci.yml` (split jobs; reads toggle)
-- `JULES_initial_setup_v3.sh` content in Jules’ Initial setup
+- Modern setup scripts for initial environment configuration
 
 ## Windows notes
 - Ensure LF endings for `run_tests.sh` (use `dos2unix` or `git config core.autocrlf input`)

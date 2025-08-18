@@ -9,5 +9,4 @@
 * Toggle which suites run using `tests/test_suite.conf` or env `TEST_SUITE`.
 * Always run pytest with `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` to avoid VM noise.
 * Local dev binds to `127.0.0.1:8050`.
-* Jules: optional `E2E_SETUP=1` in Initial setup to install Chrome; Run step executes `run_tests.sh`.
 * CI: workflow reads the same switch; has Unit and E2E jobs.

@@ -1,5 +1,5 @@
 # Overview
-A sequenced set of small, focused PRs with explicit task lists and acceptance criteria you can hand to Google's Jules asynchronous agent. Targets Windows first, scales sensibly to larger datasets, and lays groundwork for Linux.
+A sequenced set of small, focused PRs with explicit task lists and acceptance criteria. Targets Windows first, scales sensibly to larger datasets, and lays groundwork for Linux.
 
 ---
 
@@ -534,7 +534,7 @@ A sequenced set of small, focused PRs with explicit task lists and acceptance cr
 
 ---
 
-# Hand-off Notes for Jules
+# Development Notes
 - Each PR is self-contained with feature flags where useful.
 - Prefer small, reviewable commits.
 - Link PRs to this plan and check off tasks in the PR description.

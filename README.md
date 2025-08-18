@@ -51,10 +51,12 @@ meld-visualizer
 
 **Option 2: Development Installation**
 ```bash
-# Clone and install in development mode
+# Clone the repository
 git clone https://github.com/MELD-labs/meld-visualizer.git
 cd meld-visualizer
-pip install -e .
+
+# Install in development mode with dev dependencies
+pip install -e ".[dev]"
 
 # Run the application
 python -m meld_visualizer
@@ -62,10 +64,11 @@ python -m meld_visualizer
 meld-visualizer
 ```
 
-**Option 3: From Source**
+**Option 3: From Source (Legacy)**
 ```bash
-# Install dependencies
+# Install dependencies (legacy approach)
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 # Run from source
 python -m src.meld_visualizer.app
@@ -230,10 +233,13 @@ cd meld-visualizer
 # Install in development mode with dev dependencies
 pip install -e ".[dev]"
 
-# Run in debug mode
+# Run the application (debug mode is enabled by default)
 python -m meld_visualizer
 # OR
 meld-visualizer
+
+# For explicit debug mode
+DEBUG=1 meld-visualizer
 ```
 
 #### Hot Reloading
@@ -289,9 +295,9 @@ pytest tests/unit/test_data_processing.py -v
 pytest tests/integration/test_services.py -v
 
 # Using the test runner script
-scripts/run_tests.sh          # Uses tests/test_suite.conf
-TEST_SUITE=both scripts/run_tests.sh    # Run both unit and E2E tests
-TEST_SUITE=e2e scripts/run_tests.sh     # Run E2E tests only
+bash scripts/run_tests.sh          # Uses tests/test_suite.conf
+TEST_SUITE=both bash scripts/run_tests.sh    # Run both unit and E2E tests
+TEST_SUITE=e2e bash scripts/run_tests.sh     # Run E2E tests only
 ```
 
 For more detailed information on the testing strategy, see the `agents.md` file.

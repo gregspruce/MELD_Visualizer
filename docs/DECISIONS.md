@@ -2,7 +2,7 @@
 - Selenium 4 Manager, not chromedriver pins.
 - Runtime vs test deps split.
 - Repo-controlled test switch + env override.
-- Jules setup idempotent; Chrome optional.
+- Setup process is idempotent; Chrome optional for E2E testing.
 - Local bind 127.0.0.1 by default.
 - Support both get_layout(app) and create_layout().
 - E2E asserts title, upload control, and tab labels.

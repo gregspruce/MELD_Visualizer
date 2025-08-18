@@ -2,20 +2,45 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Start for Claude Code
+
+### Prerequisites
+- Python 3.8 or higher
+- Git (for repository access)
+- Chrome browser (for E2E testing)
+
+### Installation
+```bash
+# Clone repository
+git clone https://github.com/MELD-labs/meld-visualizer.git
+cd meld-visualizer
+
+# Install in development mode (recommended)
+pip install -e ".[dev]"
+
+# Verify installation
+python -c "import meld_visualizer; print('✓ Installation successful')"
+```
+
 ## Commands
 
 ### Running the Application
 ```bash
-# Method 1: Using the installed command (after pip install)
+# Method 1: Using the installed command (recommended)
 meld-visualizer
 
 # Method 2: Running as a Python module
 python -m meld_visualizer
 
-# Method 3: From source (development)
+# Method 3: From source (development debugging)
 python -m src.meld_visualizer.app
+
+# Method 4: With explicit debug mode
+DEBUG=1 meld-visualizer
+
+# All methods bind to http://127.0.0.1:8050
 ```
-The app runs in debug mode by default with hot-reloading enabled. Set `DEBUG="1"` environment variable for explicit debug mode.
+The app runs in debug mode by default with hot-reloading enabled. Most `.py` file changes will automatically refresh the application.
 
 ### Testing
 ```bash
@@ -144,3 +169,49 @@ This is a **Dash web application** for visualizing 3D process data from MELD man
 - **Service layer**: Business logic in `services/` modules for separation of concerns
 - **Configuration**: Centralized in `config.py` with `config/config.json` file
 - **Testing**: Modular test structure with fixtures in `tests/conftest.py`
+
+## Troubleshooting for Claude Code
+
+### Common Issues and Quick Fixes
+```bash
+# Application won't start
+DEBUG=1 meld-visualizer
+
+# Tests hanging
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest
+
+# Import errors
+pip install -e ".[dev]"
+python -c "import meld_visualizer; print(meld_visualizer.__file__)"
+
+# Configuration issues
+python -c "from meld_visualizer.config import load_config; print(load_config())"
+
+# E2E tests failing (missing Chrome)
+pytest -m "not e2e"  # Skip E2E tests
+```
+
+### Development Workflow for Claude Code
+1. **Setup**: `pip install -e ".[dev]"` and verify with `meld-visualizer`
+2. **Quick test**: `pytest -m "not e2e"` for fast validation
+3. **Development**: Modify files with hot-reloading active
+4. **Full validation**: `pytest` for complete test suite
+5. **Quality check**: `black src/ tests/ && flake8 src/ tests/`
+
+### Key File Locations
+- **Main app**: `src/meld_visualizer/app.py`
+- **UI layout**: `src/meld_visualizer/core/layout.py`
+- **Data processing**: `src/meld_visualizer/core/data_processing.py`
+- **Callbacks**: `src/meld_visualizer/callbacks/`
+- **Services**: `src/meld_visualizer/services/`
+- **Configuration**: `config/config.json`
+- **Tests**: `tests/` with markers in `pytest.ini`
+
+### Testing Strategy for Claude Code
+1. **Unit tests first**: Fast feedback on data processing functions
+2. **Integration tests**: Verify service interactions work correctly  
+3. **E2E tests last**: Comprehensive but slow browser automation
+4. **Coverage reports**: Use to identify untested code paths
+5. **Performance tests**: Monitor for regressions in large file handling
+
+For comprehensive troubleshooting, see `docs/TROUBLESHOOTING.md`.
