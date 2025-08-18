@@ -93,10 +93,10 @@ def register_hot_reload_callbacks(app):
         return current_trigger + 1, new_config
     
     @callback(
-        Output('radio-buttons-1', 'options'),
-        Output('radio-buttons-1', 'value'),
-        Output('radio-buttons-2', 'options'),
-        Output('radio-buttons-2', 'value'),
+        Output('radio-buttons-1', 'options', allow_duplicate=True),
+        Output('radio-buttons-1', 'value', allow_duplicate=True),
+        Output('radio-buttons-2', 'options', allow_duplicate=True),
+        Output('radio-buttons-2', 'value', allow_duplicate=True),
         Input('config-reload-trigger', 'data'),
         State('store-column-ranges', 'data'),
         State('hot-config-store', 'data'),
@@ -122,10 +122,10 @@ def register_hot_reload_callbacks(app):
         return valid_opts_1, default_1, valid_opts_2, default_2
     
     @callback(
-        Output('radio-2d-y', 'options'),
-        Output('radio-2d-y', 'value'),
-        Output('radio-2d-color', 'options'),
-        Output('radio-2d-color', 'value'),
+        Output('radio-2d-y', 'options', allow_duplicate=True),
+        Output('radio-2d-y', 'value', allow_duplicate=True),
+        Output('radio-2d-color', 'options', allow_duplicate=True),
+        Output('radio-2d-color', 'value', allow_duplicate=True),
         Input('config-reload-trigger', 'data'),
         State('store-column-ranges', 'data'),
         State('hot-config-store', 'data'),

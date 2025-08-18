@@ -18,6 +18,7 @@ A powerful 3D visualization platform for MELD (Manufacturing using Extreme Layer
 - **Automatic Unit Conversion**: Imperial to metric conversion with detection
 - **Real-time Filtering**: Range-based and custom column filtering
 - **Multi-theme Support**: 20+ Bootstrap themes with matching Plotly templates
+- **⚡ Hot-Reload Configuration**: Instant theme switching and immediate config updates (no restart required)
 - **Performance Optimization**: Multi-level caching and lazy loading
 - **Security**: Input validation, path traversal protection, and content inspection
 
@@ -163,15 +164,17 @@ You can control which data columns appear as selectable options for each plot.
 -   `plot_2d_y_options`: Sets the Y-Axis radio button options for the 2D time plot.
 -   `plot_2d_color_options`: Sets the Color Scale radio button options for the 2D time plot.
 
-### 3. In-App Settings Tab
+### 3. In-App Settings Tab ✨
 
-The "Settings" tab provides an easy interface for modifying all the options mentioned above.
+The "Settings" tab provides an easy interface for modifying all the options mentioned above with **instant hot-reload capabilities**.
 
 1.  Load a CSV file. The dropdowns for graph options will populate with columns from your file.
 2.  Navigate to the "Settings" tab.
-3.  Make your desired changes.
+3.  Make your desired changes:
+    - **Themes**: Changes apply **instantly** as you select them!
+    - **Graph Options**: Changes apply immediately after clicking "Save Configuration"
 4.  Click the **"Save Configuration"** button.
-5.  A success message will appear. **You must close and restart the application** for the new settings to take effect.
+5.  A success message will appear and **all settings are applied immediately** - no restart required!
 
 ---
 
@@ -269,10 +272,14 @@ meld-visualizer
 DEBUG=1 meld-visualizer
 ```
 
-#### Hot Reloading
+#### Hot Reloading ✨
 The application starts in **Debug Mode** by default, enabling **hot-reloading** where most changes to Python code will automatically refresh without requiring a manual restart.
 
-*Note: Changes to `src/meld_visualizer/config.py` or `config/config.json` still require a manual restart.*
+**Enhanced Configuration Hot-Reload**: 
+- ✅ **Themes**: Apply instantly via the Settings tab
+- ✅ **Graph Options**: Update immediately after saving configuration  
+- ✅ **Manual Config Changes**: Changes to `config/config.json` still require restart
+- ⚡ **Python Code**: Hot-reloads automatically in debug mode
 
 #### Code Quality Tools
 ```bash

@@ -40,7 +40,7 @@ DEBUG=1 meld-visualizer
 
 # All methods bind to http://127.0.0.1:8050
 ```
-The app runs in debug mode by default with hot-reloading enabled. Most `.py` file changes will automatically refresh the application.
+The app runs in debug mode by default with hot-reloading enabled. `.py` file changes automatically refresh, themes apply instantly, and configuration changes update immediately without restart.
 
 ### Testing
 ```bash
@@ -153,9 +153,12 @@ This is a **Dash web application** for visualizing 3D process data from MELD man
 - **`docs/agents.md`**: Detailed development instructions and testing strategy
 
 ### Development Notes
-- Hot-reloading works for `.py` files but `config/config.json` changes require restart
+- **Enhanced Hot-Reload**: 
+  - ✅ `.py` files hot-reload automatically in debug mode
+  - ✅ **Themes**: Apply instantly via Settings tab (no restart needed)
+  - ✅ **Graph Options**: Update immediately after saving in Settings tab
+  - ⚠️ Manual `config/config.json` edits still require restart
 - All 3D plots support Z-axis stretch factor for better layer visualization
-- Theme changes require app restart to take effect
 - G-code parser handles M34/M35 commands for feed rate control
 - **Volume mesh generation**: Creates 3D representations with mathematically correct feedstock geometry
   - **Feedstock geometry**: 0.5" × 0.5" square rod (12.7mm × 12.7mm, 161.3mm²)

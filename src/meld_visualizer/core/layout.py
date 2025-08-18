@@ -121,7 +121,7 @@ def build_config_tab():
         dbc.Row(dbc.Col([
             dbc.Button("Save Configuration", id="save-config-button", color="primary", n_clicks=0),
             dbc.Alert(id='save-config-alert', is_open=False, duration=10000, color="success", className="mt-3"),
-            html.P("Important: Changes will only be applied after you close and restart the application.", className="text-danger small mt-2")
+            html.P("📌 Theme changes apply instantly! Graph option changes apply immediately after saving.", className="text-success small mt-2")
         ]))
     ])
 

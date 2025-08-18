@@ -118,5 +118,5 @@ ERROR_NO_ACTIVE_DATA = "No active printing data found (FeedVel > 0)."
 
 # Success Messages
 SUCCESS_FILE_LOADED = "File loaded successfully."
-SUCCESS_CONFIG_SAVED = "Settings saved. Please restart the application."
+SUCCESS_CONFIG_SAVED = "Settings saved successfully!"
 SUCCESS_UNITS_CONVERTED = "Imperial units detected and converted to metric."
