@@ -1,0 +1,85 @@
+{
+  "project": "MELD_Visualizer",
+  "repository": "https://github.com/gregspruce/MELD_Visualizer",
+  "current_branch": "main",
+  "status": "fully_functional",
+  "last_updated": "2025-08-18",
+  
+  "critical_fixes_applied": {
+    "volume_calculation": {
+      "status": "fixed",
+      "change": "Corrected from circular wire (126.7mm²) to square rod (161.3mm²)",
+      "impact": "27% accuracy improvement",
+      "files": ["src/meld_visualizer/data_processing.py"]
+    },
+    "import_errors": {
+      "status": "fixed",
+      "change": "Added __main__.py and fixed relative imports",
+      "files": [
+        "src/meld_visualizer/__main__.py",
+        "src/meld_visualizer/callbacks/filter_callbacks.py"
+      ]
+    },
+    "repository_urls": {
+      "status": "fixed",
+      "change": "Corrected hallucinated URLs to actual GitHub repository",
+      "files": ["README.md", "docs/*.md", "*.py comments"]
+    }
+  },
+  
+  "launch_instructions": {
+    "correct_method": "python -m meld_visualizer",
+    "required_env": "PYTHONPATH=C:\\VSCode\\MELD\\MELD_Visualizer\\src",
+    "alternative": "meld-visualizer (after pip install -e)",
+    "avoid": "python src/meld_visualizer/app.py (causes import errors)"
+  },
+  
+  "architecture": {
+    "pattern": "MVC-like",
+    "structure": "src/meld_visualizer/",
+    "entry_points": ["__main__.py", "app.py"],
+    "key_modules": {
+      "app.py": "Main application entry",
+      "layout.py": "UI components (View)",
+      "callbacks/": "Interactive logic (Controller)",
+      "data_processing.py": "Data operations (Model)",
+      "config.py": "Configuration management"
+    }
+  },
+  
+  "technology_stack": {
+    "framework": "Dash >= 2.14.0",
+    "visualization": "Plotly",
+    "ui": "dash-bootstrap-components",
+    "data": "pandas, numpy, scipy",
+    "testing": "pytest, selenium"
+  },
+  
+  "key_constants": {
+    "FEEDSTOCK_DIMENSION_INCHES": 0.5,
+    "FEEDSTOCK_AREA_MM2": 161.29,
+    "INCHES_TO_MM": 25.4,
+    "DEFAULT_Z_STRETCH": 10
+  },
+  
+  "testing": {
+    "unit": "pytest -m 'not e2e'",
+    "e2e": "pytest -m 'e2e'",
+    "all": "pytest",
+    "runner": "bash run_tests.sh"
+  },
+  
+  "known_issues": [
+    "config.json changes require restart",
+    "theme changes require restart",
+    "hot-reloading limited to .py files"
+  ],
+  
+  "agent_notes": {
+    "always_use_module_execution": true,
+    "prefer_editing_over_creating": true,
+    "avoid_proactive_documentation": true,
+    "critical_accuracy_fix_applied": true,
+    "all_imports_resolved": true
+  }
+}
