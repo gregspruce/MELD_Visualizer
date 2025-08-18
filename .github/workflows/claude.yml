@@ -49,14 +49,36 @@ jobs:
           # Optional: Trigger when specific user is assigned to an issue
           # assignee_trigger: "claude-bot"
           
-          # Optional: Allow Claude to run specific commands
-          # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
+          # Allow Claude to run project-specific commands
+          allowed_tools: |
+            Bash(python app.py)
+            Bash(pytest*)
+            Bash(bash run_tests.sh*)
+            Bash(pip install*)
+            Bash(python -m pip install*)
+            Bash(pyinstaller*)
+            Bash(python -c*)
+            Bash(black*)
+            Bash(isort*)
+            Bash(ruff*)
           
-          # Optional: Add custom instructions for Claude to customize its behavior for your project
-          # custom_instructions: |
-          #   Follow our coding standards
-          #   Ensure all new code has tests
-          #   Use TypeScript for new files
+          # Custom instructions for the MELD Visualizer project
+          custom_instructions: |
+            This is a Dash web application for visualizing 3D MELD manufacturing data.
+            
+            Key project requirements:
+            - Follow the modular MVC architecture (app.py → layout.py → callbacks.py → data_processing.py)
+            - Use existing patterns for Dash callbacks with pattern matching IDs
+            - Maintain compatibility with the current theme system (20+ Bootstrap themes)
+            - Run tests with pytest before suggesting changes: `pytest -m "not e2e"` for unit tests
+            - Check that new code works with the existing CSV data processing pipeline
+            - Preserve the G-code visualization and volume mesh generation functionality
+            - Maintain Python 3.10+ compatibility
+            
+            Before making changes:
+            1. Run the test suite to ensure existing functionality
+            2. Check config.json structure if modifying configuration
+            3. Test with sample data files in the CSV/ directory
           
           # Optional: Custom environment variables for Claude
           # claude_env: |

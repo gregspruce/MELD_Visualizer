@@ -42,14 +42,30 @@ jobs:
 
           # Direct prompt for automated review (no @claude mention needed)
           direct_prompt: |
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            Please review this pull request for the MELD Visualizer Dash application and provide feedback on:
             
-            Be constructive and helpful in your feedback.
+            **Architecture & Design:**
+            - Adherence to the MVC pattern (app.py → layout.py → callbacks.py → data_processing.py)
+            - Proper use of Dash callback patterns with pattern matching IDs
+            - Integration with the existing theme system and configuration management
+            
+            **Data Processing & Visualization:**
+            - Correct handling of MELD manufacturing data (CSV parsing, unit conversions)
+            - Proper G-code visualization and volume mesh generation
+            - 3D plotting consistency with existing Plotly patterns
+            
+            **Code Quality:**
+            - Python best practices and compatibility with Python 3.10+
+            - Error handling for file uploads and data processing
+            - Performance considerations for large datasets
+            - Test coverage for new functionality
+            
+            **Integration:**
+            - Compatibility with existing CSV data pipeline
+            - Proper configuration management (config.json)
+            - Theme consistency across all components
+            
+            Be constructive and focus on maintaining the existing architecture while improving code quality.
 
           # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
           # use_sticky_comment: true
