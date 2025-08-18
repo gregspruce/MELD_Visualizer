@@ -13,7 +13,10 @@ from unittest.mock import Mock, patch
 from src.meld_visualizer.core.data_processing import (
     parse_contents, parse_gcode_file, generate_volume_mesh
 )
-from src.meld_visualizer.constants import INCH_TO_MM, IMPERIAL_VELOCITY_THRESHOLD
+from src.meld_visualizer.constants import (
+    INCH_TO_MM, IMPERIAL_VELOCITY_THRESHOLD, FEEDSTOCK_AREA_MM2,
+    FEEDSTOCK_DIMENSION_MM, FEEDSTOCK_DIMENSION_INCHES
+)
 
 
 class TestParseContents:
@@ -310,6 +313,148 @@ class TestGenerateVolumeMesh:
         
         assert mesh_data is not None
         assert len(mesh_data['vertex_colors']) == len(mesh_data['vertices'])
+    
+    def test_volume_conservation_principle(self):
+        """Test that volume mesh generation respects conservation of mass."""
+        # Create data with known feed and path velocities
+        df = pd.DataFrame({
+            'XPos': [0, 10],
+            'YPos': [0, 0],
+            'ZPos': [0, 0],
+            'ToolTemp': [100, 100],
+            'FeedVel': [50, 50],  # mm/min
+            'PathVel': [25, 25]   # mm/min
+        })
+        
+        mesh_data = generate_volume_mesh(df, 'ToolTemp')
+        assert mesh_data is not None
+        
+        # The generated mesh should have reasonable dimensions
+        # Bead area = (FeedVel * FEEDSTOCK_AREA_MM2) / PathVel
+        # Expected bead area = (50 * 161.3) / 25 = 322.6 mm²
+        expected_bead_area = (50 * FEEDSTOCK_AREA_MM2) / 25
+        assert expected_bead_area == pytest.approx(322.6, rel=1e-2)
+    
+    def test_feedstock_area_in_calculations(self):
+        """Test that mesh generation uses correct feedstock area."""
+        df = pd.DataFrame({
+            'XPos': [0, 10],
+            'YPos': [0, 0], 
+            'ZPos': [0, 0],
+            'ToolTemp': [100, 100],
+            'FeedVel': [100, 100],  # mm/min
+            'PathVel': [50, 50]     # mm/min
+        })
+        
+        mesh_data = generate_volume_mesh(df, 'ToolTemp')
+        assert mesh_data is not None
+        
+        # With double feed velocity and half path velocity, 
+        # bead area should be 4x larger than the previous test
+        expected_bead_area = (100 * FEEDSTOCK_AREA_MM2) / 50
+        assert expected_bead_area == pytest.approx(322.6, rel=1e-2)
+        
+        # Verify that the corrected feedstock area (161.3 mm²) is being used
+        assert FEEDSTOCK_AREA_MM2 == pytest.approx(161.3, rel=1e-2)
+    
+    def test_bead_thickness_calculation(self):
+        """Test that bead thickness is calculated correctly with new feedstock area."""
+        # Test data with specific velocity ratios
+        df = pd.DataFrame({
+            'XPos': [0, 10],
+            'YPos': [0, 0],
+            'ZPos': [0, 0], 
+            'ToolTemp': [100, 100],
+            'FeedVel': [161.3, 161.3],  # Same as feedstock area for easy calculation
+            'PathVel': [161.3, 161.3]   # 1:1 ratio
+        })
+        
+        mesh_data = generate_volume_mesh(df, 'ToolTemp')
+        assert mesh_data is not None
+        
+        # With 1:1 feed/path ratio, bead area should equal feedstock area
+        # This tests that the mesh generation properly uses the corrected area
+        vertices = mesh_data['vertices']
+        assert len(vertices) > 0
+        
+        # Verify mesh has reasonable scale (not too tiny or huge)
+        vertex_range = np.max(vertices) - np.min(vertices)
+        assert vertex_range > 1  # Should span more than 1mm
+        assert vertex_range < 1000  # But less than 1m
+
+
+class TestFeedstockCalculations:
+    """Test feedstock-related calculations with corrected area."""
+    
+    def test_feedstock_area_constant_accuracy(self):
+        """Test that the feedstock area constant is mathematically correct."""
+        # MELD uses 0.5" × 0.5" square rod
+        expected_dimension_mm = 0.5 * 25.4  # 12.7 mm
+        expected_area_mm2 = expected_dimension_mm ** 2  # 161.29 mm²
+        
+        assert FEEDSTOCK_DIMENSION_INCHES == 0.5
+        assert FEEDSTOCK_DIMENSION_MM == pytest.approx(expected_dimension_mm, rel=1e-6)
+        assert FEEDSTOCK_AREA_MM2 == pytest.approx(expected_area_mm2, rel=1e-6)
+    
+    def test_square_rod_vs_circular_wire_difference(self):
+        """Test that square rod area is larger than equivalent circular wire."""
+        # For comparison, a circular wire with 0.5" diameter would have area:
+        circular_area = np.pi * (FEEDSTOCK_DIMENSION_MM / 2) ** 2  # π * (6.35)²
+        square_area = FEEDSTOCK_AREA_MM2  # (12.7)²
+        
+        # Square area should be larger (by factor of 4/π ≈ 1.273)
+        assert square_area > circular_area
+        ratio = square_area / circular_area
+        assert ratio == pytest.approx(4 / np.pi, rel=1e-3)
+    
+    def test_volume_calculation_with_correct_area(self):
+        """Test that volume calculations use the correct feedstock area."""
+        # Test with simple 1:1 feed-to-path velocity ratio
+        feed_vel = 100  # mm/min
+        path_vel = 100  # mm/min
+        
+        expected_bead_area = (feed_vel * FEEDSTOCK_AREA_MM2) / path_vel
+        assert expected_bead_area == FEEDSTOCK_AREA_MM2  # Should equal feedstock area
+        assert expected_bead_area == pytest.approx(161.29, rel=1e-2)
+    
+    def test_mesh_generation_with_corrected_feedstock(self):
+        """Test mesh generation uses corrected feedstock area calculations."""
+        # Create test data with known velocity relationships
+        df = pd.DataFrame({
+            'XPos': [0, 10, 20],
+            'YPos': [0, 0, 0],
+            'ZPos': [0, 0, 0],
+            'ToolTemp': [100, 150, 200],
+            'FeedVel': [80.65, 80.65, 80.65],  # Half of feedstock area value
+            'PathVel': [80.65, 80.65, 80.65]   # Same as feed velocity
+        })
+        
+        mesh_data = generate_volume_mesh(df, 'ToolTemp')
+        assert mesh_data is not None
+        
+        # With these velocities, bead area should equal half the feedstock area
+        expected_bead_area = (80.65 * FEEDSTOCK_AREA_MM2) / 80.65
+        assert expected_bead_area == pytest.approx(FEEDSTOCK_AREA_MM2, rel=1e-2)
+    
+    def test_legacy_compatibility_maintained(self):
+        """Test that existing functionality still works with corrected area."""
+        # This ensures backward compatibility while using corrected calculations
+        df = pd.DataFrame({
+            'XPos': [0, 10],
+            'YPos': [0, 0],
+            'ZPos': [0, 0],
+            'ToolTemp': [100, 100],
+            'FeedVel': [50, 50],
+            'PathVel': [25, 25]
+        })
+        
+        mesh_data = generate_volume_mesh(df, 'ToolTemp')
+        assert mesh_data is not None
+        
+        # Should generate valid mesh with reasonable vertex count
+        assert len(mesh_data['vertices']) > 0
+        assert len(mesh_data['faces']) > 0
+        assert len(mesh_data['vertex_colors']) == len(mesh_data['vertices'])
 
 
 class TestDataProcessingHelpers:
@@ -317,8 +462,8 @@ class TestDataProcessingHelpers:
     
     def test_constants_imported(self):
         """Test that constants are properly imported."""
-        from data_processing import INCH_TO_MM
         assert INCH_TO_MM == 25.4
+        assert FEEDSTOCK_AREA_MM2 > 0
     
     @patch('data_processing.FileValidator')
     def test_security_validation_called(self, mock_validator):

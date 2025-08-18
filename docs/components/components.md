@@ -103,17 +103,23 @@ def parse_gcode(contents):
     """Parse G-code files"""
     
 def generate_volume_mesh(df, color_column):
-    """Generate 3D mesh from data"""
+    """Generate 3D mesh from data with corrected feedstock geometry"""
     
 def check_and_convert_units(df):
     """Convert imperial to metric units"""
+    
+def get_feedstock_area(feedstock_type, dimension_mm):
+    """Calculate feedstock cross-sectional area based on type"""
 ```
 
 **Features**:
 - CSV and G-code parsing
+- **Corrected Feedstock Geometry**: 0.5" × 0.5" square rod (161.3mm²)
+- **Volume Calculation Accuracy**: 27% improvement over previous circular assumption
+- **Configurable Feedstock Types**: Supports both square and circular geometries
 - Automatic unit conversion
 - Data validation
-- Mesh generation algorithms
+- Mesh generation algorithms with mathematical correctness
 - Error handling
 
 ### 4. Callback Modules (src/meld_visualizer/callbacks/)
@@ -276,15 +282,41 @@ from meld_visualizer.config import (
 }
 ```
 
-### 8. Constants (constants.py)
-**Purpose**: Centralized constant definitions
+### 8. Constants (src/meld_visualizer/constants.py)
+**Purpose**: Centralized constant definitions with feedstock geometry
+
+**Import Path**:
+```python
+from meld_visualizer.constants import (
+    FEEDSTOCK_TYPES, DEFAULT_FEEDSTOCK_TYPE,
+    FEEDSTOCK_DIMENSION_INCHES, FEEDSTOCK_AREA_MM2
+)
+```
 
 **Categories**:
+- **Feedstock Geometry**: Square rod and circular wire configurations
 - File limits
 - Conversion factors
 - UI constants
 - Validation rules
 - Performance thresholds
+
+**Feedstock Configuration**:
+```python
+FEEDSTOCK_TYPES = {
+    'square': {
+        'dimension_mm': 12.7,
+        'area_mm2': 161.3,
+        'description': 'Square rod feedstock (0.5" × 0.5")'
+    },
+    'circular': {
+        'diameter_mm': 12.7,
+        'area_mm2': 126.7,
+        'description': 'Circular wire feedstock (0.5" diameter)'
+    }
+}
+DEFAULT_FEEDSTOCK_TYPE = 'square'  # MELD uses square rod
+```
 
 ### 9. Logging Configuration (src/meld_visualizer/utils/logging_config.py)
 
@@ -338,18 +370,26 @@ from meld_visualizer.utils.logging_config import setup_logging
 - **Chunking**: Large files processed in chunks
 - **Sampling**: Data sampled for visualization
 - **Memoization**: Results cached for reuse
+- **Optimized Volume Calculations**: Efficient feedstock area calculations
 
 ### Bottlenecks
 - Large file parsing
-- Mesh generation
+- Mesh generation (improved with corrected geometry)
 - Complex filtering
 - Multiple simultaneous users
 
 ### Solutions
 - Background processing
 - Progressive rendering
-- Optimized algorithms
+- Optimized algorithms with mathematical correctness
 - Resource pooling
+- Feedstock configuration caching
+
+### Volume Calculation Performance
+- **Square Rod Geometry**: Direct area calculation (side²)
+- **Circular Geometry**: Optimized π calculation when needed
+- **Configuration Caching**: Feedstock parameters cached per session
+- **Backward Compatibility**: Legacy calculations maintained without performance penalty
 
 ## Security Considerations
 

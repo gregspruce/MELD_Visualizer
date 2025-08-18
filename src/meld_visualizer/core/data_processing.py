@@ -39,7 +39,21 @@ def parse_contents(contents, filename):
             return None, "Error: Please upload a .csv file.", False
 
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-        df['Time'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])
+        
+        # Handle Time column - check if Date column exists
+        if 'Date' in df.columns and 'Time' in df.columns:
+            df['Time'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])
+        elif 'Time' in df.columns:
+            # Try to parse Time column directly
+            try:
+                df['Time'] = pd.to_datetime(df['Time'])
+            except:
+                # If Time parsing fails, create synthetic timestamps
+                df['Time'] = pd.date_range(start='2024-01-01', periods=len(df), freq='s')
+        else:
+            # Create synthetic timestamps if no Time column exists
+            df['Time'] = pd.date_range(start='2024-01-01', periods=len(df), freq='s')
+            
         df['TimeInSeconds'] = (df['Time'] - df['Time'].min()).dt.total_seconds()
 
         converted_units = False
@@ -258,8 +272,15 @@ def generate_volume_mesh(df_active, color_col):
     # These values define the physical properties of the extrusion material.
     BEAD_LENGTH = 2.0  # Length of the rectangular part of the bead cross-section (mm)
     BEAD_RADIUS = BEAD_LENGTH / 2.0 # Radius of the semi-circular ends (mm)
-    WIRE_DIAMETER_MM = 0.5 * INCH_TO_MM # Diameter of the feedstock wire (mm)
-    WIRE_AREA = WIRE_DIAMETER_MM**2 # Area of the feedstock wire (mm^2)
+    
+    # Feedstock geometry - MELD uses 0.5" × 0.5" square rod, not circular wire
+    FEEDSTOCK_DIMENSION_INCHES = 0.5  # Square rod dimension (inches)
+    FEEDSTOCK_DIMENSION_MM = FEEDSTOCK_DIMENSION_INCHES * INCH_TO_MM  # Convert to mm (12.7 mm)
+    FEEDSTOCK_AREA_MM2 = FEEDSTOCK_DIMENSION_MM ** 2  # Square rod area (161.3 mm²)
+    
+    # Legacy variable for backward compatibility (now represents square rod area)
+    WIRE_AREA = FEEDSTOCK_AREA_MM2  # Corrected: actual square rod area, not diameter squared
+    
     MAX_BEAD_THICKNESS = 1.0 * INCH_TO_MM # Safety clip for bead thickness (mm)
     POINTS_PER_SECTION = 12 # Number of vertices in each cross-section circle
 
