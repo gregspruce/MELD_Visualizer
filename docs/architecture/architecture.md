@@ -11,30 +11,30 @@ graph TB
     end
     
     subgraph "Controller Layer"
-        CB[Callbacks Module]
-        DC[Data Callbacks]
-        GC[Graph Callbacks]
-        VC[Visualization Callbacks]
-        FC[Filter Callbacks]
-        CC[Config Callbacks]
+        CB[src/meld_visualizer/callbacks/]
+        DC[data_callbacks.py]
+        GC[graph_callbacks.py]
+        VC[visualization_callbacks.py]
+        FC[filter_callbacks.py]
+        CC[config_callbacks.py]
     end
     
     subgraph "Service Layer"
-        DS[Data Service]
-        CS[Cache Service]
-        FS[File Service]
+        DS[src/meld_visualizer/services/data_service.py]
+        CS[src/meld_visualizer/services/cache_service.py]
+        FS[src/meld_visualizer/services/file_service.py]
     end
     
     subgraph "Data Processing Layer"
-        DP[data_processing.py]
-        SU[security_utils.py]
-        Const[constants.py]
+        DP[src/meld_visualizer/core/data_processing.py]
+        SU[src/meld_visualizer/utils/security_utils.py]
+        Const[src/meld_visualizer/constants.py]
     end
     
     subgraph "Storage Layer"
-        Config[config.json]
+        Config[config/config.json]
         Cache[In-Memory Cache]
-        Logs[Log Files]
+        Logs[reports/logs]
     end
     
     UI --> CB
@@ -156,27 +156,27 @@ sequenceDiagram
 ```mermaid
 graph LR
     subgraph "Core Modules"
-        App[app.py]
-        Layout[layout.py]
-        Callbacks[callbacks/]
+        App[src/meld_visualizer/app.py]
+        Layout[src/meld_visualizer/core/layout.py]
+        Callbacks[src/meld_visualizer/callbacks/]
     end
     
     subgraph "Data Layer"
-        DataProc[data_processing.py]
-        Security[security_utils.py]
-        Constants[constants.py]
+        DataProc[src/meld_visualizer/core/data_processing.py]
+        Security[src/meld_visualizer/utils/security_utils.py]
+        Constants[src/meld_visualizer/constants.py]
     end
     
     subgraph "Service Layer"
-        Services[services/]
+        Services[src/meld_visualizer/services/]
         Cache[cache_service.py]
         Data[data_service.py]
         File[file_service.py]
     end
     
     subgraph "Configuration"
-        Config[config.py]
-        Logging[logging_config.py]
+        Config[src/meld_visualizer/config.py]
+        Logging[src/meld_visualizer/utils/logging_config.py]
     end
     
     App --> Layout
@@ -333,25 +333,25 @@ flowchart LR
 ```mermaid
 graph TB
     subgraph "Test Types"
-        Unit[Unit Tests]
-        Integration[Integration Tests]
-        E2E[E2E Tests]
+        Unit[tests/unit/]
+        Integration[tests/integration/]
+        E2E[tests/e2e/]
         Perf[Performance Tests]
         Sec[Security Tests]
     end
     
     subgraph "Test Coverage"
-        DataTests[Data Processing]
-        ServiceTests[Service Layer]
-        CallbackTests[Callbacks]
-        ValidationTests[Validation]
+        DataTests[tests/unit/test_data_processing.py]
+        ServiceTests[tests/unit/test_services.py]
+        CallbackTests[tests/integration/test_integration.py]
+        ValidationTests[tests/unit/test_validation.py]
     end
     
     subgraph "Test Infrastructure"
-        Pytest[Pytest Framework]
-        Coverage[Coverage.py]
+        Pytest[Pytest Framework + pyproject.toml]
+        Coverage[Coverage.py → reports/]
         Selenium[Selenium WebDriver]
-        Fixtures[Test Fixtures]
+        Fixtures[tests/conftest.py]
     end
     
     Unit --> DataTests
@@ -374,21 +374,22 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Development"
-        Dev[Local Development]
-        Debug[Debug Mode]
+        Dev[pip install -e .]
+        Debug[python -m meld_visualizer]
         HotReload[Hot Reloading]
+        Quality[black/flake8/mypy]
     end
     
     subgraph "Testing"
-        CI[CI Pipeline]
-        TestEnv[Test Environment]
-        Coverage[Coverage Reports]
+        CI[GitHub Actions]
+        TestEnv[pytest + coverage]
+        Coverage[reports/htmlcov/]
     end
     
     subgraph "Production"
-        Build[PyInstaller Build]
-        Exec[Standalone Executable]
-        Deploy[Deployment]
+        Build[python -m build + PyInstaller]
+        Exec[meld-visualizer command]
+        Deploy[pip install meld-visualizer]
     end
     
     Dev --> Debug

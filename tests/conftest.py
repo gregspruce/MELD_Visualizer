@@ -20,7 +20,7 @@ def _add_project_root_to_sys_path() -> Path:
 PROJECT_ROOT = _add_project_root_to_sys_path()
 
 def _try_import_app():
-    for name in ("app", "MELD_Visualizer.app", "meld_visualizer.app", "src.app"):
+    for name in ("src.meld_visualizer.app", "app", "MELD_Visualizer.app", "meld_visualizer.app", "src.app"):
         try:
             return importlib.import_module(name)
         except ModuleNotFoundError:

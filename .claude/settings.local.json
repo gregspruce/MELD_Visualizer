@@ -3,9 +3,27 @@
     "allow": [
       "Bash(pip install:*)",
       "Bash(python -m pytest tests/ --cov=. --cov-report=term-missing -m \"not e2e\")",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(mkdir:*)",
+      "Bash(move \"app.py\" \"src/meld_visualizer/app.py\")",
+      "Bash(move \"config.py\" \"src/meld_visualizer/config.py\")",
+      "Bash(move \"constants.py\" \"src/meld_visualizer/constants.py\")",
+      "Bash(cmd /c:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(cp -r \"docs\" \"docs_temp\")",
+      "Bash(cp:*)",
+      "Bash(find:*)",
+      "Bash(grep -l \"from config\\|from constants\\|from services\\|from data_processing\\|from layout\\|from logging_config\\|from security_utils\" \"src/meld_visualizer/callbacks/\"*.py)",
+      "Bash(sed:*)",
+      "Bash(timeout:*)",
+      "Bash(where:*)",
+      "Bash(bash:*)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "C:\\c\\VSCode\\MELD"
+    ]
   },
   "outputStyle": "Explanatory"
 }

@@ -38,15 +38,40 @@ This section is for users who want to run the application and configure its sett
 
 To run the application, you must have Python and the required packages installed.
 
-1.  **Install requirements:** We recommend using a virtual environment. Open a terminal or command prompt in the project directory and run:
-    ```bash
-    pip install -r requirements.txt
-    ```
-2.  **Start the application:** In the same terminal, run the main `app.py` file:
-    ```bash
-    python app.py
-    ```
-3.  The application will automatically open in your default web browser.
+#### Installation Options
+
+**Option 1: Using pip (Recommended)**
+```bash
+# Install from PyPI (when available)
+pip install meld-visualizer
+
+# Run the application
+meld-visualizer
+```
+
+**Option 2: Development Installation**
+```bash
+# Clone and install in development mode
+git clone https://github.com/MELD-labs/meld-visualizer.git
+cd meld-visualizer
+pip install -e .
+
+# Run the application
+python -m meld_visualizer
+# OR
+meld-visualizer
+```
+
+**Option 3: From Source**
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run from source
+python -m src.meld_visualizer.app
+```
+
+The application will automatically open in your default web browser at `http://127.0.0.1:8050`.
 
 ### 2. Using the Visualization Tabs
 
@@ -68,11 +93,11 @@ On the "3D Toolpath Plot", "3D Volume Mesh", and "G-code Visualization" tabs, yo
     *   A value **greater than 1.0** (e.g., `2.0`) will stretch the Z-axis, making the plot appear taller.
     *   A value **less than 1.0** (e.g., `0.5`) will compress the Z-axis, making it appear flatter.
 
-### 3. Configuration (`config.json`)
+### 3. Configuration (`config/config.json`)
 
-Settings can be changed either by using the "Settings" tab within the running application or by directly editing the `config.json` file.
+Settings can be changed either by using the "Settings" tab within the running application or by directly editing the `config/config.json` file.
 
-**IMPORTANT:** After saving any changes (either in the file or in the app), you must **close and restart the application** (`python app.py`) for your changes to take effect.
+**IMPORTANT:** After saving any changes (either in the file or in the app), you must **close and restart the application** for your changes to take effect.
 
 #### **Changing the Application Theme**
 
@@ -127,60 +152,109 @@ This section is for developers who want to modify, maintain, or build upon the a
 
 ### 4. Project Structure
 
-The application is broken into logical modules to promote maintainability and separation of concerns.
+The application follows modern Python packaging standards with a clean, modular structure:
 
 ```
-MELD_Visualizer/
-├── app.py                  # Main application entry point
-├── layout.py              # UI layout and components
-├── data_processing.py     # Data parsing and transformation
-├── config.py              # Configuration management
-├── constants.py           # Application constants
-├── security_utils.py      # Security and validation
-├── logging_config.py      # Logging configuration
-├── callbacks/             # Dash callback modules
-│   ├── data_callbacks.py
-│   ├── graph_callbacks.py
-│   ├── visualization_callbacks.py
-│   ├── filter_callbacks.py
-│   └── config_callbacks.py
-├── services/              # Service layer
-│   ├── cache_service.py
-│   ├── data_service.py
-│   └── file_service.py
-├── tests/                 # Test suites
-│   ├── test_data_processing.py
-│   ├── test_services.py
-│   ├── test_validation.py
-│   ├── test_integration.py
-│   ├── test_performance.py
-│   └── e2e/
-│       └── test_app_e2e.py
-├── docs/                  # Documentation
-│   ├── api/
-│   ├── architecture/
-│   ├── components/
-│   └── user-guide/
-├── CSV/                   # Sample data files
-├── requirements.txt       # Production dependencies
-├── requirements-dev.txt   # Development dependencies
-├── config.json           # User configuration
-├── agents.md             # Detailed instructions for AI agents/developers
-└── README.md             # This file
+meld_visualizer/
+├── pyproject.toml          # Modern Python packaging configuration
+├── README.md              # This file
+├── requirements.txt       # Production dependencies (legacy support)
+├── requirements-dev.txt   # Development dependencies (legacy support)
+├── src/meld_visualizer/   # Source package
+│   ├── __init__.py
+│   ├── app.py            # Main application entry point
+│   ├── config.py         # Configuration management
+│   ├── constants.py      # Application constants
+│   ├── core/             # Core functionality
+│   │   ├── __init__.py
+│   │   ├── layout.py     # UI layout and components (View layer)
+│   │   └── data_processing.py  # Data parsing and transformation (Model layer)
+│   ├── callbacks/        # Dash callback modules (Controller layer)
+│   │   ├── __init__.py
+│   │   ├── config_callbacks.py
+│   │   ├── data_callbacks.py
+│   │   ├── filter_callbacks.py
+│   │   ├── graph_callbacks.py
+│   │   └── visualization_callbacks.py
+│   ├── services/         # Business logic layer
+│   │   ├── __init__.py
+│   │   ├── cache_service.py
+│   │   ├── data_service.py
+│   │   └── file_service.py
+│   └── utils/            # Utility modules
+│       ├── __init__.py
+│       ├── logging_config.py
+│       └── security_utils.py
+├── tests/                # Comprehensive test suite
+│   ├── conftest.py      # Pytest configuration
+│   ├── pytest.ini      # Test settings
+│   ├── test_suite.conf  # Test runner configuration
+│   ├── unit/            # Unit tests
+│   ├── integration/     # Integration tests
+│   └── e2e/             # End-to-end tests
+├── docs/                # Consolidated documentation
+│   ├── CLAUDE.md        # AI assistant instructions
+│   ├── architecture/    # System architecture docs
+│   ├── components/      # Component documentation
+│   ├── user-guide/      # User manual
+│   └── api/             # API documentation
+├── config/              # Configuration files
+│   └── config.json     # User-configurable settings
+├── data/                # Sample and test data
+│   ├── csv/            # Sample CSV files
+│   └── nc/             # Sample G-code files
+├── scripts/             # Build and utility scripts
+│   ├── run_tests.sh    # Test runner
+│   └── create_pr.sh    # PR creation script
+└── reports/             # Generated reports (coverage, performance)
 ```
 
--   `app.py`: The main entry point. It initializes the Dash app, brings all pieces together, and runs the server. **This is the file you execute.**
--   `layout.py`: Contains all functions that create the visual components and structure of the app (the "view").
--   `callbacks.py`: Contains all the `@callback` functions that define the app's interactivity and logic (the "controller").
--   `data_processing.py`: Contains helper functions for data manipulation, such as parsing CSV files (parse_contents), parsing G-code files     (parse_gcode_file), and performing complex mesh generation calculations (generate_volume_mesh).
--   `config.py`: Handles loading the `config.json` file, defines theme constants, and centralizes configuration variables used by the app at runtime.
--   `config.json`: The user-facing configuration file. Stores defaults for themes and graph options.
+#### Key Components
+-   **`src/meld_visualizer/app.py`**: Main entry point. Initializes the Dash app, loads all modules, and starts the server.
+-   **`src/meld_visualizer/core/layout.py`**: UI components and structure (View layer).
+-   **`src/meld_visualizer/callbacks/`**: Modular callback system (Controller layer) with separate files for different functionality areas.
+-   **`src/meld_visualizer/core/data_processing.py`**: Data parsing, mesh generation, and G-code processing (Model layer).
+-   **`src/meld_visualizer/services/`**: Business logic services including caching, data processing, and file handling.
+-   **`src/meld_visualizer/config.py`**: Configuration management and theme handling.
+-   **`config/config.json`**: User-configurable settings file (themes, plot options, column mappings).
+-   **`pyproject.toml`**: Modern Python packaging configuration with dependencies and metadata.
 
 ### 5. Development Workflow
 
-Running the app with `python app.py` starts it in **Debug Mode**. This enables **hot-reloading**, where most changes to the Python code (`layout.py`, `callbacks.py`, etc.) will automatically be reflected in the running application without requiring a manual restart.
+#### Development Setup
+```bash
+# Clone the repository
+git clone https://github.com/MELD-labs/meld-visualizer.git
+cd meld-visualizer
 
-*Note: Changes to `config.py` or `config.json` still require a manual restart to be loaded.*
+# Install in development mode with dev dependencies
+pip install -e ".[dev]"
+
+# Run in debug mode
+python -m meld_visualizer
+# OR
+meld-visualizer
+```
+
+#### Hot Reloading
+The application starts in **Debug Mode** by default, enabling **hot-reloading** where most changes to Python code will automatically refresh without requiring a manual restart.
+
+*Note: Changes to `src/meld_visualizer/config.py` or `config/config.json` still require a manual restart.*
+
+#### Code Quality Tools
+```bash
+# Format code
+black src/ tests/
+
+# Lint code
+flake8 src/ tests/
+
+# Type checking
+mypy src/
+
+# Run pre-commit hooks
+pre-commit run --all-files
+```
 
 ### 6. Testing
 
@@ -195,86 +269,91 @@ The project includes a comprehensive test suite using `pytest`. The tests are lo
 
 #### Running Tests
 ```bash
-# Run all tests with coverage
-python run_tests_with_coverage.py
+# Install test dependencies
+pip install -e ".[test]"
 
-# Run specific test suites
-pytest tests/test_data_processing.py -v
-pytest tests/test_services.py -v
-pytest tests/test_validation.py -v
+# Run all tests
+pytest
 
-# Run only unit tests (exclude E2E)
-pytest -m "not e2e"
+# Run with coverage reporting
+pytest --cov=src/meld_visualizer --cov-report=html
 
-# Run E2E tests
-pytest -m "e2e"
+# Run specific test categories
+pytest -m "unit"        # Unit tests only
+pytest -m "integration" # Integration tests only
+pytest -m "e2e"         # End-to-end tests only
+pytest -m "not e2e"     # Exclude E2E tests
 
-# Generate coverage report
-pytest --cov=. --cov-report=html
+# Run specific test files
+pytest tests/unit/test_data_processing.py -v
+pytest tests/integration/test_services.py -v
+
+# Using the test runner script
+scripts/run_tests.sh          # Uses tests/test_suite.conf
+TEST_SUITE=both scripts/run_tests.sh    # Run both unit and E2E tests
+TEST_SUITE=e2e scripts/run_tests.sh     # Run E2E tests only
 ```
 
 For more detailed information on the testing strategy, see the `agents.md` file.
 
 ### 7. Building a Standalone Executable
 
-You can bundle the application into a single executable file using `pyinstaller`. The following instructions are for **Windows**. The process may vary for other operating systems.
+The application can be packaged into a standalone executable using PyInstaller.
 
-#### **Step 1: Generate a Spec File**
-
-First, run `pyinstaller` to create a `.spec` file. This file acts as a build recipe.
+#### Prerequisites
 ```bash
-pyinstaller --name VolumetricPlotter --windowed --onefile app.py
+# Install build dependencies
+pip install -e ".[build]"
 ```
 
-#### **Step 2: Edit the Spec File**
+#### Method 1: Using Python Build Tools
+```bash
+# Build wheel and source distribution
+python -m build
 
-Open `VolumetricPlotter.spec` in a text editor. You need to tell PyInstaller where to find the `config.json` file and include other hidden packages that Dash uses. Modify your spec file to look like this:
+# The built packages will be in dist/
+# Install the wheel: pip install dist/meld_visualizer-*.whl
+```
+
+#### Method 2: PyInstaller Executable
+```bash
+# Generate spec file
+pyinstaller --name MELD-Visualizer --windowed --onefile \
+    --add-data "config:config" \
+    --add-data "data:data" \
+    --hidden-import="dash_bootstrap_components._components" \
+    --hidden-import="plotly.express" \
+    --hidden-import="pkg_resources.py2_warn" \
+    src/meld_visualizer/app.py
+
+# Build from spec file (after customization if needed)
+pyinstaller MELD-Visualizer.spec
+```
+
+#### Example PyInstaller Spec Configuration
 ```python
-# -*- mode: python ; coding: utf-8 -*-
-
-block_cipher = None
-
-a = Analysis(['app.py'],
-             pathex=['C:\\path\\to\\your\\project\\volumetric_plotter_project'], # IMPORTANT: Use the absolute path to your project folder
-             binaries=[],
-             datas=[('config.json', '.')],  # Tells PyInstaller to include config.json
-             hiddenimports=[
-                'pkg_resources.py2_warn',
-                'dash_bootstrap_components._components',
-                'plotly.express'
-             ], # Helps PyInstaller find packages Dash loads dynamically
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher,
-             noarchive=False)
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
-exe = EXE(pyz,
-          a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
-          [],
-          name='VolumetricPlotter',
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          upx_exclude=[],
-          runtime_tmpdir=None,
-          console=False, # Should be False if using --windowed
-          icon=None) # You can add a path to an .ico file here
+# MELD-Visualizer.spec
+a = Analysis(
+    ['src/meld_visualizer/app.py'],
+    pathex=[],
+    binaries=[],
+    datas=[
+        ('config/config.json', 'config'),
+        ('data', 'data'),
+    ],
+    hiddenimports=[
+        'pkg_resources.py2_warn',
+        'dash_bootstrap_components._components',
+        'plotly.express',
+        'meld_visualizer.callbacks',
+        'meld_visualizer.services',
+        'meld_visualizer.utils',
+    ],
+    # ... rest of configuration
+)
 ```
-#### **Step 3: Build from the Spec File**
 
-Now, run `pyinstaller` again, but this time point it to your modified `.spec` file.
-```bash
-pyinstaller VolumetricPlotter.spec
-```
-This will create a `dist` folder containing `VolumetricPlotter.exe`. This executable can be shared and run on other Windows machines without requiring a Python installation.
+The built executable will be in `dist/MELD-Visualizer.exe` and can run on target systems without Python installation.
 
 ---
 
@@ -300,7 +379,7 @@ The E2E suite asserts the application title (**Volumetric Data Plotter**) and ve
 - [API Documentation](docs/api/openapi.yaml) - REST API specifications
 - [Architecture](docs/architecture/architecture.md) - System design and diagrams
 - [Components](docs/components/components.md) - Detailed component documentation
-- [Development Guide](agents.md) - Detailed development instructions
+- [Development Guide](docs/agents.md) - Detailed development instructions
 
 ## Security Features
 
@@ -372,7 +451,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 - **Issues**: Report bugs through GitHub Issues
 - **Documentation**: See the `docs/` directory
-- **Sample Files**: Available in the `CSV/` directory
+- **Sample Files**: Available in the `data/csv/` and `data/nc/` directories
 
 ---
 

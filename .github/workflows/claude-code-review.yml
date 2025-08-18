@@ -44,8 +44,10 @@ jobs:
           direct_prompt: |
             Please review this pull request for the MELD Visualizer Dash application and provide feedback on:
             
-            **Architecture & Design:**
-            - Adherence to the MVC pattern (app.py → layout.py → callbacks.py → data_processing.py)
+            **Package Structure & Architecture:**
+            - Adherence to the new package structure (src/meld_visualizer/ layout)
+            - Proper MVC pattern (src/meld_visualizer/app.py → core/layout.py → callbacks/ → core/data_processing.py)
+            - Correct import paths using src.meld_visualizer.* modules
             - Proper use of Dash callback patterns with pattern matching IDs
             - Integration with the existing theme system and configuration management
             
@@ -53,19 +55,22 @@ jobs:
             - Correct handling of MELD manufacturing data (CSV parsing, unit conversions)
             - Proper G-code visualization and volume mesh generation
             - 3D plotting consistency with existing Plotly patterns
+            - File paths updated for new structure (config/config.json, data/csv/, data/nc/)
             
             **Code Quality:**
-            - Python best practices and compatibility with Python 3.10+
+            - Python best practices and compatibility with Python 3.8+ (per pyproject.toml)
             - Error handling for file uploads and data processing
             - Performance considerations for large datasets
-            - Test coverage for new functionality
+            - Test coverage for new functionality with updated import paths
+            - Proper use of pyproject.toml dependencies and optional groups
             
             **Integration:**
-            - Compatibility with existing CSV data pipeline
-            - Proper configuration management (config.json)
+            - Compatibility with new package installation (`pip install -e ".[dev]"`)
+            - Proper configuration management (config/config.json path)
             - Theme consistency across all components
+            - Test structure following tests/ layout with pytest.ini
             
-            Be constructive and focus on maintaining the existing architecture while improving code quality.
+            Be constructive and focus on maintaining the modern package architecture while improving code quality.
 
           # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
           # use_sticky_comment: true

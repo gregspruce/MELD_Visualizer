@@ -21,17 +21,37 @@
 
 ### Installation
 
-#### Option 1: From Source
+#### Option 1: From PyPI (Recommended)
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/meld-visualizer.git
-cd meld-visualizer
-
-# Install dependencies
-pip install -r requirements.txt
+# Install the package
+pip install meld-visualizer
 
 # Run the application
-python app.py
+meld-visualizer
+```
+
+#### Option 2: From Source
+```bash
+# Clone the repository
+git clone https://github.com/MELD-labs/meld-visualizer.git
+cd meld-visualizer
+
+# Install in development mode
+pip install -e .
+
+# Run the application
+python -m meld_visualizer
+# OR
+meld-visualizer
+```
+
+#### Option 3: Legacy Installation
+```bash
+# For older setup or specific requirements
+pip install -r requirements.txt
+
+# Run from source
+python -m src.meld_visualizer.app
 ```
 
 #### Option 2: Standalone Executable
@@ -343,10 +363,11 @@ DEBUG=1 python app.py
 ### Getting Help
 
 #### Resources
-- GitHub Issues: Report bugs
-- Documentation: This guide
-- Sample Files: In CSV/ directory
-- Community Forum: Coming soon
+- **GitHub Issues**: Report bugs at https://github.com/MELD-labs/meld-visualizer/issues
+- **Documentation**: This guide and others in `docs/` directory
+- **Sample Files**: Available in `data/csv/` and `data/nc/` directories
+- **API Documentation**: See `docs/api/` for technical specifications
+- **Community Forum**: Coming soon
 
 #### Debug Information
 When reporting issues, include:
@@ -409,4 +430,4 @@ M35 ; Stop material feed
 ```
 
 ### Configuration Reference
-See `config.json` for all available options and their default values.
+See `config/config.json` for all available options and their default values. The configuration file is located in the `config/` directory within your installation.

@@ -25,12 +25,12 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
+            pyproject.toml
             
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          pip install -e ".[dev]"
           # Install basic linting tools
           pip install ruff black isort
           
@@ -61,12 +61,12 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
+            pyproject.toml
             
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          pip install -e ".[dev]"
           
       - name: Run unit tests
         run: |
@@ -88,6 +88,7 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
+            pyproject.toml
             
       - name: Install Chrome
         run: |
@@ -101,8 +102,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          pip install -e ".[dev]"
           
       - name: Run E2E tests
         run: |
@@ -125,21 +125,21 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
+            pyproject.toml
             
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          pip install -e ".[dev]"
           
       - name: Test app imports and basic functionality
         run: |
           python -c "
-          import app
-          import data_processing
-          import layout
-          import callbacks
-          import config
+          from src.meld_visualizer import app
+          from src.meld_visualizer.core import data_processing
+          from src.meld_visualizer.core import layout
+          from src.meld_visualizer import callbacks
+          from src.meld_visualizer import config
           print('✓ All core modules import successfully')
           
           # Test config loading
@@ -147,7 +147,7 @@ jobs:
           print('✓ Configuration loads successfully')
           
           # Test basic data processing functions
-          from data_processing import parse_csv_data
+          from src.meld_visualizer.core.data_processing import parse_csv_data
           print('✓ Data processing functions accessible')
           "
           
@@ -155,7 +155,7 @@ jobs:
         timeout-minutes: 2
         run: |
           timeout 30s python -c "
-          import app
+          from src.meld_visualizer import app
           import threading
           import time
           
@@ -196,16 +196,16 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
+            pyproject.toml
             
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
+          pip install -e ".[build]"
           
       - name: Build executable
         run: |
-          pyinstaller --name VolumetricPlotter --windowed --onefile app.py
+          pyinstaller --name VolumetricPlotter --windowed --onefile src/meld_visualizer/app.py --add-data "config:config" --add-data "data:data"
           
       - name: Upload executable artifact
         uses: actions/upload-artifact@v4

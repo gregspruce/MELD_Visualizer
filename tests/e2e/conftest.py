@@ -29,7 +29,7 @@ def _free_port():
     return port
 
 def _import_app():
-    for name in ("app", "MELD_Visualizer.app", "meld_visualizer.app", "src.app"):
+    for name in ("src.meld_visualizer.app", "app", "MELD_Visualizer.app", "meld_visualizer.app", "src.app"):
         try:
             return importlib.import_module(name)
         except ModuleNotFoundError:

@@ -51,11 +51,13 @@ jobs:
           
           # Allow Claude to run project-specific commands
           allowed_tools: |
-            Bash(python app.py)
+            Bash(python -m src.meld_visualizer.app)
+            Bash(meld-visualizer)
             Bash(pytest*)
-            Bash(bash run_tests.sh*)
+            Bash(bash scripts/run_tests.sh*)
             Bash(pip install*)
             Bash(python -m pip install*)
+            Bash(pip install -e*)
             Bash(pyinstaller*)
             Bash(python -c*)
             Bash(black*)
@@ -64,21 +66,31 @@ jobs:
           
           # Custom instructions for the MELD Visualizer project
           custom_instructions: |
-            This is a Dash web application for visualizing 3D MELD manufacturing data.
+            This is a Dash web application for visualizing 3D MELD manufacturing data with a modern package structure.
+            
+            Package Structure:
+            - Source code is in src/meld_visualizer/
+            - Configuration is in config/config.json
+            - Sample data is in data/csv/ and data/nc/
+            - Tests are in tests/ with pytest.ini config
+            - Scripts are in scripts/
             
             Key project requirements:
-            - Follow the modular MVC architecture (app.py → layout.py → callbacks.py → data_processing.py)
+            - Follow the modular MVC architecture (src/meld_visualizer/app.py → core/layout.py → callbacks/ → core/data_processing.py)
             - Use existing patterns for Dash callbacks with pattern matching IDs
             - Maintain compatibility with the current theme system (20+ Bootstrap themes)
-            - Run tests with pytest before suggesting changes: `pytest -m "not e2e"` for unit tests
+            - Install as editable package: `pip install -e ".[dev]"`
+            - Run tests with pytest: `pytest -m "not e2e"` for unit tests
             - Check that new code works with the existing CSV data processing pipeline
             - Preserve the G-code visualization and volume mesh generation functionality
-            - Maintain Python 3.10+ compatibility
+            - Maintain Python 3.8+ compatibility (see pyproject.toml)
             
             Before making changes:
-            1. Run the test suite to ensure existing functionality
-            2. Check config.json structure if modifying configuration
-            3. Test with sample data files in the CSV/ directory
+            1. Install the package in development mode: `pip install -e ".[dev]"`
+            2. Run the test suite to ensure existing functionality: `pytest`
+            3. Check config/config.json structure if modifying configuration
+            4. Test with sample data files in the data/csv/ directory
+            5. Use proper imports: `from src.meld_visualizer.core import data_processing`
           
           # Optional: Custom environment variables for Claude
           # claude_env: |

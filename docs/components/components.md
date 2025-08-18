@@ -32,19 +32,27 @@
 
 ## Component Breakdown
 
-### 1. Main Application (app.py)
+### 1. Main Application (src/meld_visualizer/app.py)
 **Purpose**: Entry point and application initialization
 
 **Key Functions**:
 - `create_app()`: Creates and configures Dash application
 - `register_callbacks()`: Registers all callback modules
 - `load_initial_config()`: Loads startup configuration
+- `main()`: Entry point for command-line execution
 
 **Dependencies**:
 - Dash framework
-- Layout module
-- Callback modules
-- Configuration
+- `meld_visualizer.core.layout`
+- `meld_visualizer.callbacks.*`
+- `meld_visualizer.config`
+
+**Import Examples**:
+```python
+from meld_visualizer.core.layout import create_main_layout
+from meld_visualizer.callbacks import register_all_callbacks
+from meld_visualizer.config import load_config
+```
 
 **Configuration**:
 ```python
@@ -53,7 +61,7 @@ HOST = "127.0.0.1"
 PORT = 8050
 ```
 
-### 2. Layout Module (layout.py)
+### 2. Layout Module (src/meld_visualizer/core/layout.py)
 **Purpose**: UI structure and component definitions
 
 **Components**:
@@ -69,8 +77,19 @@ PORT = 8050
 - Interactive controls (sliders, dropdowns, inputs)
 - Real-time updates
 
-### 3. Data Processing (data_processing.py)
+### 3. Data Processing (src/meld_visualizer/core/data_processing.py)
 **Purpose**: File parsing and data transformation
+
+**Import Path**:
+```python
+from meld_visualizer.core.data_processing import (
+    parse_contents,
+    parse_csv_data,
+    parse_gcode,
+    generate_volume_mesh,
+    check_and_convert_units
+)
+```
 
 **Core Functions**:
 ```python
@@ -97,46 +116,60 @@ def check_and_convert_units(df):
 - Mesh generation algorithms
 - Error handling
 
-### 4. Callback Modules (callbacks/)
+### 4. Callback Modules (src/meld_visualizer/callbacks/)
 
-#### Data Callbacks (data_callbacks.py)
+**Import Paths**:
+```python
+from meld_visualizer.callbacks.data_callbacks import register_data_callbacks
+from meld_visualizer.callbacks.graph_callbacks import register_graph_callbacks
+# etc.
+```
+
+#### Data Callbacks (src/meld_visualizer/callbacks/data_callbacks.py)
 **Handles**: File uploads and data management
 - File validation and parsing
 - Data storage and retrieval
 - Format conversion
 - Error handling
 
-#### Graph Callbacks (graph_callbacks.py)
+#### Graph Callbacks (src/meld_visualizer/callbacks/graph_callbacks.py)
 **Handles**: Main visualization updates
 - 3D scatter plots
 - Color mapping
 - Axis configuration
 - Plot updates
 
-#### Visualization Callbacks (visualization_callbacks.py)
+#### Visualization Callbacks (src/meld_visualizer/callbacks/visualization_callbacks.py)
 **Handles**: Advanced visualizations
 - 3D mesh generation
 - Line plots
 - Toolpath visualization
 - Z-axis scaling
 
-#### Filter Callbacks (filter_callbacks.py)
+#### Filter Callbacks (src/meld_visualizer/callbacks/filter_callbacks.py)
 **Handles**: Data filtering controls
 - Range sliders
 - Custom filters
 - Data subsetting
 - Filter synchronization
 
-#### Config Callbacks (config_callbacks.py)
+#### Config Callbacks (src/meld_visualizer/callbacks/config_callbacks.py)
 **Handles**: Settings management
 - Theme selection
 - Plot options
 - Save/load configuration
 - UI customization
 
-### 5. Service Layer (services/)
+### 5. Service Layer (src/meld_visualizer/services/)
 
-#### Cache Service (cache_service.py)
+**Import Paths**:
+```python
+from meld_visualizer.services.cache_service import CacheService
+from meld_visualizer.services.data_service import DataService  
+from meld_visualizer.services.file_service import FileService
+```
+
+#### Cache Service (src/meld_visualizer/services/cache_service.py)
 **Purpose**: Performance optimization through caching
 
 **Features**:
@@ -156,7 +189,7 @@ class CacheService:
     def cache_dataframe(df, key)
 ```
 
-#### Data Service (data_service.py)
+#### Data Service (src/meld_visualizer/services/data_service.py)
 **Purpose**: Data operations and business logic
 
 **Operations**:
@@ -166,7 +199,7 @@ class CacheService:
 - Data transformation
 - Cache integration
 
-#### File Service (file_service.py)
+#### File Service (src/meld_visualizer/services/file_service.py)
 **Purpose**: File operations and management
 
 **Functions**:
@@ -175,7 +208,16 @@ class CacheService:
 - Extension checking
 - Size verification
 
-### 6. Security Module (security_utils.py)
+### 6. Security Module (src/meld_visualizer/utils/security_utils.py)
+
+**Import Path**:
+```python
+from meld_visualizer.utils.security_utils import (
+    validate_file_path,
+    sanitize_input,
+    check_file_content
+)
+```
 **Purpose**: Input validation and security
 
 **Components**:
@@ -202,7 +244,18 @@ class CacheService:
 - Logging integration
 - User-friendly errors
 
-### 7. Configuration (config.py)
+### 7. Configuration (src/meld_visualizer/config.py)
+
+**Import Path**:
+```python
+from meld_visualizer.config import (
+    load_config,
+    get_theme_config,
+    save_config
+)
+```
+
+**Configuration File**: `config/config.json`
 **Purpose**: Application configuration management
 
 **Features**:
@@ -233,7 +286,12 @@ class CacheService:
 - Validation rules
 - Performance thresholds
 
-### 9. Logging Configuration (logging_config.py)
+### 9. Logging Configuration (src/meld_visualizer/utils/logging_config.py)
+
+**Import Path**:
+```python
+from meld_visualizer.utils.logging_config import setup_logging
+```
 **Purpose**: Structured logging system
 
 **Loggers**:
