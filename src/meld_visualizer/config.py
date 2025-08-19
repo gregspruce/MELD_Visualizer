@@ -68,7 +68,86 @@ def load_config():
 # --- Global Constants ---
 APP_CONFIG = load_config()
 PLOTLY_TEMPLATE = APP_CONFIG.get("plotly_template", "plotly_white")
-SCATTER_3D_HEIGHT = '80vh'
+
+# Legacy constant for backward compatibility
+SCATTER_3D_HEIGHT = '75vh'  # Updated from fixed 80vh for better desktop optimization
 
 # Initialize current theme for the application
 CURRENT_THEME = APP_CONFIG.get("default_theme", "Cerulean (Default)")
+
+# Responsive plot configuration functions
+def get_responsive_plot_style(plot_type='scatter_3d', viewport_width=1920):
+    """
+    Get responsive plot style based on viewport width and plot type.
+    Optimized for desktop environments only.
+    
+    Args:
+        plot_type (str): Type of plot ('scatter_3d', 'volume_mesh', etc.)
+        viewport_width (int): Browser viewport width in pixels
+    
+    Returns:
+        dict: Style configuration with responsive height and constraints
+    """
+    from .constants import RESPONSIVE_PLOT_CONFIG, PLOT_TYPE_MODIFIERS
+    
+    # Determine desktop category based on viewport width
+    if viewport_width >= 1920:
+        config = RESPONSIVE_PLOT_CONFIG['desktop_large']
+    elif viewport_width >= 1440:
+        config = RESPONSIVE_PLOT_CONFIG['desktop_medium']
+    elif viewport_width >= 1280:
+        config = RESPONSIVE_PLOT_CONFIG['desktop_small']
+    else:
+        config = RESPONSIVE_PLOT_CONFIG['desktop_compact']
+    
+    # Apply plot type modifier
+    modifier = PLOT_TYPE_MODIFIERS.get(plot_type, 1.0)
+    
+    # Calculate responsive height with CSS calc for type-specific adjustments
+    if modifier != 1.0:
+        height = f"calc({config['height']} * {modifier})"
+    else:
+        height = config['height']
+    
+    return {
+        'height': height,
+        'minHeight': config['min_height'],
+        'maxHeight': config['max_height'],
+        'width': '100%',
+        'resize': 'both',
+        'overflow': 'hidden'
+    }
+
+def get_responsive_plotly_config(plot_type='scatter_3d'):
+    """
+    Get responsive Plotly figure configuration for desktop optimization.
+    
+    Args:
+        plot_type (str): Type of plot for specific optimizations
+    
+    Returns:
+        dict: Plotly config with responsive settings
+    """
+    base_config = {
+        'responsive': True,
+        'displayModeBar': True,
+        'displaylogo': False,
+        'modeBarButtonsToRemove': [
+            'pan2d', 'select2d', 'lasso2d', 'autoScale2d'
+        ] if plot_type == 'time_series_2d' else [],
+        'doubleClick': 'reset+autosize',
+        'scrollZoom': True
+    }
+    
+    # 3D plot specific optimizations
+    if plot_type in ['scatter_3d', 'volume_mesh', 'toolpath_3d', 'custom_3d', 'gcode_viz']:
+        base_config.update({
+            'modeBarButtonsToAdd': ['resetCameraDefault3d', 'resetCameraLastSave3d'],
+            'camera': {
+                'eye': {'x': 1.5, 'y': 1.5, 'z': 1.5},
+                'center': {'x': 0, 'y': 0, 'z': 0},
+                'up': {'x': 0, 'y': 0, 'z': 1}
+            }
+        })
+    
+    return base_config

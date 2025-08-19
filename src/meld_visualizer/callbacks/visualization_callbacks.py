@@ -65,12 +65,18 @@ def register_visualization_callbacks(app=None):
         fig.update_layout(
             title='3D Toolpath Visualization (Active Extrusion Only)',
             template=PLOTLY_TEMPLATE,
+            responsive=True,
             scene=dict(
                 xaxis_title='X Position (mm)',
                 yaxis_title='Y Position (mm)',
                 zaxis_title='Z Position (mm)',
                 aspectmode='data' if z_stretch_factor == 1.0 else 'manual',
-                aspectratio=aspect_ratio
+                aspectratio=aspect_ratio,
+                camera=dict(
+                    eye=dict(x=1.5, y=1.5, z=1.5),
+                    center=dict(x=0, y=0, z=0),
+                    up=dict(x=0, y=0, z=1)
+                )
             )
         )
         
@@ -143,12 +149,18 @@ def register_visualization_callbacks(app=None):
         fig.update_layout(
             title='3D Mesh Visualization of the Print',
             template=PLOTLY_TEMPLATE,
+            responsive=True,
             scene=dict(
                 xaxis_title='X Position (mm)',
                 yaxis_title='Y Position (mm)',
                 zaxis_title='Z Position (mm)',
                 aspectmode='data' if z_stretch_factor == 1.0 else 'manual',
-                aspectratio=aspect_ratio
+                aspectratio=aspect_ratio,
+                camera=dict(
+                    eye=dict(x=1.5, y=1.5, z=1.5),
+                    center=dict(x=0, y=0, z=0),
+                    up=dict(x=0, y=0, z=1)
+                )
             )
         )
         
@@ -193,12 +205,18 @@ def register_visualization_callbacks(app=None):
             fig.update_layout(
                 title='Simulated 3D Toolpath (Active Extrusion Only)',
                 template=PLOTLY_TEMPLATE,
+                responsive=True,
                 scene=dict(
                     xaxis_title='X Position (mm)',
                     yaxis_title='Y Position (mm)',
                     zaxis_title='Z Position (mm)',
                     aspectmode='manual',
-                    aspectratio=custom_aspect_ratio
+                    aspectratio=custom_aspect_ratio,
+                    camera=dict(
+                        eye=dict(x=1.5, y=1.5, z=1.5),
+                        center=dict(x=0, y=0, z=0),
+                        up=dict(x=0, y=0, z=1)
+                    )
                 )
             )
             
@@ -227,12 +245,18 @@ def register_visualization_callbacks(app=None):
             fig.update_layout(
                 title='Simulated 3D Volume Mesh from G-code',
                 template=PLOTLY_TEMPLATE,
+                responsive=True,
                 scene=dict(
                     xaxis_title='X Position (mm)',
                     yaxis_title='Y Position (mm)',
                     zaxis_title='Z Position (mm)',
                     aspectmode='manual',
-                    aspectratio=custom_aspect_ratio
+                    aspectratio=custom_aspect_ratio,
+                    camera=dict(
+                        eye=dict(x=1.5, y=1.5, z=1.5),
+                        center=dict(x=0, y=0, z=0),
+                        up=dict(x=0, y=0, z=1)
+                    )
                 )
             )
             

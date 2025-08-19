@@ -2,7 +2,74 @@
 
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
-from ..config import APP_CONFIG, THEMES, PLOTLY_TEMPLATE, SCATTER_3D_HEIGHT
+from ..config import APP_CONFIG, THEMES, PLOTLY_TEMPLATE, SCATTER_3D_HEIGHT, get_responsive_plot_style
+
+# --- Responsive Plot Utilities ---
+def create_responsive_graph(graph_id, plot_type='scatter_3d', **kwargs):
+    """
+    Create a responsive graph component optimized for desktop resolutions.
+    
+    Args:
+        graph_id (str): Unique identifier for the graph component
+        plot_type (str): Type of plot for specific optimizations
+        **kwargs: Additional properties for the dcc.Graph component
+    
+    Returns:
+        dcc.Graph: Configured graph component with responsive styling
+    """
+    from ..config import get_responsive_plotly_config
+    
+    # Get responsive style configuration
+    default_style = get_responsive_plot_style(plot_type)
+    
+    # Get responsive Plotly configuration
+    plot_config = get_responsive_plotly_config(plot_type)
+    
+    # Merge with any user-provided style
+    if 'style' in kwargs:
+        default_style.update(kwargs['style'])
+        del kwargs['style']
+    
+    # Merge with any user-provided config
+    if 'config' in kwargs:
+        plot_config.update(kwargs['config'])
+        del kwargs['config']
+    
+    return dcc.Graph(
+        id=graph_id,
+        style=default_style,
+        config=plot_config,
+        className='responsive-plot',
+        **kwargs
+    )
+
+def add_viewport_detection():
+    """Add client-side viewport detection for responsive plot scaling."""
+    return html.Div([
+        dcc.Store(id='viewport-dimensions', data={'width': 1920, 'height': 1080}),
+        dcc.Interval(id='viewport-check-interval', interval=5000, n_intervals=0, disabled=True),
+        html.Script("""
+        // Detect initial viewport size and update on resize
+        function updateViewportDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            // Store dimensions in dcc.Store component
+            if (window.dash_clientside) {
+                window.dash_clientside.set_props('viewport-dimensions', {
+                    data: {width: width, height: height}
+                });
+            }
+        }
+        
+        // Update on page load and window resize
+        window.addEventListener('load', updateViewportDimensions);
+        window.addEventListener('resize', updateViewportDimensions);
+        
+        // Initial update
+        updateViewportDimensions();
+        """)
+    ], id='viewport-detector', style={'display': 'none'})
 
 # --- Reusable Layout Functions ---
 def build_header():
@@ -56,8 +123,8 @@ def build_main_controls_and_graphs():
             dbc.Col([html.H5("Graph 2 Controls"), dcc.RadioItems(id='radio-buttons-2', options=[], value=None, inline=True), create_filter_controls('zpos-2', 'ZPos')], width=6)
         ]),
         dbc.Row([
-            dbc.Col(dcc.Graph(id='graph-1', style={'height': SCATTER_3D_HEIGHT}), width=6),
-            dbc.Col(dcc.Graph(id='graph-2', style={'height': SCATTER_3D_HEIGHT}), width=6)
+            dbc.Col(create_responsive_graph('graph-1', 'scatter_3d'), width=6),
+            dbc.Col(create_responsive_graph('graph-2', 'scatter_3d'), width=6)
         ]),
     ]
 
@@ -69,7 +136,7 @@ def build_2d_plotter():
             dbc.Col([html.H6("Y-Axis"), dcc.RadioItems(id='radio-2d-y', options=[], value=None, inline=True)], width=6),
             dbc.Col([html.H6("Color Scale"), dcc.RadioItems(id='radio-2d-color', options=[], value=None, inline=True)], width=6),
         ], align="center", className="mb-2"),
-        dbc.Row(dbc.Col(dcc.Graph(id='graph-2d'), width=12)),
+        dbc.Row(dbc.Col(create_responsive_graph('graph-2d', 'time_series_2d'), width=12)),
     ]
 
 def build_custom_plotter():
@@ -86,7 +153,7 @@ def build_custom_plotter():
             dbc.Col([html.H6("Filter By"), dcc.Dropdown(id='custom-dropdown-filter', options=[], value=None, clearable=False)], width=3),
             dbc.Col(create_filter_controls('custom', 'Selected Filter'), width=9),
         ]),
-        dbc.Row(dbc.Col(dcc.Graph(id='custom-graph', style={'height': SCATTER_3D_HEIGHT}), width=12)),
+        dbc.Row(dbc.Col(create_responsive_graph('custom-graph', 'custom_3d'), width=12)),
     ]
 
 def build_data_table():
@@ -145,7 +212,7 @@ def build_line_plot_tab():
                 width="auto"
             )
         ], align="center"),
-        dcc.Loading(id="loading-line-plot", type="circle", children=dcc.Graph(id='line-plot-3d', style={'height': SCATTER_3D_HEIGHT}))
+        dcc.Loading(id="loading-line-plot", type="circle", children=create_responsive_graph('line-plot-3d', 'toolpath_3d'))
     ])
 
 def build_mesh_plot_tab():
@@ -172,7 +239,7 @@ def build_mesh_plot_tab():
                 width="auto"
             )
         ], align="center"),
-        dcc.Loading(id="loading-mesh-plot", type="circle", children=dcc.Graph(id='mesh-plot-3d', style={'height': SCATTER_3D_HEIGHT}))
+        dcc.Loading(id="loading-mesh-plot", type="circle", children=create_responsive_graph('mesh-plot-3d', 'volume_mesh'))
     ])
 
 def build_gcode_tab():
@@ -220,7 +287,7 @@ def build_gcode_tab():
         dcc.Loading(
             id="loading-gcode-plot",
             type="circle",
-            children=dcc.Graph(id='gcode-graph', style={'height': SCATTER_3D_HEIGHT})
+            children=create_responsive_graph('gcode-graph', 'gcode_viz')
         )
     ])
 
@@ -248,6 +315,9 @@ def get_layout(app):
     return html.Div([
         # Hot-reload components for dynamic theme/config updates
         create_theme_injection_component(),
+        
+        # Viewport detection for responsive plot scaling
+        add_viewport_detection(),
         
         dbc.Container([
             # Add the new store for G-code data

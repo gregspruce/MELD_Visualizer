@@ -28,6 +28,7 @@ def create_empty_figure(message="Upload a file and configure options."):
     fig = go.Figure()
     fig.update_layout(
         template=PLOTLY_TEMPLATE,
+        responsive=True,
         xaxis={'visible': False},
         yaxis={'visible': False},
         annotations=[{
@@ -75,10 +76,18 @@ def register_graph_callbacks(app=None):
             color=col_chosen, template=PLOTLY_TEMPLATE
         )
         
-        return fig.update_layout(
+        fig.update_layout(
             margin=DEFAULT_GRAPH_MARGIN, 
-            scene_aspectmode=DEFAULT_ASPECT_MODE
+            scene_aspectmode=DEFAULT_ASPECT_MODE,
+            responsive=True,
+            scene_camera=dict(
+                eye=dict(x=1.5, y=1.5, z=1.5),
+                center=dict(x=0, y=0, z=0),
+                up=dict(x=0, y=0, z=1)
+            )
         )
+        
+        return fig
 
     @callback(
         Output("graph-2", "figure"),
@@ -109,10 +118,18 @@ def register_graph_callbacks(app=None):
             color=col_chosen, template=PLOTLY_TEMPLATE
         )
         
-        return fig.update_layout(
+        fig.update_layout(
             margin=DEFAULT_GRAPH_MARGIN, 
-            scene_aspectmode=DEFAULT_ASPECT_MODE
+            scene_aspectmode=DEFAULT_ASPECT_MODE,
+            responsive=True,
+            scene_camera=dict(
+                eye=dict(x=1.5, y=1.5, z=1.5),
+                center=dict(x=0, y=0, z=0),
+                up=dict(x=0, y=0, z=1)
+            )
         )
+        
+        return fig
 
     @callback(
         Output('graph-2d', 'figure'),
@@ -144,6 +161,7 @@ def register_graph_callbacks(app=None):
             color=color_col, template=PLOTLY_TEMPLATE
         )
         
+        fig.update_layout(responsive=True)
         return fig
 
     @callback(
@@ -181,7 +199,15 @@ def register_graph_callbacks(app=None):
             color=color_col, template=PLOTLY_TEMPLATE
         )
         
-        return fig.update_layout(
+        fig.update_layout(
             margin=DEFAULT_GRAPH_MARGIN, 
-            scene_aspectmode=DEFAULT_ASPECT_MODE
+            scene_aspectmode=DEFAULT_ASPECT_MODE,
+            responsive=True,
+            scene_camera=dict(
+                eye=dict(x=1.5, y=1.5, z=1.5),
+                center=dict(x=0, y=0, z=0),
+                up=dict(x=0, y=0, z=1)
+            )
         )
+        
+        return fig

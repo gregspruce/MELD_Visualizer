@@ -47,7 +47,8 @@
       "mcp__sequential-thinking__sequentialthinking",
       "mcp__playwright__browser_wait_for",
       "mcp__playwright__browser_console_messages",
-      "mcp__playwright__browser_type"
+      "mcp__playwright__browser_type",
+      "Bash(del test_responsive_validation.py)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
