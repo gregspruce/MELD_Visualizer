@@ -1,0 +1,29 @@
+{
+  "feedstock": {
+    "dimension_inches": 0.5,
+    "shape": "square",
+    "comments": "MELD uses 0.5 inch square rod feedstock"
+  },
+  "bead_geometry": {
+    "length_mm": 2.0,
+    "radius_mm": 1.0,
+    "max_thickness_mm": 25.4,
+    "comments": "Capsule-shaped bead with rectangular center and semi-circular ends"
+  },
+  "calibration": {
+    "correction_factor": 1.0,
+    "area_offset": 0.0,
+    "comments": "Tune these values to match physical print results"
+  },
+  "tuning_guide": {
+    "correction_factor": "Multiplicative adjustment - increase if calculated volume is too small",
+    "area_offset": "Additive adjustment in mm² - use for systematic offset",
+    "validation_process": [
+      "1. Print a test part with known parameters",
+      "2. Measure actual deposited volume/mass",
+      "3. Compare with calculated volume from CSV data",
+      "4. Adjust correction_factor to match: actual_volume / calculated_volume",
+      "5. Use area_offset for fine-tuning if needed"
+    ]
+  }
+}

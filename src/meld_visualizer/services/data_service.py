@@ -16,6 +16,10 @@ from ..utils.security_utils import FileValidator, InputValidator
 from .cache_service import get_cache, cached
 from .file_service import FileService
 
+# Import new modular volume components
+from ..core.volume_calculations import VolumeCalculator
+from ..core.volume_mesh import MeshGenerator, VolumePlotter
+
 # Try to import optimized functions, fallback to standard
 try:
     # Import from reports directory at project root
@@ -25,17 +29,17 @@ try:
     sys.path.insert(0, reports_path)
     from data_processing_optimized import (
         parse_contents_optimized as parse_contents_impl,
-        generate_volume_mesh_optimized as generate_mesh_impl,
-        generate_volume_mesh_lod
+        generate_volume_mesh_optimized as generate_mesh_impl_legacy,
+        generate_volume_mesh_lod as generate_mesh_lod_legacy
     )
     OPTIMIZED_AVAILABLE = True
 except ImportError:
     from ..core.data_processing import (
         parse_contents as parse_contents_impl,
-        generate_volume_mesh as generate_mesh_impl
+        generate_volume_mesh as generate_mesh_impl_legacy
     )
     OPTIMIZED_AVAILABLE = False
-    generate_volume_mesh_lod = None
+    generate_mesh_lod_legacy = None
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +54,12 @@ class DataService:
         self.cache = get_cache()
         self.file_service = FileService()
         self.current_df_id = None
+        
+        # Initialize volume components
+        self.volume_calculator = VolumeCalculator()
+        self.mesh_generator = MeshGenerator()
+        self.volume_plotter = VolumePlotter()
+        
         logger.info(f"DataService initialized (optimized: {OPTIMIZED_AVAILABLE})")
     
     def parse_file(self, contents: str, filename: str) -> Tuple[Optional[pd.DataFrame], Optional[str], bool]:
@@ -153,7 +163,7 @@ class DataService:
     def generate_mesh(self, df: pd.DataFrame, color_column: str, 
                      lod: str = 'high') -> Optional[Dict[str, Any]]:
         """
-        Generate 3D mesh with LOD support.
+        Generate 3D mesh with LOD support using new modular system.
         
         Args:
             df: Input DataFrame
@@ -176,17 +186,49 @@ class DataService:
             logger.info(f"Using cached mesh (LOD: {lod})")
             return cached
         
-        # Generate mesh
-        if OPTIMIZED_AVAILABLE and generate_volume_mesh_lod is not None:
-            mesh_data = generate_volume_mesh_lod(df, color_column, lod)
-        else:
-            mesh_data = generate_mesh_impl(df, color_column)
+        # Prepare data with volume calculations if needed
+        if 'Bead_Thickness_mm' not in df.columns:
+            df = self.volume_calculator.process_dataframe(df)
+        
+        # Generate mesh using new modular system
+        mesh_data = self.mesh_generator.generate_mesh_lod(
+            df, 
+            color_column, 
+            lod,
+            self.volume_calculator.bead_geometry.length_mm,
+            self.volume_calculator.bead_geometry.radius_mm
+        )
         
         if mesh_data is not None:
             self.cache.set(cache_key, mesh_data)
             logger.info(f"Generated mesh with {len(mesh_data['vertices'])} vertices")
         
         return mesh_data
+    
+    def calculate_volume_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Add volume calculations to DataFrame.
+        
+        Args:
+            df: Input DataFrame with velocity columns
+            
+        Returns:
+            DataFrame with added volume columns
+        """
+        return self.volume_calculator.process_dataframe(df)
+    
+    def set_volume_calibration(self, correction_factor: float = 1.0, 
+                              area_offset: float = 0.0) -> None:
+        """
+        Set calibration factors for volume calculations.
+        
+        Args:
+            correction_factor: Multiplicative correction
+            area_offset: Additive correction in mm²
+        """
+        self.volume_calculator.set_calibration(correction_factor, area_offset)
+        self.volume_plotter.set_calibration(correction_factor, area_offset)
+        logger.info(f"Volume calibration updated: factor={correction_factor}, offset={area_offset}")
     
     def process_in_chunks(self, df: pd.DataFrame, 
                          operation: callable, 
