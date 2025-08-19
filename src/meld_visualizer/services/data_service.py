@@ -60,7 +60,39 @@ class DataService:
         self.mesh_generator = MeshGenerator()
         self.volume_plotter = VolumePlotter()
         
+        # Load calibration if available
+        self._load_calibration()
+        
         logger.info(f"DataService initialized (optimized: {OPTIMIZED_AVAILABLE})")
+    
+    def _load_calibration(self):
+        """Load calibration from config file if available."""
+        import json
+        import os
+        
+        config_path = 'config/volume_calibration.json'
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                
+                # Apply calibration
+                if 'calibration' in config:
+                    cal = config['calibration']
+                    width_mult = cal.get('width_multiplier', 1.0)
+                    self.volume_calculator.set_calibration(
+                        correction_factor=cal.get('correction_factor', 1.0),
+                        area_offset=cal.get('area_offset', 0.0),
+                        width_multiplier=width_mult
+                    )
+                    self.volume_plotter.calculator.set_calibration(
+                        correction_factor=cal.get('correction_factor', 1.0),
+                        area_offset=cal.get('area_offset', 0.0),
+                        width_multiplier=width_mult
+                    )
+                    logger.info(f"Loaded calibration: width_multiplier={width_mult:.3f}")
+            except Exception as e:
+                logger.warning(f"Failed to load calibration: {e}")
     
     def parse_file(self, contents: str, filename: str) -> Tuple[Optional[pd.DataFrame], Optional[str], bool]:
         """
@@ -190,13 +222,14 @@ class DataService:
         if 'Bead_Thickness_mm' not in df.columns:
             df = self.volume_calculator.process_dataframe(df)
         
-        # Generate mesh using new modular system
+        # Generate mesh using new modular system with width multiplier
         mesh_data = self.mesh_generator.generate_mesh_lod(
             df, 
             color_column, 
             lod,
             self.volume_calculator.bead_geometry.length_mm,
-            self.volume_calculator.bead_geometry.radius_mm
+            self.volume_calculator.bead_geometry.radius_mm,
+            width_multiplier=self.volume_calculator.width_multiplier
         )
         
         if mesh_data is not None:

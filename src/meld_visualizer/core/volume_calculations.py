@@ -135,6 +135,7 @@ class VolumeCalculator:
         # Calibration factors for tuning
         self.volume_correction_factor = 1.0  # Multiplicative correction
         self.area_offset = 0.0  # Additive correction in mm²
+        self.width_multiplier = 1.0  # Width spreading factor for bead overlap
         
         logger.info(f"VolumeCalculator initialized with feedstock area: "
                    f"{self.feedstock.cross_sectional_area_mm2:.2f} mm²")
@@ -187,6 +188,27 @@ class VolumeCalculator:
         else:
             return self.bead_geometry.calculate_thickness(bead_area)
     
+    def calculate_effective_bead_width(self, thickness: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        """
+        Calculate effective bead width including spreading.
+        
+        The physical bead spreads wider than the theoretical capsule shape
+        due to material flow and pressure during deposition.
+        
+        Args:
+            thickness: Bead thickness in mm
+            
+        Returns:
+            Effective bead width in mm
+        """
+        # Theoretical capsule width
+        theoretical_width = thickness + 2 * self.bead_geometry.radius_mm
+        
+        # Apply width multiplier to account for spreading
+        effective_width = theoretical_width * self.width_multiplier
+        
+        return effective_width
+    
     def process_dataframe(self, df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
         """
         Add volume calculation columns to a DataFrame.
@@ -217,6 +239,9 @@ class VolumeCalculator:
             df['FeedVel'].values,
             df['PathVel'].values
         )
+        
+        # Calculate effective width with spreading
+        df['Bead_Width_mm'] = self.calculate_effective_bead_width(df['Bead_Thickness_mm'].values)
         
         # Add reference columns for analysis
         df['Feedstock_Area_mm2'] = self.feedstock.cross_sectional_area_mm2
@@ -295,19 +320,22 @@ class VolumeCalculator:
     
     def set_calibration(self, 
                         correction_factor: float = 1.0,
-                        area_offset: float = 0.0) -> None:
+                        area_offset: float = 0.0,
+                        width_multiplier: float = 1.0) -> None:
         """
         Set calibration factors for volume calculations.
         
         These factors can be tuned to match physical print results.
         
         Args:
-            correction_factor: Multiplicative correction (default 1.0)
+            correction_factor: Multiplicative correction for volume (default 1.0)
             area_offset: Additive correction in mm² (default 0.0)
+            width_multiplier: Width spreading factor for overlap (default 1.0)
         """
         self.volume_correction_factor = correction_factor
         self.area_offset = area_offset
-        logger.info(f"Calibration set: factor={correction_factor}, offset={area_offset}")
+        self.width_multiplier = width_multiplier
+        logger.info(f"Calibration set: factor={correction_factor}, offset={area_offset}, width_mult={width_multiplier}")
     
     def export_parameters(self) -> Dict[str, any]:
         """
