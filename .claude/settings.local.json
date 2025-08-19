@@ -36,7 +36,14 @@
       "Bash(claude mcp add filesystem:*)",
       "Bash(claude mcp add memory:*)",
       "Bash(claude mcp add fetch:*)",
-      "Bash(claude mcp:*)"
+      "Bash(claude mcp:*)",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_file_upload",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_close"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
