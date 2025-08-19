@@ -27,7 +27,16 @@
       "Bash(git push:*)",
       "Bash(git pull:*)",
       "Bash(git branch:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebSearch",
+      "Bash(claude mcp)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(claude mcp add filesystem:*)",
+      "Bash(claude mcp add memory:*)",
+      "Bash(claude mcp add fetch:*)",
+      "Bash(claude mcp:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
@@ -35,12 +44,4 @@
     ]
   },
   "outputStyle": "Explanatory"
-}
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": ["-y", "@executeautomation/playwright-mcp-server"]
-    }
-  }
 }
