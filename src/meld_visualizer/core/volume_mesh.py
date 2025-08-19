@@ -36,7 +36,8 @@ class MeshGenerator:
                                direction: np.ndarray,
                                thickness: float,
                                bead_length: float,
-                               bead_radius: float) -> np.ndarray:
+                               bead_radius: float,
+                               width_multiplier: float = 1.0) -> np.ndarray:
         """
         Generate vertices for a single cross-section of the bead.
         
@@ -76,24 +77,28 @@ class MeshGenerator:
         
         u_vec = np.cross(h_vec, direction)
         
+        # Apply width multiplier to effectively widen the bead
+        effective_thickness = thickness * width_multiplier
+        effective_radius = bead_radius * width_multiplier
+        
         # Generate vertices for capsule cross-section
         vertices = []
         half_n = self.points_per_section // 2
         
         # First semi-circle (left side)
-        center_left = position - h_vec * thickness / 2.0
+        center_left = position - h_vec * effective_thickness / 2.0
         for i in range(half_n):
             angle = np.pi/2 + (np.pi * i) / (half_n - 1)
-            vertex = center_left + bead_radius * (
+            vertex = center_left + effective_radius * (
                 np.cos(angle) * h_vec + np.sin(angle) * u_vec
             )
             vertices.append(vertex)
         
         # Second semi-circle (right side)
-        center_right = position + h_vec * thickness / 2.0
+        center_right = position + h_vec * effective_thickness / 2.0
         for i in range(half_n):
             angle = -np.pi/2 + (np.pi * i) / (half_n - 1)
-            vertex = center_right + bead_radius * (
+            vertex = center_right + effective_radius * (
                 np.cos(angle) * h_vec + np.sin(angle) * u_vec
             )
             vertices.append(vertex)
@@ -106,7 +111,8 @@ class MeshGenerator:
                              thickness1: float,
                              thickness2: float,
                              bead_length: float,
-                             bead_radius: float) -> Tuple[np.ndarray, np.ndarray]:
+                             bead_radius: float,
+                             width_multiplier: float = 1.0) -> Tuple[np.ndarray, np.ndarray]:
         """
         Generate mesh for a single segment between two points.
         
@@ -127,12 +133,12 @@ class MeshGenerator:
         if np.linalg.norm(direction) < 1e-6:
             return np.array([]), np.array([])
         
-        # Generate cross-sections at both ends
+        # Generate cross-sections at both ends  
         verts1 = self.generate_cross_section(
-            p1, direction, thickness1, bead_length, bead_radius
+            p1, direction, thickness1, bead_length, bead_radius, width_multiplier
         )
         verts2 = self.generate_cross_section(
-            p2, direction, thickness2, bead_length, bead_radius
+            p2, direction, thickness2, bead_length, bead_radius, width_multiplier
         )
         
         # Combine vertices
@@ -159,7 +165,8 @@ class MeshGenerator:
                      df: pd.DataFrame,
                      color_column: str,
                      bead_length: float = 2.0,
-                     bead_radius: float = 1.0) -> Optional[Dict[str, Any]]:
+                     bead_radius: float = 1.0,
+                     width_multiplier: float = 1.0) -> Optional[Dict[str, Any]]:
         """
         Generate complete mesh from DataFrame.
         
@@ -201,7 +208,8 @@ class MeshGenerator:
             seg_verts, seg_faces = self.generate_segment_mesh(
                 positions[i], positions[i+1],
                 thicknesses[i], thicknesses[i+1],
-                bead_length, bead_radius
+                bead_length, bead_radius,
+                width_multiplier
             )
             
             # Skip empty segments
@@ -244,7 +252,8 @@ class MeshGenerator:
                          color_column: str,
                          lod: str = 'high',
                          bead_length: float = 2.0,
-                         bead_radius: float = 1.0) -> Optional[Dict[str, Any]]:
+                         bead_radius: float = 1.0,
+                         width_multiplier: float = 1.0) -> Optional[Dict[str, Any]]:
         """
         Generate mesh with level-of-detail support.
         
@@ -281,7 +290,7 @@ class MeshGenerator:
             df_sampled = df
         
         # Generate mesh with adjusted settings
-        result = self.generate_mesh(df_sampled, color_column, bead_length, bead_radius)
+        result = self.generate_mesh(df_sampled, color_column, bead_length, bead_radius, width_multiplier)
         
         # Restore original setting
         self.points_per_section = original_points
