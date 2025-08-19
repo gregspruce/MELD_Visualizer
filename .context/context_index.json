@@ -1,0 +1,100 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-01-18",
+  "project": "MELD Visualizer",
+  "context_files": {
+    "project_overview.md": {
+      "description": "High-level project goals, architecture, and technology stack",
+      "topics": ["goals", "architecture", "stack", "conventions"]
+    },
+    "current_state.md": {
+      "description": "Recently implemented features, current status, and known issues",
+      "topics": ["features", "fixes", "issues", "performance", "testing"]
+    },
+    "design_decisions.md": {
+      "description": "Architectural choices, API patterns, and implementation rationale",
+      "topics": ["architecture", "patterns", "security", "configuration"]
+    },
+    "code_patterns.md": {
+      "description": "Coding conventions, common patterns, and best practices",
+      "topics": ["conventions", "patterns", "testing", "error-handling", "performance"]
+    },
+    "agent_coordination.md": {
+      "description": "Agent work history, discoveries, and coordination patterns",
+      "topics": ["agents", "discoveries", "workflows", "dependencies"]
+    },
+    "future_roadmap.md": {
+      "description": "Planned features, improvements, and technical debt",
+      "topics": ["features", "improvements", "debt", "timeline", "metrics"]
+    },
+    "quick_reference.md": {
+      "description": "Quick lookup for constants, commands, and common solutions",
+      "topics": ["constants", "commands", "structure", "troubleshooting"]
+    }
+  },
+  "key_discoveries": {
+    "volume_calculation": {
+      "issue": "Incorrect circular wire assumption",
+      "fix": "Square rod geometry (161.29mm²)",
+      "impact": "27% accuracy improvement"
+    },
+    "import_errors": {
+      "issue": "Relative import failures",
+      "fix": "Added __main__.py for module execution",
+      "command": "python -m meld_visualizer"
+    },
+    "hot_reload": {
+      "feature": "Dynamic theme and config updates",
+      "method": "Clientside CSS injection",
+      "status": "Fully implemented"
+    }
+  },
+  "critical_information": {
+    "repository": "https://github.com/gregspruce/MELD_Visualizer",
+    "launch_command": "python -m meld_visualizer",
+    "feedstock_area": 161.29,
+    "feedstock_dimension": 0.5,
+    "python_version": "3.8+",
+    "dash_version": ">=2.14.0"
+  },
+  "hot_reload_capabilities": {
+    "theme_switching": {
+      "status": "instant",
+      "method": "clientside_callback",
+      "no_restart": true
+    },
+    "config_updates": {
+      "status": "instant",
+      "method": "runtime_update",
+      "no_restart": true
+    },
+    "manual_edits": {
+      "status": "requires_restart",
+      "method": "file_not_watched",
+      "no_restart": false
+    }
+  },
+  "testing_strategy": {
+    "unit": {
+      "command": "pytest -m 'not e2e'",
+      "coverage": "90%",
+      "focus": "data_processing"
+    },
+    "integration": {
+      "command": "pytest -m integration",
+      "coverage": "callbacks",
+      "focus": "component_interaction"
+    },
+    "e2e": {
+      "command": "pytest -m e2e",
+      "coverage": "workflows",
+      "requires": "chrome"
+    }
+  },
+  "agent_summary": {
+    "total_agents_used": 7,
+    "successful_fixes": 5,
+    "major_discoveries": 3,
+    "coordination_patterns": 4
+  }
+}
