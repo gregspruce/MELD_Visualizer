@@ -17,12 +17,30 @@ def register_all_callbacks(app=None):
     Args:
         app: Dash app instance (optional if using @callback decorator)
     """
-    # Register callbacks from each module
-    register_data_callbacks(app)
-    register_graph_callbacks(app)
-    register_config_callbacks(app)
-    register_visualization_callbacks(app)
-    register_filter_callbacks(app)
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Register callbacks from each module in dependency order
+    try:
+        logger.info("Registering data callbacks...")
+        register_data_callbacks(app)
+        
+        logger.info("Registering config callbacks...")
+        register_config_callbacks(app)
+        
+        logger.info("Registering filter callbacks...")
+        register_filter_callbacks(app)
+        
+        logger.info("Registering graph callbacks...")
+        register_graph_callbacks(app)
+        
+        logger.info("Registering visualization callbacks...")
+        register_visualization_callbacks(app)
+        
+        logger.info("All core callbacks registered successfully")
+    except Exception as e:
+        logger.error(f"Error registering callbacks: {e}")
+        raise
 
 # For backward compatibility
 register_callbacks = register_all_callbacks

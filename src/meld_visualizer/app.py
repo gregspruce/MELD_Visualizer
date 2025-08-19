@@ -65,7 +65,12 @@ def _register_callbacks(app):
         # Import the modular callbacks
         from .callbacks import register_all_callbacks
         register_all_callbacks(app)
-        logger.info("Callbacks registered successfully")
+        
+        # Register hot-reload callbacks as part of main registration
+        from .utils.hot_reload import register_hot_reload_callbacks
+        register_hot_reload_callbacks(app)
+        
+        logger.info("All callbacks registered successfully")
     except ImportError as e:
         logger.error(f"Failed to import callbacks module: {e}")
         logger.error("Please ensure all callback modules are properly installed")
@@ -81,10 +86,6 @@ def create_app(testing: bool = False) -> Dash:
     )
     app.layout = _build_layout(app)
     _register_callbacks(app)
-    
-    # Enable hot-reload for themes and config
-    from .utils.hot_reload import register_hot_reload_callbacks
-    register_hot_reload_callbacks(app)
     
     return app
 

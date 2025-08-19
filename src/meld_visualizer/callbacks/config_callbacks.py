@@ -104,48 +104,78 @@ def register_config_callbacks(app=None):
         Output('radio-buttons-1', 'value'),
         Output('radio-buttons-2', 'options'),
         Output('radio-buttons-2', 'value'),
-        Input('store-column-ranges', 'data')
+        Input('store-column-ranges', 'data'),
+        Input('config-reload-trigger', 'data'),
+        prevent_initial_call=False
     )
-    def update_main_graph_radios(column_ranges):
+    def update_main_graph_radios(column_ranges, reload_trigger):
         """Populate radio items for main graphs based on config and available columns."""
-        if not column_ranges:
+        try:
+            if not column_ranges:
+                return [], None, [], None
+            
+            # Reload config if triggered by hot-reload
+            if reload_trigger:
+                from ..config import load_config
+                current_config = load_config()
+                logger.debug("Hot-reloaded config for main graph radios")
+            else:
+                current_config = APP_CONFIG
+            
+            df_cols = list(column_ranges.keys())
+            
+            valid_opts_1 = [opt for opt in current_config.get('graph_1_options', []) 
+                           if opt in df_cols]
+            valid_opts_2 = [opt for opt in current_config.get('graph_2_options', []) 
+                           if opt in df_cols]
+            
+            default_1 = valid_opts_1[0] if valid_opts_1 else None
+            default_2 = valid_opts_2[0] if valid_opts_2 else None
+            
+            return valid_opts_1, default_1, valid_opts_2, default_2
+            
+        except Exception as e:
+            logger.error(f"Error updating main graph radios: {e}")
             return [], None, [], None
-        
-        df_cols = list(column_ranges.keys())
-        
-        valid_opts_1 = [opt for opt in APP_CONFIG['graph_1_options'] 
-                       if opt in df_cols]
-        valid_opts_2 = [opt for opt in APP_CONFIG['graph_2_options'] 
-                       if opt in df_cols]
-        
-        default_1 = valid_opts_1[0] if valid_opts_1 else None
-        default_2 = valid_opts_2[0] if valid_opts_2 else None
-        
-        return valid_opts_1, default_1, valid_opts_2, default_2
 
     @callback(
         Output('radio-2d-y', 'options'),
         Output('radio-2d-y', 'value'),
         Output('radio-2d-color', 'options'),
         Output('radio-2d-color', 'value'),
-        Input('store-column-ranges', 'data')
+        Input('store-column-ranges', 'data'),
+        Input('config-reload-trigger', 'data'),
+        prevent_initial_call=False
     )
-    def update_2d_plot_radios(column_ranges):
+    def update_2d_plot_radios(column_ranges, reload_trigger):
         """Populate radio items for 2D plot based on config and available columns."""
-        if not column_ranges:
-            return [], None, [], None
-        
-        df_cols = list(column_ranges.keys())
-        
-        valid_y_opts = [opt for opt in APP_CONFIG['plot_2d_y_options'] 
-                       if opt in df_cols]
-        valid_color_opts = [opt for opt in APP_CONFIG['plot_2d_color_options'] 
+        try:
+            if not column_ranges:
+                return [], None, [], None
+            
+            # Reload config if triggered by hot-reload
+            if reload_trigger:
+                from ..config import load_config
+                current_config = load_config()
+                logger.debug("Hot-reloaded config for 2D plot radios")
+            else:
+                current_config = APP_CONFIG
+            
+            df_cols = list(column_ranges.keys())
+            
+            valid_y_opts = [opt for opt in current_config.get('plot_2d_y_options', []) 
                            if opt in df_cols]
-        
-        default_y = valid_y_opts[0] if valid_y_opts else None
-        default_color = valid_color_opts[0] if valid_color_opts else None
-        
-        return valid_y_opts, default_y, valid_color_opts, default_color
+            valid_color_opts = [opt for opt in current_config.get('plot_2d_color_options', []) 
+                               if opt in df_cols]
+            
+            default_y = valid_y_opts[0] if valid_y_opts else None
+            default_color = valid_color_opts[0] if valid_color_opts else None
+            
+            return valid_y_opts, default_y, valid_color_opts, default_color
+            
+        except Exception as e:
+            logger.error(f"Error updating 2D plot radios: {e}")
+            return [], None, [], None
 
     @callback(
         Output('custom-dropdown-x', 'options'),
