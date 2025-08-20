@@ -8,6 +8,9 @@ graph TB
         UI[Dash UI Components]
         Layout[layout.py]
         Assets[Static Assets]
+        EUI[Enhanced UI Components]
+        EUJS[enhanced-ui.js]
+        EUCSS[enhanced-desktop-ui.css]
     end
     
     subgraph "Controller Layer"
@@ -17,6 +20,7 @@ graph TB
         VC[visualization_callbacks.py]
         FC[filter_callbacks.py]
         CC[config_callbacks.py]
+        EUC[enhanced_ui_callbacks.py]
     end
     
     subgraph "Service Layer"
@@ -38,11 +42,17 @@ graph TB
     end
     
     UI --> CB
+    EUI --> Layout
+    EUJS --> EUI
+    EUCSS --> EUI
+    Layout --> UI
     CB --> DC
     CB --> GC
     CB --> VC
     CB --> FC
     CB --> CC
+    CB --> EUC
+    EUC --> EUI
     
     DC --> DS
     GC --> DS

@@ -9,6 +9,7 @@ from .graph_callbacks import register_graph_callbacks
 from .config_callbacks import register_config_callbacks
 from .visualization_callbacks import register_visualization_callbacks
 from .filter_callbacks import register_filter_callbacks
+from .enhanced_ui_callbacks import register_enhanced_ui_callbacks
 
 def register_all_callbacks(app=None):
     """
@@ -37,7 +38,10 @@ def register_all_callbacks(app=None):
         logger.info("Registering visualization callbacks...")
         register_visualization_callbacks(app)
         
-        logger.info("All core callbacks registered successfully")
+        logger.info("Registering enhanced UI callbacks...")
+        register_enhanced_ui_callbacks(app)
+        
+        logger.info("All callbacks registered successfully")
     except Exception as e:
         logger.error(f"Error registering callbacks: {e}")
         raise
@@ -52,5 +56,6 @@ __all__ = [
     'register_graph_callbacks',
     'register_config_callbacks',
     'register_visualization_callbacks',
-    'register_filter_callbacks'
+    'register_filter_callbacks',
+    'register_enhanced_ui_callbacks'
 ]

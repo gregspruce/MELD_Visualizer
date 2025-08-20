@@ -1,0 +1,654 @@
+/* Enhanced Desktop UI Styles for MELD Visualizer */
+/* Optimized for desktop resolutions: 1920x1080, 1440x900, 1366x768, 1280x1024 */
+
+/* === Tab Navigation Enhancements === */
+
+/* Enhanced tab container with overflow handling */
+.enhanced-tabs-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.enhanced-tabs-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.enhanced-tabs-scroll-container {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-border-color) transparent;
+}
+
+.enhanced-tabs-scroll-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.enhanced-tabs-scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.enhanced-tabs-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--bs-border-color);
+    border-radius: 2px;
+}
+
+.enhanced-tabs-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-secondary);
+}
+
+/* Desktop-optimized tab styling */
+.enhanced-tabs .nav-tabs {
+    border-bottom: none;
+    flex-wrap: nowrap;
+    min-width: max-content;
+    margin: 0;
+    padding: 0;
+}
+
+.enhanced-tabs .nav-link {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    margin-right: 2px;
+    white-space: nowrap;
+    border: none;
+    border-radius: 0;
+    color: var(--bs-secondary);
+    background: transparent;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+    min-width: 140px;
+    text-align: center;
+}
+
+.enhanced-tabs .nav-link:hover {
+    background: var(--bs-light);
+    color: var(--bs-primary);
+    transform: translateY(-1px);
+}
+
+.enhanced-tabs .nav-link.active {
+    background: var(--bs-primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(var(--bs-primary-rgb), 0.3);
+}
+
+.enhanced-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: white;
+}
+
+/* Tab scroll buttons */
+.tab-scroll-button {
+    flex-shrink: 0;
+    width: 40px;
+    height: 48px;
+    border: none;
+    background: var(--bs-light);
+    color: var(--bs-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.tab-scroll-button:hover {
+    background: var(--bs-primary);
+    color: white;
+}
+
+.tab-scroll-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.tab-scroll-button.left {
+    border-right: 1px solid var(--bs-border-color);
+}
+
+.tab-scroll-button.right {
+    border-left: 1px solid var(--bs-border-color);
+}
+
+/* Responsive adjustments for desktop resolutions */
+@media (max-width: 1366px) {
+    .enhanced-tabs .nav-link {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 1280px) {
+    .enhanced-tabs .nav-link {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+        min-width: 100px;
+    }
+}
+
+/* === Enhanced Control Panel Organization === */
+
+.enhanced-control-panel {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+    padding: 0;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.control-panel-header {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px 8px 0 0;
+    margin: 0;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.control-panel-header:hover {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-success));
+}
+
+.control-panel-header .collapse-icon {
+    transition: transform 0.3s ease;
+    font-size: 0.8rem;
+}
+
+.control-panel-header.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+.control-panel-body {
+    padding: 1.25rem;
+    background: var(--bs-body-bg);
+    border-radius: 0 0 8px 8px;
+}
+
+/* Control groups within panels */
+.control-group {
+    background: var(--bs-light);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.control-group:last-child {
+    margin-bottom: 0;
+}
+
+.control-group-title {
+    position: absolute;
+    top: -0.5rem;
+    left: 1rem;
+    background: var(--bs-body-bg);
+    padding: 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bs-primary);
+    border-radius: 4px;
+}
+
+.control-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.control-row:last-child {
+    margin-bottom: 0;
+}
+
+.control-item {
+    flex: 1;
+    min-width: 0;
+}
+
+.control-label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--bs-dark);
+    margin-bottom: 0.25rem;
+}
+
+/* Enhanced form controls */
+.enhanced-input-group {
+    margin-bottom: 0.75rem;
+}
+
+.enhanced-input-group .input-group-text {
+    background: var(--bs-primary);
+    color: white;
+    border-color: var(--bs-primary);
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.enhanced-input-group .form-control {
+    border-color: var(--bs-primary);
+}
+
+.enhanced-input-group .form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* === User Feedback System === */
+
+/* Loading overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.loading-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 300px;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--bs-border-color);
+    border-top: 4px solid var(--bs-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-message {
+    color: var(--bs-dark);
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+/* Progress indicators */
+.progress-container {
+    background: var(--bs-light);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid var(--bs-border-color);
+}
+
+.progress-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--bs-dark);
+}
+
+.enhanced-progress {
+    height: 24px;
+    background: var(--bs-border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.enhanced-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--bs-primary), var(--bs-success));
+    border-radius: 12px;
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.enhanced-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: progress-shine 2s infinite;
+}
+
+@keyframes progress-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* === Toast Notification System === */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+    width: 100%;
+}
+
+.enhanced-toast {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    transform: translateX(400px);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--bs-primary);
+}
+
+.enhanced-toast.show {
+    transform: translateX(0);
+}
+
+.enhanced-toast.success {
+    border-left-color: var(--bs-success);
+}
+
+.enhanced-toast.error {
+    border-left-color: var(--bs-danger);
+}
+
+.enhanced-toast.warning {
+    border-left-color: var(--bs-warning);
+}
+
+.enhanced-toast.info {
+    border-left-color: var(--bs-info);
+}
+
+.toast-header {
+    background: var(--bs-light);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: between;
+}
+
+.toast-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+.toast-title {
+    font-weight: 600;
+    margin: 0;
+    flex: 1;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--bs-secondary);
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-close:hover {
+    color: var(--bs-dark);
+}
+
+.toast-body {
+    padding: 1rem;
+    color: var(--bs-dark);
+}
+
+.toast-progress {
+    height: 3px;
+    background: var(--bs-border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.toast-progress-bar {
+    height: 100%;
+    background: var(--bs-primary);
+    width: 100%;
+    animation: toast-countdown 5s linear forwards;
+}
+
+.enhanced-toast.success .toast-progress-bar {
+    background: var(--bs-success);
+}
+
+.enhanced-toast.error .toast-progress-bar {
+    background: var(--bs-danger);
+}
+
+.enhanced-toast.warning .toast-progress-bar {
+    background: var(--bs-warning);
+}
+
+.enhanced-toast.info .toast-progress-bar {
+    background: var(--bs-info);
+}
+
+@keyframes toast-countdown {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* === Enhanced Upload Area === */
+.enhanced-upload-area {
+    border: 2px dashed var(--bs-border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    background: var(--bs-light);
+    transition: all 0.3s ease;
+    margin: 1rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.enhanced-upload-area:hover {
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+.enhanced-upload-area.dragover {
+    border-color: var(--bs-success);
+    background: rgba(var(--bs-success-rgb), 0.1);
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: var(--bs-secondary);
+    margin-bottom: 1rem;
+}
+
+.enhanced-upload-area:hover .upload-icon {
+    color: var(--bs-primary);
+}
+
+.upload-text {
+    font-size: 1.1rem;
+    color: var(--bs-dark);
+    margin-bottom: 0.5rem;
+}
+
+.upload-hint {
+    font-size: 0.9rem;
+    color: var(--bs-secondary);
+}
+
+/* === Responsive Adjustments for Desktop === */
+
+/* Large Desktop (1920px+) */
+@media (min-width: 1920px) {
+    .enhanced-control-panel {
+        font-size: 1rem;
+    }
+    
+    .control-panel-body {
+        padding: 1.5rem;
+    }
+    
+    .toast-container {
+        max-width: 450px;
+    }
+}
+
+/* Medium Desktop (1440px - 1919px) */
+@media (max-width: 1919px) and (min-width: 1440px) {
+    .enhanced-control-panel {
+        font-size: 0.95rem;
+    }
+    
+    .control-panel-body {
+        padding: 1.25rem;
+    }
+}
+
+/* Small Desktop (1280px - 1439px) */
+@media (max-width: 1439px) and (min-width: 1280px) {
+    .enhanced-control-panel {
+        font-size: 0.9rem;
+    }
+    
+    .control-panel-body {
+        padding: 1rem;
+    }
+    
+    .toast-container {
+        max-width: 350px;
+    }
+}
+
+/* Compact Desktop (1024px - 1279px) */
+@media (max-width: 1279px) and (min-width: 1024px) {
+    .enhanced-control-panel {
+        font-size: 0.85rem;
+    }
+    
+    .control-panel-body {
+        padding: 0.75rem;
+    }
+    
+    .control-group {
+        padding: 0.75rem;
+    }
+    
+    .toast-container {
+        max-width: 320px;
+        top: 10px;
+        right: 10px;
+    }
+}
+
+/* === Accessibility Enhancements === */
+.enhanced-tabs .nav-link:focus,
+.control-panel-header:focus,
+.toast-close:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+.enhanced-toast[role="alert"] {
+    /* Ensure screen readers announce toasts */
+    position: relative;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .enhanced-tabs .nav-link {
+        border: 1px solid;
+    }
+    
+    .enhanced-control-panel {
+        border-width: 2px;
+    }
+    
+    .enhanced-toast {
+        border: 2px solid;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .enhanced-tabs .nav-link,
+    .control-panel-header,
+    .loading-overlay,
+    .enhanced-toast,
+    .enhanced-progress-bar {
+        transition: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+    }
+    
+    .enhanced-progress-bar::after {
+        animation: none;
+    }
+    
+    @keyframes spin,
+    @keyframes progress-shine,
+    @keyframes toast-countdown {
+        to { transform: none; width: 0%; }
+    }
+}

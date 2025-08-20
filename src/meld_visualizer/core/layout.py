@@ -3,6 +3,7 @@
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 from ..config import APP_CONFIG, THEMES, PLOTLY_TEMPLATE, SCATTER_3D_HEIGHT, get_responsive_plot_style
+from .enhanced_ui import EnhancedUIComponents, UserFeedbackManager
 
 # --- Responsive Plot Utilities ---
 def create_responsive_graph(graph_id, plot_type='scatter_3d', **kwargs):
@@ -71,60 +72,179 @@ def add_viewport_detection():
         """)
     ], id='viewport-detector', style={'display': 'none'})
 
+def add_enhanced_ui_scripts():
+    """Add enhanced UI JavaScript and CSS includes."""
+    return html.Div([
+        html.Link(
+            rel="stylesheet",
+            href="/assets/enhanced-desktop-ui.css",
+            id="enhanced-ui-css"
+        ),
+        html.Script(
+            src="/assets/enhanced-ui.js",
+            id="enhanced-ui-js"
+        ),
+        html.Link(
+            rel="stylesheet",
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css",
+            id="font-awesome-css"
+        )
+    ], id='enhanced-ui-includes', style={'display': 'none'})
+
 # --- Reusable Layout Functions ---
 def build_header():
-    """Builds the header section with file upload and status messages."""
+    """Builds the header section with enhanced file upload and status messages."""
     return dbc.Row([
         html.Div(id='output-filename', className="text-primary text-center fs-3 mb-2", children="Please upload a CSV file to begin."),
         dbc.Alert(id='config-warning-alert', color="warning", is_open=False, className="w-75 mx-auto"),
-        dcc.Upload(
-            id='upload-data',
-            children=html.Div(['Drag and Drop or ', html.A('Select a CSV File')]),
-            style={
-                'width': '100%', 'height': '60px', 'lineHeight': '60px',
-                'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
-                'textAlign': 'center', 'margin': '10px 0'
-            }
+        # Enhanced upload area with better visual feedback
+        EnhancedUIComponents.create_enhanced_upload_area(
+            upload_id='upload-data',
+            message="Drag and Drop or Select a CSV File",
+            accepted_types=".csv,.nc,.gcode"
         )
     ])
 
 def create_filter_controls(control_id_prefix, filter_label):
-    """Creates a standardized set of filter controls (slider, inputs)."""
-    return html.Div([
-        html.H6(f"Filter by {filter_label}"),
-        dcc.RangeSlider(
-            id={'type': 'range-slider', 'index': control_id_prefix},
-            min=0, max=1, step=0.1, value=[0, 1],
-            tooltip={"placement": "bottom", "always_visible": True}, marks=None
-        ),
-        dbc.Row([
-            dbc.Col(dbc.InputGroup([dbc.InputGroupText("Lower Bound"), dbc.Input(id={'type': 'lower-bound-input', 'index': control_id_prefix}, type="number", step=0.1, debounce=True)]), width=6),
-            dbc.Col(dbc.InputGroup([dbc.InputGroupText("Upper Bound"), dbc.Input(id={'type': 'upper-bound-input', 'index': control_id_prefix}, type="number", step=0.1, debounce=True)]), width=6),
-        ], className="mt-2"),
-        dbc.Row([
-            dbc.Col(dbc.InputGroup([dbc.InputGroupText("Slider Min"), dbc.Input(id={'type': 'slider-min-input', 'index': control_id_prefix}, type="number", step=0.1, debounce=True)]), width=6),
-            dbc.Col(dbc.InputGroup([dbc.InputGroupText("Slider Max"), dbc.Input(id={'type': 'slider-max-input', 'index': control_id_prefix}, type="number", step=0.1, debounce=True)]), width=6),
-        ], className="mt-2"),
-    ])
+    """Creates a standardized set of enhanced filter controls with better organization."""
+    return EnhancedUIComponents.create_control_group(
+        title=f"Filter by {filter_label}",
+        controls=[
+            dcc.RangeSlider(
+                id={'type': 'range-slider', 'index': control_id_prefix},
+                min=0, max=1, step=0.1, value=[0, 1],
+                tooltip={"placement": "bottom", "always_visible": True}, 
+                marks=None,
+                className="mb-3"
+            ),
+            dbc.Row([
+                dbc.Col(
+                    EnhancedUIComponents.create_enhanced_input_group(
+                        "Lower Bound",
+                        dbc.Input(
+                            id={'type': 'lower-bound-input', 'index': control_id_prefix}, 
+                            type="number", step=0.1, debounce=True
+                        )
+                    ), width=6
+                ),
+                dbc.Col(
+                    EnhancedUIComponents.create_enhanced_input_group(
+                        "Upper Bound",
+                        dbc.Input(
+                            id={'type': 'upper-bound-input', 'index': control_id_prefix}, 
+                            type="number", step=0.1, debounce=True
+                        )
+                    ), width=6
+                ),
+            ]),
+            dbc.Row([
+                dbc.Col(
+                    EnhancedUIComponents.create_enhanced_input_group(
+                        "Slider Min",
+                        dbc.Input(
+                            id={'type': 'slider-min-input', 'index': control_id_prefix}, 
+                            type="number", step=0.1, debounce=True
+                        )
+                    ), width=6
+                ),
+                dbc.Col(
+                    EnhancedUIComponents.create_enhanced_input_group(
+                        "Slider Max",
+                        dbc.Input(
+                            id={'type': 'slider-max-input', 'index': control_id_prefix}, 
+                            type="number", step=0.1, debounce=True
+                        )
+                    ), width=6
+                ),
+            ]),
+        ],
+        group_id=f"filter-{control_id_prefix}"
+    )
 
 def create_color_scale_controls(control_id_prefix):
-    """Creates a pair of inputs for setting min/max of a color scale."""
-    return dbc.Row([
-        dbc.Col(dbc.InputGroup([dbc.InputGroupText("Color Min"), dbc.Input(id={'type': 'color-min-input', 'index': control_id_prefix}, type="number", debounce=True)])),
-        dbc.Col(dbc.InputGroup([dbc.InputGroupText("Color Max"), dbc.Input(id={'type': 'color-max-input', 'index': control_id_prefix}, type="number", debounce=True)])),
-    ], className="mb-2")
+    """Creates enhanced color scale controls with better visual organization."""
+    return EnhancedUIComponents.create_control_group(
+        title="Color Scale Range",
+        controls=[
+            dbc.Row([
+                dbc.Col(
+                    EnhancedUIComponents.create_enhanced_input_group(
+                        "Color Min",
+                        dbc.Input(
+                            id={'type': 'color-min-input', 'index': control_id_prefix}, 
+                            type="number", debounce=True
+                        )
+                    ), width=6
+                ),
+                dbc.Col(
+                    EnhancedUIComponents.create_enhanced_input_group(
+                        "Color Max",
+                        dbc.Input(
+                            id={'type': 'color-max-input', 'index': control_id_prefix}, 
+                            type="number", debounce=True
+                        )
+                    ), width=6
+                ),
+            ])
+        ],
+        group_id=f"color-scale-{control_id_prefix}"
+    )
 
 # --- Tab-Specific Layout Functions ---
 def build_main_controls_and_graphs():
-    """Builds the layout for the 'Main 3D Plots' tab."""
+    """Builds the enhanced layout for the 'Main 3D Plots' tab with organized controls."""
     return [
         dbc.Row([
-            dbc.Col([html.H5("Graph 1 Controls"), dcc.RadioItems(id='radio-buttons-1', options=[], value=None, inline=True), create_filter_controls('zpos-1', 'ZPos')], width=6),
-            dbc.Col([html.H5("Graph 2 Controls"), dcc.RadioItems(id='radio-buttons-2', options=[], value=None, inline=True), create_filter_controls('zpos-2', 'ZPos')], width=6)
-        ]),
+            dbc.Col([
+                EnhancedUIComponents.create_control_panel(
+                    title="Graph 1 Controls",
+                    controls=[
+                        dcc.RadioItems(
+                            id='radio-buttons-1', 
+                            options=[], 
+                            value=None, 
+                            inline=True,
+                            className="mb-3"
+                        ),
+                        create_filter_controls('zpos-1', 'ZPos')
+                    ],
+                    panel_id="graph-1-controls",
+                    initial_collapsed=False
+                )
+            ], width=6),
+            dbc.Col([
+                EnhancedUIComponents.create_control_panel(
+                    title="Graph 2 Controls",
+                    controls=[
+                        dcc.RadioItems(
+                            id='radio-buttons-2', 
+                            options=[], 
+                            value=None, 
+                            inline=True,
+                            className="mb-3"
+                        ),
+                        create_filter_controls('zpos-2', 'ZPos')
+                    ],
+                    panel_id="graph-2-controls",
+                    initial_collapsed=False
+                )
+            ], width=6)
+        ], className="mb-3"),
         dbc.Row([
-            dbc.Col(create_responsive_graph('graph-1', 'scatter_3d'), width=6),
-            dbc.Col(create_responsive_graph('graph-2', 'scatter_3d'), width=6)
+            dbc.Col([
+                dcc.Loading(
+                    id="loading-graph-1",
+                    type="circle",
+                    children=create_responsive_graph('graph-1', 'scatter_3d')
+                )
+            ], width=6),
+            dbc.Col([
+                dcc.Loading(
+                    id="loading-graph-2",
+                    type="circle",
+                    children=create_responsive_graph('graph-2', 'scatter_3d')
+                )
+            ], width=6)
         ]),
     ]
 
@@ -292,38 +412,98 @@ def build_gcode_tab():
     ])
 
 def build_app_body_with_tabs():
-    """Constructs the main tab structure of the app."""
-    return dbc.Tabs([
-        dbc.Tab(label="Main 3D Plots", children=[html.Div(className="mt-4", children=[*build_main_controls_and_graphs()])]),
-        dbc.Tab(label="2D Time Plot", children=[html.Div(className="mt-4", children=[*build_2d_plotter()])]),
-        dbc.Tab(label="Custom 3D Plot", children=[html.Div(className="mt-4", children=[*build_custom_plotter()])]),
-        dbc.Tab(label="Data Table", children=[html.Div(className="mt-4", children=[build_data_table()])]),
-        dbc.Tab(label="3D Toolpath Plot", children=[build_line_plot_tab()]),
-        dbc.Tab(label="3D Volume Mesh", children=[build_mesh_plot_tab()]),
-        dbc.Tab(label="G-code Visualization", children=[build_gcode_tab()]),  # <-- New Tab Added Here
-        dbc.Tab(label="Settings", children=[build_config_tab()])
-    ])
+    """Constructs the enhanced main tab structure with desktop-optimized navigation."""
+    tabs_config = [
+        {
+            'id': 'main-3d-plots',
+            'label': 'Main 3D Plots',
+            'content': html.Div(className="mt-4", children=[*build_main_controls_and_graphs()])
+        },
+        {
+            'id': '2d-time-plot',
+            'label': '2D Time Plot',
+            'content': html.Div(className="mt-4", children=[*build_2d_plotter()])
+        },
+        {
+            'id': 'custom-3d-plot',
+            'label': 'Custom 3D Plot',
+            'content': html.Div(className="mt-4", children=[*build_custom_plotter()])
+        },
+        {
+            'id': 'data-table',
+            'label': 'Data Table',
+            'content': html.Div(className="mt-4", children=[build_data_table()])
+        },
+        {
+            'id': '3d-toolpath-plot',
+            'label': '3D Toolpath Plot',
+            'content': build_line_plot_tab()
+        },
+        {
+            'id': '3d-volume-mesh',
+            'label': '3D Volume Mesh',
+            'content': build_mesh_plot_tab()
+        },
+        {
+            'id': 'gcode-visualization',
+            'label': 'G-code Visualization',
+            'content': build_gcode_tab()
+        },
+        {
+            'id': 'settings',
+            'label': 'Settings',
+            'content': build_config_tab()
+        }
+    ]
+    
+    return EnhancedUIComponents.create_enhanced_tabs(
+        tabs_config=tabs_config,
+        active_tab='main-3d-plots'
+    )
 
 def get_layout(app):
     """
-    Creates the master layout for the entire application.
+    Creates the enhanced master layout for the entire application with desktop optimizations.
     This function is called by app.py.
     The 'app' argument is unused but required by the dynamic loader.
     """
     from ..utils.hot_reload import create_theme_injection_component
     
     return html.Div([
+        # Enhanced CSS and JS includes
+        html.Link(
+            rel="stylesheet",
+            href="/assets/enhanced-desktop-ui.css"
+        ),
+        html.Script(src="/assets/enhanced-ui.js"),
+        
+        # Font Awesome for icons
+        html.Link(
+            rel="stylesheet",
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        ),
+        
         # Hot-reload components for dynamic theme/config updates
         create_theme_injection_component(),
         
         # Viewport detection for responsive plot scaling
         add_viewport_detection(),
         
+        # Enhanced UI feedback components
+        EnhancedUIComponents.create_loading_overlay("Processing data..."),
+        EnhancedUIComponents.create_toast_container(),
+        
         dbc.Container([
-            # Add the new store for G-code data
-            dcc.Store(id='store-main-df'), dcc.Store(id='store-gcode-df'),
-            dcc.Store(id='store-layout-config'), dcc.Store(id='store-config-warnings'),
-            dcc.Store(id='store-column-ranges'), dcc.Store(id='store-config-updated'),
+            # Enhanced data stores with UI state management
+            dcc.Store(id='store-main-df'), 
+            dcc.Store(id='store-gcode-df'),
+            dcc.Store(id='store-layout-config'), 
+            dcc.Store(id='store-config-warnings'),
+            dcc.Store(id='store-column-ranges'), 
+            dcc.Store(id='store-config-updated'),
+            dcc.Store(id='ui-state-store', data={}),
+            dcc.Store(id='toast-trigger-store', data=0),
+            dcc.Store(id='loading-state-store', data={'show': False, 'message': ''}),
             
             # Theme update feedback message
             html.Div(id='theme-update-message', style={'display': 'none'}),
