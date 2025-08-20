@@ -38,10 +38,11 @@ def register_all_callbacks(app=None):
         logger.info("Registering visualization callbacks...")
         register_visualization_callbacks(app)
         
-        logger.info("Registering enhanced UI callbacks...")
-        register_enhanced_ui_callbacks(app)
+        # Temporarily disabled - callbacks reference non-existent components
+        # logger.info("Registering enhanced UI callbacks...")
+        # register_enhanced_ui_callbacks(app)
         
-        logger.info("All callbacks registered successfully")
+        logger.info("All core callbacks registered successfully")
     except Exception as e:
         logger.error(f"Error registering callbacks: {e}")
         raise

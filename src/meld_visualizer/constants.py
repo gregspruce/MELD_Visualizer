@@ -63,27 +63,27 @@ MAX_Z_STRETCH_FACTOR = 10.0
 # Optimized for standard desktop resolutions: 1920x1080, 1440x900, 1366x768, 1280x1024
 RESPONSIVE_PLOT_CONFIG = {
     'desktop_large': {     # 1920x1080+, 2560x1440+
-        'height': '75vh',
-        'min_height': '500px',
-        'max_height': '900px',
+        'height': '500px',  # Fixed height for consistent appearance
+        'min_height': '450px',
+        'max_height': '550px',
         'breakpoint': 1920
     },
     'desktop_medium': {    # 1440x900, 1600x900, 1680x1050
-        'height': '70vh', 
-        'min_height': '450px',
-        'max_height': '800px',
+        'height': '450px',  # Fixed height for consistent appearance
+        'min_height': '400px',
+        'max_height': '500px',
         'breakpoint': 1440
     },
     'desktop_small': {     # 1366x768, 1280x1024, 1280x800
-        'height': '65vh',
-        'min_height': '400px',
-        'max_height': '700px', 
+        'height': '400px',  # Fixed height for consistent appearance
+        'min_height': '350px',
+        'max_height': '450px', 
         'breakpoint': 1280
     },
     'desktop_compact': {   # 1024x768, smaller desktop displays
-        'height': '60vh',
-        'min_height': '350px',
-        'max_height': '600px',
+        'height': '350px',  # Fixed height for consistent appearance
+        'min_height': '300px',
+        'max_height': '400px',
         'breakpoint': 1024
     }
 }
