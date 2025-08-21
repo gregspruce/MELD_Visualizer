@@ -142,12 +142,7 @@ def get_responsive_plotly_config(plot_type='scatter_3d'):
     # 3D plot specific optimizations
     if plot_type in ['scatter_3d', 'volume_mesh', 'toolpath_3d', 'custom_3d', 'gcode_viz']:
         base_config.update({
-            'modeBarButtonsToAdd': ['resetCameraDefault3d', 'resetCameraLastSave3d'],
-            'camera': {
-                'eye': {'x': 1.5, 'y': 1.5, 'z': 1.5},
-                'center': {'x': 0, 'y': 0, 'z': 0},
-                'up': {'x': 0, 'y': 0, 'z': 1}
-            }
+            'modeBarButtonsToAdd': ['resetCameraDefault3d', 'resetCameraLastSave3d']
         })
     
     return base_config

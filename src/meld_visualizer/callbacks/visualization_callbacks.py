@@ -65,7 +65,6 @@ def register_visualization_callbacks(app=None):
         fig.update_layout(
             title='3D Toolpath Visualization (Active Extrusion Only)',
             template=PLOTLY_TEMPLATE,
-            responsive=True,
             scene=dict(
                 xaxis_title='X Position (mm)',
                 yaxis_title='Y Position (mm)',
@@ -149,7 +148,6 @@ def register_visualization_callbacks(app=None):
         fig.update_layout(
             title='3D Mesh Visualization of the Print',
             template=PLOTLY_TEMPLATE,
-            responsive=True,
             scene=dict(
                 xaxis_title='X Position (mm)',
                 yaxis_title='Y Position (mm)',
@@ -205,7 +203,6 @@ def register_visualization_callbacks(app=None):
             fig.update_layout(
                 title='Simulated 3D Toolpath (Active Extrusion Only)',
                 template=PLOTLY_TEMPLATE,
-                responsive=True,
                 scene=dict(
                     xaxis_title='X Position (mm)',
                     yaxis_title='Y Position (mm)',
@@ -245,7 +242,6 @@ def register_visualization_callbacks(app=None):
             fig.update_layout(
                 title='Simulated 3D Volume Mesh from G-code',
                 template=PLOTLY_TEMPLATE,
-                responsive=True,
                 scene=dict(
                     xaxis_title='X Position (mm)',
                     yaxis_title='Y Position (mm)',
