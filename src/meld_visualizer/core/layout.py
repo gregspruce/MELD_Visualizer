@@ -37,11 +37,15 @@ def create_responsive_graph(graph_id, plot_type='scatter_3d', **kwargs):
         plot_config.update(kwargs['config'])
         del kwargs['config']
     
+    # Import here to avoid circular imports
+    from ..callbacks.graph_callbacks import create_empty_figure
+    
     return dcc.Graph(
         id=graph_id,
         style=default_style,
         config=plot_config,
         className='responsive-plot',
+        figure=kwargs.pop('figure', create_empty_figure()),
         **kwargs
     )
 
