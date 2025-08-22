@@ -59,11 +59,17 @@
       "Bash(powershell:*)",
       "Bash(git config:*)",
       "Bash(jq:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(git stash:*)",
+      "mcp__filesystem__search_files",
+      "mcp__filesystem__read_text_file"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
-      "C:\\c\\VSCode\\MELD"
+      "C:\\c\\VSCode\\MELD",
+      "C:\\"
     ]
   },
   "outputStyle": "Explanatory"
