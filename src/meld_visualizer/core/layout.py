@@ -82,11 +82,11 @@ def add_enhanced_ui_scripts():
     return html.Div([
         html.Link(
             rel="stylesheet",
-            href="/assets/enhanced-desktop-ui.css",
+            href="/static/css/enhanced-desktop-ui.css",
             id="enhanced-ui-css"
         ),
         html.Script(
-            src="/assets/enhanced-ui.js",
+            src="/static/js/enhanced-ui.js",
             id="enhanced-ui-js"
         ),
         html.Link(

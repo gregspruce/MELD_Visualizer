@@ -117,3 +117,39 @@ dmypy.json
 # IDE settings
 .idea/
 .vscode/
+
+# ============================================
+# Project-specific patterns after reorganization
+# ============================================
+
+# Logs - don't track log files but keep the directory
+logs/*.log
+logs/*.txt
+# Keep the logs directory itself
+!logs/.gitkeep
+
+# Reports - track structure but not generated reports
+reports/*.html
+reports/coverage/
+reports/*.json
+# Keep report directories
+!reports/.gitkeep
+
+# Data - be selective about what data to track
+data/csv/*.tmp
+data/csv/*.bak
+# Large data files (add specific patterns as needed)
+# data/csv/large_*.csv
+
+# Cleanup folder - KEEPING THIS TRACKED
+# The Cleanup folder contains files under review
+# It is intentionally tracked in version control
+# for collaborative review and decision making
+# Cleanup/  # <-- NOT adding this, so it stays tracked
+
+# Temporary files that might appear during cleanup
+*.tmp
+*.bak
+*~
+.DS_Store
+Thumbs.db

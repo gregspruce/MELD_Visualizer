@@ -44,6 +44,39 @@ This guide explains how to run the application, customize its appearance, and un
 
 ---
 
+## 📁 Project Structure
+
+```
+MELD_Visualizer/
+├── .github/                      # GitHub workflows and templates
+├── config/                       # Configuration files
+│   ├── config.json               # Main application configuration
+│   └── volume_calibration.json   # Volume calibration settings
+├── data/                         # Data files
+│   ├── csv/                      # CSV data files
+│   ├── nc/                       # NC (G-code) files
+│   └── samples/                  # Sample data for testing
+├── docs/                         # Documentation
+│   ├── api/                      # API documentation
+│   ├── architecture/             # Architecture diagrams
+│   ├── components/               # Component documentation
+│   ├── reports/                  # Analysis reports
+│   └── user-guide/               # User documentation
+├── src/meld_visualizer/          # Main application package
+│   ├── callbacks/                # Dash callbacks
+│   ├── core/                     # Core business logic
+│   ├── services/                 # Service layer
+│   ├── static/                   # Static assets (CSS/JS)
+│   └── utils/                    # Utilities
+├── tests/                        # Test suite
+│   ├── unit/                     # Unit tests
+│   ├── integration/              # Integration tests
+│   └── e2e/                      # End-to-end tests
+├── scripts/                      # Utility scripts
+├── logs/                         # Application logs
+└── Cleanup/                      # Files pending review
+```
+
 ## User Guide
 
 This section is for users who want to run the application and configure its settings.
