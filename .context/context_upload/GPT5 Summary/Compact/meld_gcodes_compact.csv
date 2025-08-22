@@ -1,0 +1,22 @@
+c,s,m,d,p,n
+G00,rapid,1,1,,ignores F; cancels G60
+G01,linear,1,0,F,
+G02,arc_cw,0,0,I|J|K|U,IJK center (relative) or U radius; helix by Z/Axis
+G03,arc_ccw,0,0,I|J|K|U,
+G04,dwell,B,0,X(sec)|I(alt),
+G09,accurate_stop_blk,B,0,,block‑level accurate stop
+G17,plane_xy,1,1,,
+G18,plane_zx,1,0,,
+G19,plane_yz,1,0,,
+G53,zero_shift_off,1,1,,suppresses programmable/adjustable
+G54,zero_shift_1,1,0,,
+G55,zero_shift_2,1,0,,
+G56,zero_shift_3,1,0,,
+G57,zero_shift_4,1,0,,
+G60,accurate_stop,1,0,,reset by G00
+G70,units_in_mmmin,1,1,,mixed; avoid; add G04 X0.5 if no motion
+G71,units_mm_mmmin,1,0,,preferred
+G700,units_in_ipm,1,0,,add G04 X0.5 if no motion
+G710,units_mm_ipm,1,0,,mixed; avoid; add G04 X0.5 if no motion
+G90,absolute,1,1,,
+G91,incremental,1,0,,

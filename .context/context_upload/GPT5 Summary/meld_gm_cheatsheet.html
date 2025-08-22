@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MELD L3/K2 G&M Programming Cheat Sheet</title>
+<style>
+  :root{--bg:#0b0f14;--fg:#e9eef5;--muted:#9fb4c7;--accent:#5cc8ff;--bad:#ff6a6a;}
+  html,body{background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;line-height:1.35;margin:0}
+  header{padding:28px 20px 8px;border-bottom:1px solid #203040;background:linear-gradient(180deg,#0f1520 0%,#0b0f14 100%)}
+  h1{margin:0 0 6px;font-size:22px}
+  h2{margin:28px 0 8px;font-size:18px;color:var(--accent);border-bottom:1px dashed #22374a;padding-bottom:4px}
+  h3{margin:16px 0 4px;font-size:15px;color:#b7d7ef}
+  .wrap{padding:20px;max-width:1200px;margin:0 auto}
+  p,li{color:var(--muted)}
+  code,kbd{background:#131a22;border:1px solid #1f2a36;border-radius:6px;padding:2px 6px}
+  table{border-collapse:collapse;width:100%;margin:12px 0}
+  th,td{border-bottom:1px solid #203040;padding:8px 10px;text-align:left;vertical-align:top}
+  th{color:#bcd4e6;font-weight:600;background:#0e141b;position:sticky;top:0}
+  .small{font-size:12px}
+  .tag{display:inline-block;padding:2px 6px;border-radius:4px;background:#14202b;color:#bfe4ff;margin-right:4px}
+  .warn{color:var(--bad);font-weight:600}
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .card{border:1px solid #203040;border-radius:12px;padding:14px;background:#0e141b}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace}
+  footer{padding:20px;color:#7d8ea0;border-top:1px solid #203040}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <h1>MELD L3/K2 — G &amp; M Code Programming Cheat Sheet</h1>
+  <p class="small">Compact, practical reference for writing programs on MELD L3/K2. Values shown in the tables are machine-specific. When in doubt, test with dry-run.</p>
+</header>
+<main class="wrap">
+  <section id="quick-rules" class="card">
+    <h2>Quick rules that bite (read me)</h2>
+    <ul>
+      <li><b>End of program:</b> put <code>G04 X0.5</code> on the line before <code>M30</code>, and ensure a newline after <code>M30</code>. This lets fast-bit M functions finish cleanly.</li>
+      <li><b>Velocity (F):</b> must be set &gt; 0 before any move or you’ll get an error. <span class="mono">F</span> is modal.</li>
+      <li><b>Units:</b> Prefer <code>G71</code> (mm) or <code>G700</code> (inch+ipm). <span class="warn">Avoid mixed-unit</span> <code>G70</code>/<code>G710</code>. If you switch units on a block without motion, add <code>G04 X0.5</code> so the HMI updates.</li>
+      <li><b>Mutual exclusivity:</b> don’t combine G codes from the same modal group on one line (see table).</li>
+      <li><b>Look‑ahead:</b> controller blends up to ~128 segments to keep speed; <code>G60/G09</code> forces accurate stops.</li>
+      <li><b>M functions:</b> <i>handshake</i> types halt the block until complete; <i>fast‑bit</i> types don’t halt and can be combined (up to 10) in one line.</li>
+    </ul>
+  </section>
+
+  <section id="execution-order" class="card">
+    <h2>Interpreter execution order (per block)</h2>
+    <ol>
+      <li><b>Reference system:</b> <code>N*</code>, <code>G17–G19</code>, <code>G70/G71/G700/G710</code>, <code>G90/G91</code></li>
+      <li><b>Configure:</b> <code>G53–G57</code> (zero shifts), <code>F</code></li>
+      <li><b>M pre:</b> M-functions configured as <i>before</i></li>
+      <li><b>PLC params:</b> <code>S</code> (e.g., spindle RPM/actuator)</li>
+      <li><b>Movement:</b> <code>G00–G03</code> (+ <code>G09/G60</code>)</li>
+      <li><b>Wait:</b> <code>G04</code></li>
+      <li><b>M post:</b> M-functions configured as <i>after</i></li>
+    </ol>
+  </section>
+
+  <section id="gcodes">
+    <h2>G Codes</h2>
+    <table>
+      <thead><tr><th>Code</th><th>Description</th><th>Modal</th><th>Default</th><th>Notes / Params</th></tr></thead>
+      <tbody>
+        <tr><td><code>G00</code></td><td>Rapid traverse (linear)</td><td>Yes</td><td>Default</td><td>Ignores <code>F</code>; cancels <code>G60</code>.</td></tr>
+        <tr><td><code>G01</code></td><td>Linear interpolation</td><td>Yes</td><td>No</td><td>Uses modal <code>F</code>.</td></tr>
+        <tr><td><code>G02</code>/<code>G03</code></td><td>CW/CCW arc or helix</td><td>No</td><td>No</td><td><code>I,J,K</code> center offsets (relative); or <code>U</code> radius (± picks short/long arc). Helix by adding motion in 3rd axis.</td></tr>
+        <tr><td><code>G04</code></td><td>Dwell</td><td>Block</td><td>—</td><td>Use <code>X&lt;sec&gt;</code> (e.g., <code>X0.5</code>).</td></tr>
+        <tr><td><code>G09</code></td><td>Accurate stop (non‑modal)</td><td>Block</td><td>—</td><td>Block‑level equivalent to <code>G60</code>.</td></tr>
+        <tr><td><code>G17/G18/G19</code></td><td>Working plane XY/ZX/YZ</td><td>Yes</td><td><code>G17</code></td><td>Arcs/helix plane.</td></tr>
+        <tr><td><code>G53</code></td><td>Suppress zero‑shift</td><td>Yes</td><td>Default</td><td>Suppresses programmable/adjustable shifts for current+following blocks.</td></tr>
+        <tr><td><code>G54–G57</code></td><td>Select adjustable zero‑shift</td><td>Yes</td><td>No</td><td>Channel‑dependent work offsets.</td></tr>
+        <tr><td><code>G60</code></td><td>Modal accurate stop</td><td>Yes</td><td>No</td><td>Stops at corners; reset by <code>G00</code>.</td></tr>
+        <tr><td><code>G70</code>/<code>G71</code></td><td>Set units inch+mm/min / mm+mm/min</td><td>Yes</td><td><code>G70</code> default*</td><td class="small">*Machine default shown; avoid mixed units (<code>G70</code>), prefer <code>G71</code>.</td></tr>
+        <tr><td><code>G700</code>/<code>G710</code></td><td>Set units inch+ipm / mm+ipm</td><td>Yes</td><td>No</td><td>Add <code>G04 X0.5</code> if no motion on same block so HMI updates.</td></tr>
+        <tr><td><code>G90/G91</code></td><td>Absolute / Incremental</td><td>Yes</td><td><code>G90</code></td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="card">
+      <h3>Mutually exclusive groups (don’t put on the same line)</h3>
+      <ul class="mono small">
+        <li>Interpolation/offset: G00,G01,G02,G03,G04,G58,G59</li>
+        <li>Units: G70,G71,G700,G710</li>
+        <li>Abs/inc: G90,G91</li>
+        <li>Zero shift: G53,G54,G55,G56,G57</li>
+        <li>Plane: G17,G18,G19</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="mcodes">
+    <h2>M Codes</h2>
+    <table>
+      <thead><tr><th>Code</th><th>Description</th><th>Type</th><th>Timing</th><th>Key Params</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>M02/M30</code></td><td>Program end</td><td>Handshake</td><td>After</td><td>—</td><td><b>Before</b> <code>M30</code> add <code>G04 X0.5</code>; ensure newline after <code>M30</code>.</td></tr>
+        <tr><td><code>M04</code></td><td>Spindle ON (CCW)</td><td>Handshake</td><td>After</td><td><code>S</code>=rpm</td><td>Waits until ≥95% of setpoint.</td></tr>
+        <tr><td><code>M05</code></td><td>Spindle OFF</td><td>Handshake</td><td>After</td><td>—</td><td>Waits for stop.</td></tr>
+        <tr><td><code>M06</code></td><td>Spindle setpoint (no wait)</td><td>Handshake</td><td>After</td><td><code>S</code>=rpm</td><td>Does not wait to reach setpoint.</td></tr>
+        <tr><td><code>M08/M09</code></td><td>Coolant ON/OFF</td><td>Fast‑bit</td><td>Before</td><td>—</td><td>—</td></tr>
+        <tr><td><code>M10/M11</code></td><td>Shield gas ON/OFF</td><td>Fast‑bit</td><td>Before</td><td>—</td><td>—</td></tr>
+        <tr><td><code>M12/M13</code></td><td>Table cooling ON/OFF</td><td>Fast‑bit</td><td>Before</td><td>—</td><td>—</td></tr>
+        <tr><td><code>M17</code></td><td>End subroutine (return)</td><td>Handshake</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code>M20–M29</code></td><td>Actuator: speed/limits/FRO/start/stop/reload/force controls/holds</td><td>Handshake</td><td>After</td><td><code>S</code> as documented</td><td>See notes in manual (force thresholds, resume/reduce, holds).</td></tr>
+        <tr><td><code>M34/M35</code></td><td>Continuous feed start/stop</td><td>Handshake</td><td>After</td><td><code>S</code>=ipm or mm/min×10</td><td>Velocity positive only.</td></tr>
+        <tr><td><code>M38/M39</code></td><td>Hold until feed torque (inst/1s avg)</td><td>Handshake</td><td>After</td><td><code>S</code>=%×10</td><td>Pauses until threshold.</td></tr>
+        <tr><td><code>M40</code></td><td>Spindle PID mode</td><td>Handshake</td><td>After</td><td><code>S</code>=0 torque, 1 force, 2 K‑type#1, 3 temp</td><td>—</td></tr>
+        <tr><td><code>M41</code></td><td>Spindle PID enable/setpoint</td><td>Handshake</td><td>After</td><td><code>S</code>=setpoint (units per mode)</td><td>Set <code>S=0</code> to disable.</td></tr>
+        <tr><td><code>M42/M43</code></td><td>Hold until torque / tool temp</td><td>Handshake</td><td>After</td><td><code>S</code>=hold value</td><td>Pauses until reached.</td></tr>
+        <tr><td><code>M50/M51</code></td><td>Save last Z / XY position</td><td>Handshake</td><td>After</td><td>—</td><td>Saves to <code>R50</code>/<code>R51–R52</code>.</td></tr>
+        <tr><td><code>M52</code></td><td>Traverse FRO (%)</td><td>Handshake</td><td>After</td><td><code>S</code>=1–300</td><td>Sets traverse FRO.</td></tr>
+        <tr><td><code>M53</code></td><td>FRO ramp (→100%)</td><td>Handshake</td><td>After</td><td><code>S</code>=time×10</td><td>Forces traverse+actuator FRO to 100% over time.</td></tr>
+        <tr><td><code>M54–M56</code></td><td>Gcode hold (+message/+door)</td><td>Handshake</td><td>After</td><td>—</td><td>M55/M56 display the line comment; M56 also unlocks door.</td></tr>
+        <tr><td><code>M60–M62</code></td><td>CSV recording start/stop/frequency</td><td>Handshake</td><td>After</td><td><code>S</code>=Hz (1–20)</td><td>—</td></tr>
+        <tr><td><code>M71–M76</code></td><td>Spindle PID gains/limits/min/max</td><td>Handshake</td><td>After</td><td><code>S</code>=scaled as noted</td><td>Writes PID config.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="letters" class="grid">
+    <div class="card"><h2>Letter addresses</h2>
+      <ul class="mono small">
+        <li><b>F</b>=feed (modal; must be &gt;0 before moving)</li>
+        <li><b>S</b>=spindle/actuator/PLC param for M‑codes</li>
+        <li><b>I,J,K</b>=arc center offsets; also <b>I</b> for <code>G04</code> duration</li>
+        <li><b>U</b>=arc radius; sign picks short/long</li>
+        <li><b>XYZ</b>=target position</li>
+        <li><b>N</b>=block number (match file line for HMI)</li>
+      </ul>
+    </div>
+    <div class="card"><h2>R‑parameters quick ref</h2>
+      <ul class="mono small">
+        <li>Loop ctrl: R10–R14</li>
+        <li>Saved pos: R50(Z), R51(X), R52(Y)</li>
+        <li>Spindle: R100–R104 (cmd, torque, speed, power, setpoint)</li>
+        <li>Traverse/feed/state: R105–R128 (vel,pos,torque,temps,cur line)</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="logic" class="card">
+    <h2>Logic &amp; structures (rest of chapter)</h2>
+    <div class="grid">
+      <div>
+        <h3>Jumps</h3>
+        <p class="mono small">@100 unconditional; @121–@126 conditional (≠,=,&lt;=,&lt;,&gt;=,&gt;). <b>K</b> gives signed relative jump target.</p>
+      </div>
+      <div>
+        <h3>Loops</h3>
+        <p class="mono small">@131–@136 while; @141–@146 repeat‑until; @151 for‑to; @161 for‑down‑to. End loops with <code>@100</code> back‑jump; use @620/@621 to inc/dec counters.</p>
+      </div>
+      <div>
+        <h3>Subroutines</h3>
+        <p class="mono small">Define with label <code>L####</code>; call via <code>L####</code> (optionally <code>Pn</code> repeats); return with <code>M17</code>; max nesting ~20.</p>
+      </div>
+      <div>
+        <h3>Feed &amp; smoothing</h3>
+        <p class="mono small"><code>FCONST</code> (default) vs <code>FLIN</code> ramping; vertex smoothing via <code>#set paramVertexSmoothing(...)</code> with constant/adaptive modes; auto accurate stop via <code>#set paramAutoAccurateStop(angle)</code>.</p>
+      </div>
+      <div>
+        <h3>Runtime control</h3>
+        <p class="mono small">Block skip with leading <code>/</code> (optionally <code>/0..3</code>); decoder stop <code>@714</code> waits for external event (e.g., to update R‑params).</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="examples" class="card">
+    <h2>Starter patterns</h2>
+<pre class="mono small">
+(Units + safe stop + spindle)
+N10 G700 F2000     (inch + ipm)
+N20 M04 S350       (spindle on, waits to 95%)
+N30 G01 X5.0 Y0
+N40 G04 X0.5       (dwell ensures M* flush)
+N50 M30            (newline after this line)
+</pre>
+  </section>
+</main>
+<footer class="wrap small">
+  Source: MELD Manufacturing L3 &amp; K2 Operator Manual (G/M code chapter, Rev K, Mar 2024).
+</footer>
+</body>
+</html>

@@ -1,0 +1,1 @@
+example prompt using json schema: Use g[], m[], rules{} from the attached JSON as the definitive MELD code reference. Cite code lines back in responses

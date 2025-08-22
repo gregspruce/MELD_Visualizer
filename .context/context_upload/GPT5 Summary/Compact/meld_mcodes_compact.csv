@@ -1,0 +1,47 @@
+c,s,t,w,p,n
+M02,end,hs,post,,use G04 X0.5 before M30 if used
+M30,end,hs,post,,newline required after
+M04,spindle_on_ccw,hs,post,S(rpm),waits to ≥95%
+M05,spindle_off,hs,post,,
+M06,spindle_setpoint_nowait,hs,post,S(rpm),
+M08,coolant_on,fb,pre,,
+M09,coolant_off,fb,pre,,
+M10,shield_on,fb,pre,,
+M11,shield_off,fb,pre,,
+M12,tablecool_on,fb,pre,,
+M13,tablecool_off,fb,pre,,
+M17,sub_end,hs,post,,
+M20,act_pos_speed,hs,post,S,
+M21,act_soft_limit,hs,post,S,
+M22,act_FRO,hs,post,S%,
+M23,act_pos_start,hs,post,S,
+M24,act_vel_start,hs,post,S,
+M25,act_stop,hs,post,,
+M26,act_reload,hs,post,,
+M27,act_reduce_force,hs,post,S,
+M28,act_resume_force,hs,post,S,
+M29,hold_until_act_force,hs,post,S,
+M34,cont_feed_start,hs,post,S(ipm or mm/min×10),positive only
+M35,cont_feed_stop,hs,post,,
+M38,hold_until_feed_torque_inst,hs,post,S(%×10),
+M39,hold_until_feed_torque_avg,hs,post,S(%×10),
+M40,spindle_pid_mode,hs,post,S(0 torque/1 force/2 K1/3 temp),
+M41,spindle_pid_enable,hs,post,S(setpoint or 0),
+M42,hold_until_spindle_torque,hs,post,S,
+M43,hold_until_tool_temp,hs,post,S(°C),
+M50,save_last_Z,hs,post,,writes R50
+M51,save_last_XY,hs,post,,"writes R51,R52"
+M52,trv_FRO,hs,post,S% (1..300),
+M53,FRO_ramp_to_100,hs,post,S(time×10),
+M54,hold,hs,post,,
+M55,hold_msg,hs,post,,displays comment
+M56,hold_msg_door,hs,post,,displays comment + unlocks door
+M60,csv_start,hs,post,,
+M61,csv_stop,hs,post,,
+M62,csv_freq,hs,post,S(Hz 1-20),
+M71,sp_pid_kp,hs,post,S×100,
+M72,sp_pid_tn,hs,post,S×10,
+M73,sp_pid_tv,hs,post,S,
+M74,sp_pid_td,hs,post,S,
+M75,sp_pid_min,hs,post,S,
+M76,sp_pid_max,hs,post,S,

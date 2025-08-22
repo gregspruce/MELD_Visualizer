@@ -56,7 +56,10 @@
       "Bash(npx @executeautomation/mcp-playwright:*)",
       "Bash(echo $SHELL)",
       "Bash(stty:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(git config:*)",
+      "Bash(jq:*)",
+      "Bash(dir:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
