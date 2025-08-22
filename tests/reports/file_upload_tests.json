@@ -1,0 +1,49 @@
+{
+  "total_tests": 4,
+  "passed": 4,
+  "failed": 0,
+  "skipped": 0,
+  "pass_rate": 100.0,
+  "total_duration": 0.013993024826049805,
+  "average_duration": 0.003498256206512451,
+  "results": [
+    {
+      "test_name": "test_upload_valid_csv",
+      "status": "passed",
+      "duration": 7.534027099609375e-05,
+      "timestamp": "2025-08-22T12:00:13.124590",
+      "details": {
+        "file": "sample_meld_data.csv"
+      }
+    },
+    {
+      "test_name": "test_upload_gcode_file",
+      "status": "passed",
+      "duration": 3.8623809814453125e-05,
+      "timestamp": "2025-08-22T12:00:13.124640",
+      "details": {
+        "file": "sample_gcode.nc"
+      }
+    },
+    {
+      "test_name": "test_upload_invalid_file",
+      "status": "passed",
+      "duration": 0.0005602836608886719,
+      "timestamp": "2025-08-22T12:00:13.125207",
+      "details": {
+        "file": "invalid.txt",
+        "expected": "error"
+      }
+    },
+    {
+      "test_name": "test_upload_large_file",
+      "status": "passed",
+      "duration": 0.013318777084350586,
+      "timestamp": "2025-08-22T12:00:13.138545",
+      "details": {
+        "rows": 10000,
+        "upload_time": 9.298324584960938e-06
+      }
+    }
+  ]
+}

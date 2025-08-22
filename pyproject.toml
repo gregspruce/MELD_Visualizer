@@ -53,22 +53,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-mock>=3.10.0",
-    "selenium>=4.10.0",
-    "webdriver-manager>=3.8.0",
     "black>=23.0.0",
     "flake8>=6.0.0",
     "mypy>=1.0.0",
     "pre-commit>=3.0.0",
-]
-test = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-mock>=3.10.0",
-    "selenium>=4.10.0",
-    "webdriver-manager>=3.8.0",
 ]
 build = [
     "pyinstaller>=5.10.0",
@@ -90,7 +78,6 @@ packages = ["src/meld_visualizer"]
 [tool.hatch.build.targets.sdist]
 include = [
     "/src",
-    "/tests",
     "/docs",
     "/config",
     "/data",
@@ -100,56 +87,6 @@ include = [
     "requirements-dev.txt",
 ]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--verbose",
-    "--tb=short",
-    "--cov=src/meld_visualizer",
-    "--cov-report=term-missing",
-    "--cov-report=html:reports/htmlcov",
-    "--cov-report=xml:reports/coverage.xml",
-]
-markers = [
-    "e2e: End-to-end tests using Selenium",
-    "integration: Integration tests",
-    "unit: Unit tests",
-    "slow: Slow running tests",
-]
-filterwarnings = [
-    "ignore::UserWarning",
-    "ignore::DeprecationWarning",
-]
-
-[tool.coverage.run]
-source = ["src/meld_visualizer"]
-omit = [
-    "*/tests/*",
-    "*/test_*",
-    "*/conftest.py",
-    "*/__pycache__/*",
-    "*/reports/*",
-    "*/scripts/*",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
-]
 
 [tool.black]
 line-length = 100
@@ -192,7 +129,6 @@ module = [
     "pandas.*",
     "numpy.*",
     "scipy.*",
-    "selenium.*",
 ]
 ignore_missing_imports = true
 
