@@ -58,6 +58,47 @@ dev = [
     "mypy>=1.0.0",
     "pre-commit>=3.0.0",
 ]
+test = [
+    # Core testing frameworks
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "pytest-xvfb>=3.0.0",
+    "pytest-html>=3.2.0",
+    "pytest-json-report>=1.5.0",
+    "pytest-timeout>=2.1.0",
+    "pytest-rerunfailures>=11.1.0",
+    
+    # Performance and profiling
+    "memory-profiler>=0.61.0",
+    "psutil>=5.9.0",
+    "py-spy>=0.3.14",
+    
+    # HTTP testing and mocking
+    "responses>=0.23.0",
+    "httpx>=0.24.0",
+    "aiohttp>=3.8.0",
+    
+    # Data testing utilities
+    "faker>=19.0.0",
+    "factory-boy>=3.3.0",
+    "hypothesis>=6.82.0",
+    
+    # Test utilities
+    "freezegun>=1.2.2",
+    "dirty-equals>=0.6.0",
+    "testfixtures>=7.2.0",
+    
+    # Security testing
+    "bandit>=1.7.5",
+    "safety>=2.3.0",
+]
+playwright = [
+    # Playwright testing dependencies
+    "playwright>=1.37.0",
+    "pytest-playwright>=0.4.2",
+]
 build = [
     "pyinstaller>=5.10.0",
     "auto-py-to-exe>=2.0.0",
@@ -147,4 +188,120 @@ exclude = [
     ".tox",
     ".eggs",
     "*.egg",
+    "tests/reports",
 ]
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = [
+    "-ra",
+    "-q",
+    "--tb=short",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src/meld_visualizer",
+    "--cov-report=term-missing",
+    "--cov-report=html:tests/reports/coverage_html",
+    "--cov-report=xml:tests/reports/coverage.xml",
+    "--cov-report=json:tests/reports/coverage.json",
+    "--cov-fail-under=75",
+    "--junitxml=tests/reports/junit.xml",
+    "--maxfail=3",
+]
+markers = [
+    "unit: Unit tests for individual components",
+    "integration: Integration tests for component interactions", 
+    "performance: Performance and benchmark tests",
+    "slow: Tests that take longer to run",
+    "security: Security-related tests",
+    "mock: Tests that heavily use mocking",
+    "parametrize: Parametrized tests with multiple inputs",
+    "skip_ci: Tests to skip in CI environment",
+    "requires_data: Tests that require external data files",
+    "e2e: End-to-end tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning", 
+    "ignore::UserWarning:plotly.*",
+    "ignore::UserWarning:pandas.*",
+    "error::UserWarning:meld_visualizer.*",
+]
+minversion = "7.0"
+timeout = 300
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["src/meld_visualizer"]
+branch = true
+parallel = true
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__main__.py",
+    "*/setup.py",
+    "*/venv/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.paths]
+source = [
+    "src/meld_visualizer",
+    "*/site-packages/meld_visualizer",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+ignore_errors = true
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "tests/reports/coverage_html"
+
+[tool.coverage.xml]
+output = "tests/reports/coverage.xml"
+
+[tool.coverage.json]
+output = "tests/reports/coverage.json"
+
+# Bandit security configuration
+[tool.bandit]
+exclude_dirs = ["tests", "docs", "build", "dist"]
+skips = ["B101", "B601"]  # Skip assert_used and shell_injection_process for tests
+
+# Safety configuration (for dependency vulnerability scanning)
+[tool.safety]
+ignore = []  # Add vulnerability IDs to ignore if needed
+
+# Performance testing configuration
+[tool.performance]
+benchmark_timeout = 30
+memory_limit_mb = 500
+load_test_duration = 300
+
+# Test data configuration
+[tool.test_data]
+csv_samples_dir = "tests/playwright/fixtures/test_data"
+gcode_samples_dir = "tests/playwright/fixtures/test_data"
+large_dataset_size = 50000
+performance_dataset_size = 10000
