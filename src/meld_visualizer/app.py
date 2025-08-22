@@ -78,11 +78,16 @@ def _register_callbacks(app):
         logger.error(f"Unexpected error registering callbacks: {e}")
 
 def create_app(testing: bool = False) -> Dash:
+    # Set the static folder path
+    static_folder = os.path.join(os.path.dirname(__file__), 'static')
+    
     app = Dash(
         __name__,
         external_stylesheets=_resolve_external_stylesheets(),
         suppress_callback_exceptions=True,
         title=APP_TITLE,
+        assets_folder=static_folder,
+        assets_url_path='/static'
     )
     app.layout = _build_layout(app)
     _register_callbacks(app)

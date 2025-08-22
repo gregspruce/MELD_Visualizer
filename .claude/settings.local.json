@@ -51,7 +51,12 @@
       "Bash(del test_responsive_validation.py)",
       "Bash(copy:*)",
       "Bash(gh pr create:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(claude doctor)",
+      "Bash(npx @executeautomation/mcp-playwright:*)",
+      "Bash(echo $SHELL)",
+      "Bash(stty:*)",
+      "Bash(powershell:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
