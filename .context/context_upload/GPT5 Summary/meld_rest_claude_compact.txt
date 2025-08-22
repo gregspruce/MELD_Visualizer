@@ -1,0 +1,38 @@
+# MELD L3/K2 — Control Flow & Runtime (compact)
+
+JUMPS
+- @100 K±n  -> unconditional jump (relative signed K)
+- @121..@126 -> conditional jumps (≠,=,≤,<,≥,>) with K±n target
+- @111 CASE -> @111 Rk Kc1 Kt1 Kc2 Kt2 ... (compare Rk to constants; jump on match; else fall-through)
+
+LOOPS
+- WHILE: @131..@136 Rm Kc [K±exit]; body ... ; @100 K-<while_line>
+- REPEAT‑UNTIL: @141..@146 Rm Kc [Kstart]; body ... ; test at end; runs ≥1×
+- FOR‑TO: @151 Rm Ktarget Kstart ; ... ; @620 Rm ; @100 K-<for_line>
+- FOR‑DOWNTO: @161 ... ; use @621 Rm to decrement
+- Notes: loops may nest.
+
+SUBROUTINES
+- Define: label L#### ; end with M17. Same file or CNC dir file named L####. Max nesting ~20.
+- Call: `L####` (optionally `Pq` repeats q times). Dynamic: `L=Rxx`. Pass via R‑params.
+
+R‑PARAMETERS & MATH
+- R0..R999 doubles; left‑to‑right evaluation in calc expressions.
+- Built‑ins: @61x abs/len, @63x trig (deg), @62x inc/dec/int, etc.
+- MELD reserved (read/update): R10‑14 loop/flow; R50‑52 saved XYZ; R100‑104 spindle; R105‑128 status/telemetry.
+
+BLOCK SKIP & COMMENTS
+- Prefix block with `/` or `/0..3` to enable skip groups. Comments in ( ... ) — no nested parens.
+
+FEED & VELOCITY
+- F modal; error if move with F=0. Interpolation: FCONST (default, fast to setpoint) or FLIN (linear ramp).
+
+LOOK‑AHEAD & ACCURACY
+- Dynamic look‑ahead (~128 segments) keeps velocity across transitions; G60 modal precise stop; G09 block precise stop.
+
+SMOOTHING
+- #set paramVertexSmoothing(type;subtype;radius) -> blend transitions (constant/vertex‑distance/adaptive).
+- #set paramAutoAccurateStop(angle_deg) -> auto insert accurate stops when deflection exceeds angle.
+
+DECODER STOP
+- @714 -> pause interpreter until external event; use to refresh R‑params.

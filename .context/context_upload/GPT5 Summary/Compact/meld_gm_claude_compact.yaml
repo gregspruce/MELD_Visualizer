@@ -1,0 +1,105 @@
+legend:
+  m: "modal? (1 yes,0 no,B=block)"
+  d: "default? (1 default)"
+  t: "type (hs=handshake,fb=fastbit)"
+  w: "when (pre/post)"
+  p: "params"
+g:
+  - ["G00","rapid","1",1,[],"ignores F; cancels G60"]
+  - ["G01","linear","1",0,["F"],""]
+  - ["G02","arc_cw","0",0,["I","J","K","U"],"IJK center (relative) or U radius; helix by Z/Axis"]
+  - ["G03","arc_ccw","0",0,["I","J","K","U"],""]
+  - ["G04","dwell","B",0,["X(sec)","I(alt)"],""]
+  - ["G09","accurate_stop_blk","B",0,[],"block‑level accurate stop"]
+  - ["G17","plane_xy","1",1,[],""]
+  - ["G18","plane_zx","1",0,[],""]
+  - ["G19","plane_yz","1",0,[],""]
+  - ["G53","zero_shift_off","1",1,[],"suppresses programmable/adjustable"]
+  - ["G54","zero_shift_1","1",0,[],""]
+  - ["G55","zero_shift_2","1",0,[],""]
+  - ["G56","zero_shift_3","1",0,[],""]
+  - ["G57","zero_shift_4","1",0,[],""]
+  - ["G60","accurate_stop","1",0,[],"reset by G00"]
+  - ["G70","units_in_mmmin","1",1,[],"mixed; avoid; add G04 X0.5 if no motion"]
+  - ["G71","units_mm_mmmin","1",0,[],"preferred"]
+  - ["G700","units_in_ipm","1",0,[],"add G04 X0.5 if no motion"]
+  - ["G710","units_mm_ipm","1",0,[],"mixed; avoid; add G04 X0.5 if no motion"]
+  - ["G90","absolute","1",1,[],""]
+  - ["G91","incremental","1",0,[],""]
+m:
+  - ["M02","end","hs","post",[],"use G04 X0.5 before M30 if used"]
+  - ["M30","end","hs","post",[],"newline required after"]
+  - ["M04","spindle_on_ccw","hs","post",["S(rpm)"],"waits to ≥95%"]
+  - ["M05","spindle_off","hs","post",[],""]
+  - ["M06","spindle_setpoint_nowait","hs","post",["S(rpm)"],""]
+  - ["M08","coolant_on","fb","pre",[],""]
+  - ["M09","coolant_off","fb","pre",[],""]
+  - ["M10","shield_on","fb","pre",[],""]
+  - ["M11","shield_off","fb","pre",[],""]
+  - ["M12","tablecool_on","fb","pre",[],""]
+  - ["M13","tablecool_off","fb","pre",[],""]
+  - ["M17","sub_end","hs","post",[],""]
+  - ["M20","act_pos_speed","hs","post",["S"],""]
+  - ["M21","act_soft_limit","hs","post",["S"],""]
+  - ["M22","act_FRO","hs","post",["S%"],""]
+  - ["M23","act_pos_start","hs","post",["S"],""]
+  - ["M24","act_vel_start","hs","post",["S"],""]
+  - ["M25","act_stop","hs","post",[],""]
+  - ["M26","act_reload","hs","post",[],""]
+  - ["M27","act_reduce_force","hs","post",["S"],""]
+  - ["M28","act_resume_force","hs","post",["S"],""]
+  - ["M29","hold_until_act_force","hs","post",["S"],""]
+  - ["M34","cont_feed_start","hs","post",["S(ipm or mm/min×10)"],"positive only"]
+  - ["M35","cont_feed_stop","hs","post",[],""]
+  - ["M38","hold_until_feed_torque_inst","hs","post",["S(%×10)"],""]
+  - ["M39","hold_until_feed_torque_avg","hs","post",["S(%×10)"],""]
+  - ["M40","spindle_pid_mode","hs","post",["S(0 torque/1 force/2 K1/3 temp)"],""]
+  - ["M41","spindle_pid_enable","hs","post",["S(setpoint or 0)"],""]
+  - ["M42","hold_until_spindle_torque","hs","post",["S"],""]
+  - ["M43","hold_until_tool_temp","hs","post",["S(°C)"],""]
+  - ["M50","save_last_Z","hs","post",[],"writes R50"]
+  - ["M51","save_last_XY","hs","post",[],"writes R51,R52"]
+  - ["M52","trv_FRO","hs","post",["S% (1..300)"],""]
+  - ["M53","FRO_ramp_to_100","hs","post",["S(time×10)"],""]
+  - ["M54","hold","hs","post",[],""]
+  - ["M55","hold_msg","hs","post",[],"displays comment"]
+  - ["M56","hold_msg_door","hs","post",[],"displays comment + unlocks door"]
+  - ["M60","csv_start","hs","post",[],""]
+  - ["M61","csv_stop","hs","post",[],""]
+  - ["M62","csv_freq","hs","post",["S(Hz 1-20)"],""]
+  - ["M71","sp_pid_kp","hs","post",["S×100"],""]
+  - ["M72","sp_pid_tn","hs","post",["S×10"],""]
+  - ["M73","sp_pid_tv","hs","post",["S"],""]
+  - ["M74","sp_pid_td","hs","post",["S"],""]
+  - ["M75","sp_pid_min","hs","post",["S"],""]
+  - ["M76","sp_pid_max","hs","post",["S"],""]
+rules:
+  mutual:
+    - ["G00,G01,G02,G03,G04,G58,G59"]
+    - ["G70,G71,G700,G710"]
+    - ["G90,G91"]
+    - ["G53,G54,G55,G56,G57"]
+    - ["G17,G18,G19"]
+  end:
+    - "add G04 X0.5 before M30"
+    - "newline after M30"
+  units:
+    - "prefer G71 or G700"
+    - "avoid mixed G70/G710"
+    - "if unit set w/o motion add G04 X0.5"
+  lookahead: "~128 geometry entries; keeps speed; G60/G09 force stops"
+  F: "must be >0 before first move or error"
+  letters:
+    F: "feed modal"
+    S: "M‑param (rpm/Hz/%)"
+    IJK: "arc center rel; I also dwell duration"
+    U: "arc radius (sign=short/long)"
+    N: "block"
+    XYZ: "position"
+  R_reserved:
+    - "R10-14 loop"
+    - "R50 Zlast"
+    - "R51 Xlast"
+    - "R52 Ylast"
+    - "R100-104 spindle"
+    - "R105-128 status"

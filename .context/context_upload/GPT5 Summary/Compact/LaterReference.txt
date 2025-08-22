@@ -1,0 +1,13 @@
+﻿Notes on formats:
+
+CSV headers are tiny on purpose.
+
+G: c,s,m,d,p,n → code, short desc, modal?, default?, params (|-joined), notes
+
+M: c,s,t,w,p,n → code, short desc, type (hs|fb), timing (pre|post), params, notes
+
+JSONL records are one per line, merged G+M:
+
+G: {"r":"g","c":"G01","s":"linear","m":"1","d":0,"p":["F"],"n":""}
+
+M: {"r":"m","c":"M04","s":"spindle_on_ccw","t":"hs","w":"post","p":["S(rpm)"],"n":"waits to ≥95%"}

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MELD Manufacturing G-Code & M-Code Programming Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .command-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafafa;
+        }
+        .command-header {
+            font-weight: bold;
+            color: #2980b9;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        .command-desc {
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .syntax {
+            background: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+        .example {
+            background: #e8f4fd;
+            border-left: 3px solid #3498db;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .modal {
+            background: #d4edda;
+            color: #155724;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            columns: 2;
+            column-gap: 30px;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MELD Manufacturing G-Code & M-Code Programming Guide</h1>
+        
+        <div class="toc">
+            <h3>Quick Navigation</h3>
+            <ul>
+                <li><a href="#g-commands">G-Commands (Motion & Setup)</a></li>
+                <li><a href="#m-commands">M-Commands (Machine Functions)</a></li>
+                <li><a href="#parameters">R-Parameters & Variables</a></li>
+                <li><a href="#programming-tips">Programming Tips</a></li>
+            </ul>
+        </div>
+
+        <h2 id="g-commands">G-Commands (Motion & Setup)</h2>
+        
+        <div class="command-grid">
+            <div class="command-card">
+                <div class="command-header">G00 - Rapid Traverse</div>
+                <div class="command-desc">Moves tool quickly to position (not for MELD operations)</div>
+                <div class="modal">Modal (Default)</div>
+                <div class="syntax">G00 X&lt;pos&gt; Y&lt;pos&gt; Z&lt;pos&gt;</div>
+                <div class="example">N10 G00 X20 Y10 Z30</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">G01 - Linear Interpolation</div>
+                <div class="command-desc">Linear movement at programmed feedrate</div>
+                <div class="modal">Modal</div>
+                <div class="syntax">G01 X&lt;pos&gt; Y&lt;pos&gt; Z&lt;pos&gt; F&lt;feedrate&gt;</div>
+                <div class="example">N20 G01 X100.1 Y200 F6000</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">G02 - Clockwise Arc</div>
+                <div class="command-desc">Circular interpolation clockwise</div>
+                <div class="modal">Modal</div>
+                <div class="syntax">G02 X&lt;end&gt; Y&lt;end&gt; I&lt;center_x&gt; J&lt;center_y&gt; F&lt;feed&gt;<br>
+                G02 X&lt;end&gt; Y&lt;end&gt; U&lt;radius&gt; F&lt;feed&gt;</div>
+                <div class="example">N10 G02 X200 Y100 I50 J0 F6000</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">G03 - Counterclockwise Arc</div>
+                <div class="command-desc">Circular interpolation counterclockwise</div>
+                <div class="modal">Modal</div>
+                <div class="syntax">G03 X&lt;end&gt; Y&lt;end&gt; I&lt;center_x&gt; J&lt;center_y&gt; F&lt;feed&gt;</div>
+                <div class="example">N20 G03 X150 Z150 I0 K50</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">G04 - Dwell</div>
+                <div class="command-desc">Pause execution for specified time</div>
+                <div class="syntax">G04 X&lt;seconds&gt; or G04 F&lt;seconds&gt;</div>
+                <div class="example">N30 G04 X0.5  (pause 0.5 seconds)</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">G17/G18/G19 - Working Planes</div>
+                <div class="command-desc">Select coordinate plane for arcs</div>
+                <div class="modal">Modal</div>
+                <div class="syntax">G17 (XY-plane - default)<br>G18 (ZX-plane)<br>G19 (YZ-plane)</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">G70/G71/G700/G710 - Units</div>
+                <div class="command-desc">Set length and velocity units</div>
+                <div class="modal">Modal</div>
+                <div class="syntax">G70: inch/mm/min<br>G71: mm/mm/min<br>G700: inch/inch/min<br>G710: mm/inch/min</div>
+                <div class="warning">Include G04 X0.5 for HMI display update</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">G90/G91 - Coordinate Mode</div>
+                <div class="command-desc">Absolute vs incremental positioning</div>
+                <div class="modal">Modal</div>
+                <div class="syntax">G90: Absolute (default)<br>G91: Incremental</div>
+                <div class="example">N10 G90 G01 X10 Y20<br>N20 G91 X10 Y10  (relative)</div>
+            </div>
+        </div>
+
+        <h2 id="m-commands">M-Commands (Machine Functions)</h2>
+        
+        <div class="command-grid">
+            <div class="command-card">
+                <div class="command-header">M04/M05/M06 - Spindle Control</div>
+                <div class="command-desc">Start/stop spindle operation</div>
+                <div class="syntax">M04 S&lt;rpm&gt;  (start CCW, wait for setpoint)<br>
+                M05          (stop spindle)<br>
+                M06 S&lt;rpm&gt;  (start CCW, don't wait)</div>
+                <div class="example">N100 M04 S350  (start at 350 RPM)<br>N110 M05      (stop)</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">M08/M09 - Tool Cooling</div>
+                <div class="command-desc">Control tool cooling system</div>
+                <div class="syntax">M08: Coolant ON<br>M09: Coolant OFF</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">M10/M11 - Shield Gas</div>
+                <div class="command-desc">Control shield gas valve</div>
+                <div class="syntax">M10: Shield Gas ON<br>M11: Shield Gas OFF</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">M20-M29 - Actuator Control</div>
+                <div class="command-desc">Material feed actuator operations</div>
+                <div class="syntax">M20 S&lt;vel&gt;   (set velocity, mil/min or mm/min×10)<br>
+                M21 S&lt;pos&gt;   (set soft limit)<br>
+                M23 S&lt;pos&gt;   (position start)<br>
+                M24 S&lt;vel&gt;   (velocity start)<br>
+                M25          (stop actuator)</div>
+                <div class="example">N100 M23 S5000  (move to 5" position)</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">M40-M43 - Spindle PID</div>
+                <div class="command-desc">Advanced spindle control modes</div>
+                <div class="syntax">M40 S&lt;mode&gt;  (0=torque, 1=force, 2=temp, 3=tool temp)<br>
+                M41 S&lt;value&gt; (enable PID with setpoint)<br>
+                M42 S&lt;torque&gt; (hold until torque reached)<br>
+                M43 S&lt;temp&gt;  (hold until temperature reached)</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">M50/M51 - Save Coordinates</div>
+                <div class="command-desc">Save current position to variables</div>
+                <div class="syntax">M50: Save Z coordinate to R50<br>M51: Save XY coordinates to R51,R52</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">M54-M56 - Program Holds</div>
+                <div class="command-desc">Pause program execution</div>
+                <div class="syntax">M54: Simple hold<br>
+                M55: Hold with message display<br>
+                M56: Hold with message + door unlock</div>
+                <div class="example">N100 M55 (Load new material)</div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-header">M30 - Program End</div>
+                <div class="command-desc">Terminate program execution</div>
+                <div class="syntax">G04 X0.5<br>M30</div>
+                <div class="warning">Always include G04 X0.5 before M30</div>
+            </div>
+        </div>
+
+        <h2 id="parameters">R-Parameters & Variables</h2>
+        
+        <div class="command-card">
+            <div class="command-header">R-Parameter System</div>
+            <div class="command-desc">1000 variables (R0-R999) for calculations and data storage</div>
+            <div class="syntax">R&lt;n&gt; = &lt;value&gt;  (assignment)<br>
+            R&lt;n&gt; = R&lt;m&gt; + R&lt;p&gt; - 17.5 * R&lt;q&gt; / 2.5  (calculations)</div>
+            <div class="example">N100 R5=17.5<br>N110 R6=-4<br>N120 R1=R2+R3-17.5*R9/2.5</div>
+        </div>
+
+        <div class="command-card">
+            <div class="command-header">Reserved MELD R-Parameters</div>
+            <div class="command-desc">System-updated parameters (READ-ONLY)</div>
+            <div class="syntax">R50-R52: Last X,Y,Z positions<br>
+            R100-R104: Spindle data (speed, torque, power)<br>
+            R105-R118: Feed/traverse data<br>
+            R119-R128: Temperatures</div>
+        </div>
+
+        <h2 id="programming-tips">Programming Tips & Best Practices</h2>
+        
+        <div class="command-card">
+            <div class="command-header">Program Structure</div>
+            <div class="syntax">% ProgramName (optional header)<br>
+            N10 G0 X100 Y100 Z0<br>
+            ...<br>
+            N999 G04 X0.5<br>
+            N1000 M30</div>
+            <div class="warning">Always end with G04 X0.5 before M30</div>
+        </div>
+
+        <div class="command-card">
+            <div class="command-header">Comments</div>
+            <div class="syntax">(This is a comment)<br>
+            N10 G01 (linear move) X10 (to position 10)</div>
+        </div>
+
+        <div class="command-card">
+            <div class="command-header">Subroutines</div>
+            <div class="syntax">N100 L2000    (call subroutine)<br>
+            N110 L2000 P5 (call 5 times)<br>
+            ...<br>
+            L2000         (subroutine label)<br>
+            N10 G01 X100<br>
+            N99 M17       (return)</div>
+        </div>
+
+        <div class="command-card">
+            <div class="command-header">Execution Order</div>
+            <div class="command-desc">Commands execute in specific order regardless of programming order:</div>
+            <div class="syntax">1. Reference System (N*, G17-G19, G70-G71, G90-G91)<br>
+            2. Configuration (G53-G57, F*)<br>
+            3. M-Function Pre<br>
+            4. Parameter to PLC (S*)<br>
+            5. Movement (G00-G03)<br>
+            6. Wait (G04)<br>
+            7. M-Function Post</div>
+        </div>
+
+        <div class="warning">
+            <strong>Important Notes:</strong><br>
+            • Use line numbers equal to Gcode line for proper HMI display<br>
+            • Include G04 X0.5 when changing units without movement<br>
+            • Only one handshake M-function per line<br>
+            • Up to 10 fast-bit M-functions per line allowed<br>
+            • Use LF-only line endings (no CR+LF)
+        </div>
+    </div>
+</body>
+</html>

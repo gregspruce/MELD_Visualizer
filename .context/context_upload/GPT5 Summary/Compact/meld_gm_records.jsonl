@@ -1,0 +1,67 @@
+{"r":"g","c":"G00","s":"rapid","m":"1","d":1,"p":[],"n":"ignores F; cancels G60"}
+{"r":"g","c":"G01","s":"linear","m":"1","d":0,"p":["F"],"n":""}
+{"r":"g","c":"G02","s":"arc_cw","m":"0","d":0,"p":["I","J","K","U"],"n":"IJK center (relative) or U radius; helix by Z/Axis"}
+{"r":"g","c":"G03","s":"arc_ccw","m":"0","d":0,"p":["I","J","K","U"],"n":""}
+{"r":"g","c":"G04","s":"dwell","m":"B","d":0,"p":["X(sec)","I(alt)"],"n":""}
+{"r":"g","c":"G09","s":"accurate_stop_blk","m":"B","d":0,"p":[],"n":"block‑level accurate stop"}
+{"r":"g","c":"G17","s":"plane_xy","m":"1","d":1,"p":[],"n":""}
+{"r":"g","c":"G18","s":"plane_zx","m":"1","d":0,"p":[],"n":""}
+{"r":"g","c":"G19","s":"plane_yz","m":"1","d":0,"p":[],"n":""}
+{"r":"g","c":"G53","s":"zero_shift_off","m":"1","d":1,"p":[],"n":"suppresses programmable/adjustable"}
+{"r":"g","c":"G54","s":"zero_shift_1","m":"1","d":0,"p":[],"n":""}
+{"r":"g","c":"G55","s":"zero_shift_2","m":"1","d":0,"p":[],"n":""}
+{"r":"g","c":"G56","s":"zero_shift_3","m":"1","d":0,"p":[],"n":""}
+{"r":"g","c":"G57","s":"zero_shift_4","m":"1","d":0,"p":[],"n":""}
+{"r":"g","c":"G60","s":"accurate_stop","m":"1","d":0,"p":[],"n":"reset by G00"}
+{"r":"g","c":"G70","s":"units_in_mmmin","m":"1","d":1,"p":[],"n":"mixed; avoid; add G04 X0.5 if no motion"}
+{"r":"g","c":"G71","s":"units_mm_mmmin","m":"1","d":0,"p":[],"n":"preferred"}
+{"r":"g","c":"G700","s":"units_in_ipm","m":"1","d":0,"p":[],"n":"add G04 X0.5 if no motion"}
+{"r":"g","c":"G710","s":"units_mm_ipm","m":"1","d":0,"p":[],"n":"mixed; avoid; add G04 X0.5 if no motion"}
+{"r":"g","c":"G90","s":"absolute","m":"1","d":1,"p":[],"n":""}
+{"r":"g","c":"G91","s":"incremental","m":"1","d":0,"p":[],"n":""}
+{"r":"m","c":"M02","s":"end","t":"hs","w":"post","p":[],"n":"use G04 X0.5 before M30 if used"}
+{"r":"m","c":"M30","s":"end","t":"hs","w":"post","p":[],"n":"newline required after"}
+{"r":"m","c":"M04","s":"spindle_on_ccw","t":"hs","w":"post","p":["S(rpm)"],"n":"waits to ≥95%"}
+{"r":"m","c":"M05","s":"spindle_off","t":"hs","w":"post","p":[],"n":""}
+{"r":"m","c":"M06","s":"spindle_setpoint_nowait","t":"hs","w":"post","p":["S(rpm)"],"n":""}
+{"r":"m","c":"M08","s":"coolant_on","t":"fb","w":"pre","p":[],"n":""}
+{"r":"m","c":"M09","s":"coolant_off","t":"fb","w":"pre","p":[],"n":""}
+{"r":"m","c":"M10","s":"shield_on","t":"fb","w":"pre","p":[],"n":""}
+{"r":"m","c":"M11","s":"shield_off","t":"fb","w":"pre","p":[],"n":""}
+{"r":"m","c":"M12","s":"tablecool_on","t":"fb","w":"pre","p":[],"n":""}
+{"r":"m","c":"M13","s":"tablecool_off","t":"fb","w":"pre","p":[],"n":""}
+{"r":"m","c":"M17","s":"sub_end","t":"hs","w":"post","p":[],"n":""}
+{"r":"m","c":"M20","s":"act_pos_speed","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M21","s":"act_soft_limit","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M22","s":"act_FRO","t":"hs","w":"post","p":["S%"],"n":""}
+{"r":"m","c":"M23","s":"act_pos_start","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M24","s":"act_vel_start","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M25","s":"act_stop","t":"hs","w":"post","p":[],"n":""}
+{"r":"m","c":"M26","s":"act_reload","t":"hs","w":"post","p":[],"n":""}
+{"r":"m","c":"M27","s":"act_reduce_force","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M28","s":"act_resume_force","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M29","s":"hold_until_act_force","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M34","s":"cont_feed_start","t":"hs","w":"post","p":["S(ipm or mm/min×10)"],"n":"positive only"}
+{"r":"m","c":"M35","s":"cont_feed_stop","t":"hs","w":"post","p":[],"n":""}
+{"r":"m","c":"M38","s":"hold_until_feed_torque_inst","t":"hs","w":"post","p":["S(%×10)"],"n":""}
+{"r":"m","c":"M39","s":"hold_until_feed_torque_avg","t":"hs","w":"post","p":["S(%×10)"],"n":""}
+{"r":"m","c":"M40","s":"spindle_pid_mode","t":"hs","w":"post","p":["S(0 torque/1 force/2 K1/3 temp)"],"n":""}
+{"r":"m","c":"M41","s":"spindle_pid_enable","t":"hs","w":"post","p":["S(setpoint or 0)"],"n":""}
+{"r":"m","c":"M42","s":"hold_until_spindle_torque","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M43","s":"hold_until_tool_temp","t":"hs","w":"post","p":["S(°C)"],"n":""}
+{"r":"m","c":"M50","s":"save_last_Z","t":"hs","w":"post","p":[],"n":"writes R50"}
+{"r":"m","c":"M51","s":"save_last_XY","t":"hs","w":"post","p":[],"n":"writes R51,R52"}
+{"r":"m","c":"M52","s":"trv_FRO","t":"hs","w":"post","p":["S% (1..300)"],"n":""}
+{"r":"m","c":"M53","s":"FRO_ramp_to_100","t":"hs","w":"post","p":["S(time×10)"],"n":""}
+{"r":"m","c":"M54","s":"hold","t":"hs","w":"post","p":[],"n":""}
+{"r":"m","c":"M55","s":"hold_msg","t":"hs","w":"post","p":[],"n":"displays comment"}
+{"r":"m","c":"M56","s":"hold_msg_door","t":"hs","w":"post","p":[],"n":"displays comment + unlocks door"}
+{"r":"m","c":"M60","s":"csv_start","t":"hs","w":"post","p":[],"n":""}
+{"r":"m","c":"M61","s":"csv_stop","t":"hs","w":"post","p":[],"n":""}
+{"r":"m","c":"M62","s":"csv_freq","t":"hs","w":"post","p":["S(Hz 1-20)"],"n":""}
+{"r":"m","c":"M71","s":"sp_pid_kp","t":"hs","w":"post","p":["S×100"],"n":""}
+{"r":"m","c":"M72","s":"sp_pid_tn","t":"hs","w":"post","p":["S×10"],"n":""}
+{"r":"m","c":"M73","s":"sp_pid_tv","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M74","s":"sp_pid_td","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M75","s":"sp_pid_min","t":"hs","w":"post","p":["S"],"n":""}
+{"r":"m","c":"M76","s":"sp_pid_max","t":"hs","w":"post","p":["S"],"n":""}
