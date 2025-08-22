@@ -1,0 +1,80 @@
+{
+  "name": "meld-visualizer-playwright-tests",
+  "version": "1.0.0",
+  "description": "Playwright tests for MELD Visualizer Dash application",
+  "private": true,
+  "scripts": {
+    "build": "tsc --noEmit",
+    "build:watch": "tsc --noEmit --watch",
+    "type-check": "tsc --noEmit --skipLibCheck",
+    "lint": "tsc --noEmit && echo \"TypeScript compilation successful\"",
+    "test": "playwright test --config=config/playwright.config.ts",
+    "test:js": "playwright test --config=config/playwright.config.js",
+    "test:headed": "playwright test --config=config/playwright.config.ts --headed",
+    "test:debug": "playwright test --config=config/playwright.config.ts --debug",
+    "test:ui": "playwright test --config=config/playwright.config.ts --ui",
+    "test:e2e": "playwright test e2e/ --config=config/playwright.config.ts",
+    "test:integration": "playwright test integration/ --config=config/playwright.config.ts",
+    "test:performance": "playwright test performance/ --config=config/playwright.config.ts",
+    "test:visual": "playwright test visual/ --config=config/playwright.config.ts",
+    "test:unit": "playwright test unit/ --config=config/playwright.config.ts",
+    "test:smoke": "playwright test --grep=\"@smoke\" --config=config/playwright.config.ts",
+    "test:regression": "playwright test --grep=\"@regression\" --config=config/playwright.config.ts",
+    "test:report": "playwright show-report",
+    "test:codegen": "playwright codegen http://localhost:8050",
+    "test:mcp": "python ../run_playwright_mcp_tests.py",
+    "test:mcp:headed": "python ../run_playwright_mcp_tests.py --headed",
+    "test:mcp:debug": "python ../run_playwright_mcp_tests.py --debug",
+    "test:mcp:e2e": "python ../run_playwright_mcp_tests.py --type e2e",
+    "test:mcp:visual": "python ../run_playwright_mcp_tests.py --type visual",
+    "test:mcp:performance": "python ../run_playwright_mcp_tests.py --type performance",
+    "install:browsers": "playwright install",
+    "install:deps": "playwright install-deps",
+    "install:mcp": "python ../run_playwright_mcp_tests.py --install",
+    "update:snapshots": "playwright test --config=config/playwright.config.ts --update-snapshots",
+    "codegen:mcp": "python ../run_playwright_mcp_tests.py --codegen",
+    "report:mcp": "python ../run_playwright_mcp_tests.py --report",
+    "clean": "rimraf dist coverage .nyc_output",
+    "validate:types": "tsc --noEmit --strict",
+    "test:types": "npm run validate:types && echo \"All TypeScript types are valid\""
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.37.1",
+    "@types/node": "^20.5.0",
+    "typescript": "^5.1.6",
+    "ts-node": "^10.9.1",
+    "rimraf": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
+    "eslint": "^8.47.0"
+  },
+  "dependencies": {
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
+    "dotenv": "^16.3.1",
+    "fs-extra": "^11.1.1",
+    "sharp": "^0.32.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "e2e",
+    "meld",
+    "dash",
+    "visualization",
+    "typescript",
+    "type-safe",
+    "mcp",
+    "manufacturing"
+  ],
+  "author": "MELD Manufacturing Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gregspruce/MELD_Visualizer.git",
+    "directory": "tests/playwright"
+  }
+}

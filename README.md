@@ -532,5 +532,3 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - **Sample Files**: Available in the `data/csv/` and `data/nc/` directories
 
 ---
-
-**Made with ❤️ for the MELD manufacturing community**
