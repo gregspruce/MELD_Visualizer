@@ -9,6 +9,7 @@ from typing import Optional, Any
 import numpy as np
 import pyvista as pv
 import os
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,8 @@ class SimplifiedTrameServer:
         self.initialized = False
         self.server = None
         self.mode = "unknown"  # "interactive", "offscreen", or "failed"
+        self.server_thread = None
+        self.pending_mesh = None  # Store mesh to be loaded after initialization
         
     def initialize(self) -> bool:
         """Initialize PyVista plotter with appropriate fallback."""
@@ -49,82 +52,82 @@ class SimplifiedTrameServer:
         try:
             # Set environment for better compatibility
             os.environ['PYVISTA_OFF_SCREEN'] = 'false'
+            os.environ['PYVISTA_TRAME_SERVER_PROXY_PREFIX'] = ''
             
             # Import Trame components
             from trame.app import get_server
             from trame.widgets import vtk
             from trame.ui.vuetify import SinglePageLayout
-            
-            # Try to create plotter with specific backend
-            try:
-                # Try with Qt backend first (if available)
-                self.plotter = pv.Plotter(off_screen=False, notebook=False)
-            except:
-                # Fall back to default backend
-                self.plotter = pv.Plotter(off_screen=True, window_size=[800, 600])
-                
-            # Create Trame server
-            self.server = get_server(f"pyvista_server_{self.port}")
-            self.server.client_type = "vue2"
-            self.ctrl = self.server.controller
-            self.state = self.server.state
-            
-            # Build simple UI
-            with SinglePageLayout(self.server) as layout:
-                layout.title.set_text("PyVista 3D Viewer")
-                
-                with layout.content:
-                    with vtk.VtkView() as view:
-                        self.ctrl.view_update = view.update
-                        self.ctrl.view_reset_camera = view.reset_camera
-                        
-                        # Connect render window
-                        view.set_render_window(self.plotter.ren_win)
-            
-            # Start server in background thread
-            import threading
             import asyncio
             
+            # Create event to signal when server is ready
+            server_ready = threading.Event()
+            server_error = threading.Event()
+            
             def start_server():
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+                """Start server in its own thread with proper context."""
                 try:
+                    # Create new event loop for this thread
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    
+                    # Create PyVista plotter IN THIS THREAD to avoid OpenGL context issues
+                    self.plotter = pv.Plotter(
+                        off_screen=False,
+                        notebook=False,
+                        window_size=[800, 600]
+                    )
+                    
+                    # Create Trame server
+                    self.server = get_server(f"pyvista_server_{self.port}")
+                    self.server.client_type = "vue2"
+                    self.ctrl = self.server.controller
+                    self.state = self.server.state
+                    
+                    # Build simple UI
+                    with SinglePageLayout(self.server) as layout:
+                        layout.title.set_text("PyVista 3D Viewer")
+                        
+                        with layout.content:
+                            with vtk.VtkLocalView(self.plotter.ren_win) as view:
+                                self.ctrl.view_update = view.update
+                                self.ctrl.view_reset_camera = view.reset_camera
+                    
+                    # Signal that server is ready
+                    server_ready.set()
+                    
+                    # If there's a pending mesh, load it now
+                    if self.pending_mesh is not None:
+                        self._load_mesh_internal(self.pending_mesh)
+                        self.pending_mesh = None
+                    
+                    # Start the server
                     self.server.start(
                         port=self.port, 
                         show=False, 
                         open_browser=False,
-                        exec_mode='task'  # Use task mode for better compatibility
+                        exec_mode='task'
                     )
                 except Exception as e:
                     logger.error(f"Server start error: {e}")
+                    server_error.set()
             
-            server_thread = threading.Thread(target=start_server, daemon=True)
-            server_thread.start()
+            # Start server thread
+            self.server_thread = threading.Thread(target=start_server, daemon=True)
+            self.server_thread.start()
             
-            # Give it a moment to start
-            import time
-            time.sleep(2)
-            
-            # Test if server is actually running
-            import requests
-            try:
-                response = requests.get(f"http://localhost:{self.port}/", timeout=2)
-                if response.status_code == 200:
-                    self.initialized = True
-                    return True
-            except:
-                pass
+            # Wait for server to be ready or error
+            if server_ready.wait(timeout=5):
+                self.initialized = True
+                logger.info(f"Trame server initialized on port {self.port}")
+                return True
+            elif server_error.is_set():
+                logger.error("Server failed to start due to error")
+                return False
+            else:
+                logger.error("Server initialization timeout")
+                return False
                 
-            # Server didn't start properly
-            if self.plotter:
-                self.plotter.close()
-            if self.server:
-                try:
-                    self.server.stop()
-                except:
-                    pass
-            return False
-            
         except Exception as e:
             logger.debug(f"Interactive mode failed: {e}")
             return False
@@ -162,12 +165,8 @@ class SimplifiedTrameServer:
         """Get the current operating mode."""
         return self.mode
     
-    def load_mesh(self, mesh: pv.PolyData) -> bool:
-        """Load a mesh for visualization."""
-        if not self.initialized:
-            if not self.initialize():
-                return False
-        
+    def _load_mesh_internal(self, mesh: pv.PolyData) -> bool:
+        """Internal method to load mesh - must be called in server thread."""
         try:
             self.mesh = mesh
             self.plotter.clear()
@@ -188,17 +187,32 @@ class SimplifiedTrameServer:
             self.plotter.reset_camera()
             self.plotter.camera.zoom(1.2)
             
-            # Update view if server is running (interactive mode)
-            if self.server and hasattr(self, 'ctrl'):
-                try:
+            # Update view if in interactive mode
+            if hasattr(self, 'ctrl') and hasattr(self.ctrl, 'view_update'):
+                if callable(self.ctrl.view_update):
                     self.ctrl.view_update()
-                except:
-                    pass  # Ignore update errors
                     
             return True
         except Exception as e:
             logger.error(f"Failed to load mesh: {e}")
             return False
+    
+    def load_mesh(self, mesh: pv.PolyData) -> bool:
+        """Load a mesh for visualization."""
+        if not self.initialized:
+            if not self.initialize():
+                return False
+        
+        if self.mode == "interactive":
+            # Store mesh to be loaded by server thread
+            self.pending_mesh = mesh
+            # Wait a bit for it to be processed
+            import time
+            time.sleep(0.5)
+            return True
+        else:
+            # Off-screen mode - load directly
+            return self._load_mesh_internal(mesh)
     
     def export_screenshot(self, filename: str = "screenshot.png") -> bool:
         """Export a screenshot."""
