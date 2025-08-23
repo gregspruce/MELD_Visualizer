@@ -30,9 +30,14 @@ class SimplePyVistaIntegration:
             html.Div(
                 id="pyvista-viz-container",
                 children=[
-                    html.P(
-                        "Click 'Initialize PyVista' to start the high-performance renderer.",
-                        className="text-muted text-center"
+                    html.Div(
+                        id="pyvista-placeholder-text",
+                        children=[
+                            html.I(className="bi bi-cube me-2"),
+                            html.Span("Click 'Initialize PyVista Renderer' to start the high-performance 3D viewer.")
+                        ],
+                        className="text-muted text-center d-flex align-items-center justify-content-center h-100",
+                        style={"minHeight": "700px"}
                     ),
                     html.Iframe(
                         id="pyvista-iframe",
@@ -45,7 +50,7 @@ class SimplePyVistaIntegration:
                         }
                     )
                 ],
-                style={"minHeight": "700px", "backgroundColor": "#f8f9fa"}
+                style={"minHeight": "700px", "backgroundColor": "#f8f9fa", "position": "relative"}
             )
         ])
     
@@ -116,9 +121,15 @@ class SimplePyVistaIntegration:
     def get_iframe_src(self) -> str:
         """Get the iframe source URL."""
         if self.initialized and self.server:
-            port = getattr(self, 'port', 8051)
-            return f"http://localhost:{port}/"
+            src = self.server.get_iframe_src()
+            return src if src else ""
         return ""
+    
+    def get_mode(self) -> str:
+        """Get the current operating mode."""
+        if self.server:
+            return self.server.get_mode()
+        return "unknown"
     
     def export_mesh(self, filename: str) -> bool:
         """Export the current mesh to a file."""
