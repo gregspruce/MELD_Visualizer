@@ -10,6 +10,8 @@ from .config_callbacks import register_config_callbacks
 from .visualization_callbacks import register_visualization_callbacks
 from .filter_callbacks import register_filter_callbacks
 from .enhanced_ui_callbacks import register_enhanced_ui_callbacks
+# from .pyvista_callbacks import register_pyvista_callbacks  # Full version - disabled
+from .pyvista_simple_callbacks import register_pyvista_simple_callbacks
 
 def register_all_callbacks(app=None):
     """
@@ -38,6 +40,9 @@ def register_all_callbacks(app=None):
         logger.info("Registering visualization callbacks...")
         register_visualization_callbacks(app)
         
+        logger.info("Registering simplified PyVista callbacks...")
+        register_pyvista_simple_callbacks(app)
+        
         # Temporarily disabled - callbacks reference non-existent components
         # logger.info("Registering enhanced UI callbacks...")
         # register_enhanced_ui_callbacks(app)
@@ -58,5 +63,6 @@ __all__ = [
     'register_config_callbacks',
     'register_visualization_callbacks',
     'register_filter_callbacks',
-    'register_enhanced_ui_callbacks'
+    'register_enhanced_ui_callbacks',
+    'register_pyvista_simple_callbacks'
 ]

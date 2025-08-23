@@ -30,15 +30,6 @@ A powerful 3D visualization platform for MELD (Manufacturing using Extreme Layer
 - 2D Time Series plots
 - Z-axis scaling for layer visibility
 
-### Key Technical Improvements
-- **Corrected Feedstock Geometry**: Now uses accurate 0.5" × 0.5" square rod geometry (161.3mm²)
-- **Volume Accuracy**: 27% improvement over previous circular wire assumption (126.7mm²)
-- **Configuration Support**: Runtime-configurable feedstock types and dimensions
-- **Backward Compatibility**: Legacy configurations continue to work seamlessly
-- **Enhanced UI System**: Desktop-optimized interface with responsive layouts (1024px-1920px+)
-- **User Feedback System**: Toast notifications, loading overlays, and progress indicators
-- **Keyboard Navigation**: Ctrl+Arrow keys for tab navigation, Escape for dismissing notifications
-- **Accessibility**: WCAG AA compliant with ARIA labels and keyboard support
 
 This guide explains how to run the application, customize its appearance, and understand its structure for future development.
 
@@ -109,16 +100,6 @@ pip install -e ".[dev]"
 python -m meld_visualizer
 # OR
 meld-visualizer
-```
-
-**Option 3: From Source (Legacy)**
-```bash
-# Install dependencies (legacy approach)
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-
-# Run from source
-python -m src.meld_visualizer.app
 ```
 
 The application will automatically open in your default web browser at `http://127.0.0.1:8050`.
@@ -290,89 +271,6 @@ meld_visualizer/
 -   **`config/config.json`**: User-configurable settings file (themes, plot options, column mappings, feedstock geometry).
 -   **`pyproject.toml`**: Modern Python packaging configuration with dependencies and metadata.
 
-### 5. Development Workflow
-
-#### Development Setup
-```bash
-# Clone the repository
-git clone https://github.com/gregspruce/MELD_Visualizer.git
-cd MELD_Visualizer
-
-# Install in development mode with dev dependencies
-pip install -e ".[dev]"
-
-# Run the application (debug mode is enabled by default)
-python -m meld_visualizer
-# OR
-meld-visualizer
-
-# For explicit debug mode
-DEBUG=1 meld-visualizer
-```
-
-#### Hot Reloading ✨
-The application starts in **Debug Mode** by default, enabling **hot-reloading** where most changes to Python code will automatically refresh without requiring a manual restart.
-
-**Enhanced Configuration Hot-Reload**: 
-- ✅ **Themes**: Apply instantly via the Settings tab
-- ✅ **Graph Options**: Update immediately after saving configuration  
-- ✅ **Manual Config Changes**: Changes to `config/config.json` still require restart
-- ⚡ **Python Code**: Hot-reloads automatically in debug mode
-
-#### Code Quality Tools
-```bash
-# Format code
-black src/ tests/
-
-# Lint code
-flake8 src/ tests/
-
-# Type checking
-mypy src/
-
-# Run pre-commit hooks
-pre-commit run --all-files
-```
-
-### 6. Testing
-
-The project includes a comprehensive test suite using `pytest`. The tests are located in the `tests/` directory.
-
-#### Test Categories
-- **Unit Tests**: Test individual functions and modules
-- **Integration Tests**: Test component interactions
-- **Security Tests**: Validate input sanitization and security measures
-- **Performance Tests**: Benchmark critical operations
-- **E2E Tests**: Test full application workflows
-
-#### Running Tests
-```bash
-# Install test dependencies
-pip install -e ".[test]"
-
-# Run all tests
-pytest
-
-# Run with coverage reporting
-pytest --cov=src/meld_visualizer --cov-report=html
-
-# Run specific test categories
-pytest -m "unit"        # Unit tests only
-pytest -m "integration" # Integration tests only
-pytest -m "e2e"         # End-to-end tests only
-pytest -m "not e2e"     # Exclude E2E tests
-
-# Run specific test files
-pytest tests/unit/test_data_processing.py -v
-pytest tests/integration/test_services.py -v
-
-# Using the test runner script
-bash scripts/run_tests.sh          # Uses tests/test_suite.conf
-TEST_SUITE=both bash scripts/run_tests.sh    # Run both unit and E2E tests
-TEST_SUITE=e2e bash scripts/run_tests.sh     # Run E2E tests only
-```
-
-For more detailed information on the testing strategy, see the `agents.md` file.
 
 ### 7. Building a Standalone Executable
 
@@ -435,20 +333,6 @@ The built executable will be in `dist/MELD-Visualizer.exe` and can run on target
 
 ---
 
-## E2E Tabs Coverage & Theme Note
-The E2E suite asserts the application title (**Volumetric Data Plotter**) and verifies the presence & clickability of these tab labels:
-
-- Main 3D Plots
-- 2D Time Plot
-- Custom 3D Plot
-- Data Table
-- 3D Toolpath Plot
-- 3D Volume Mesh
-- G-code Visualization
-- Settings
-
-> **Note on styling:** The app loads a Bootstrap theme (from `config.py` if set, otherwise default) so `dash-bootstrap-components` widgets render correctly. If you see blue underlined links instead of tabs, your theme didn't load—check network access or switch to a local CSS under `assets/`.
-
 ---
 
 ## Documentation
@@ -508,18 +392,7 @@ pip install -r requirements.txt --upgrade
 
 See [User Guide](docs/user-guide/user-guide.md#troubleshooting) for more solutions.
 
-## Contributing
 
-We welcome contributions! When contributing:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Write tests for new features
-4. Ensure all tests pass
-5. Update documentation
-6. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-7. Push to the branch (`git push origin feature/AmazingFeature`)
-8. Open a Pull Request
 
 ## License
 

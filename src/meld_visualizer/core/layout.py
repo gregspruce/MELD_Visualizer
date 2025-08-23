@@ -365,6 +365,51 @@ def build_mesh_plot_tab():
         dcc.Loading(id="loading-mesh-plot", type="circle", children=create_responsive_graph('mesh-plot-3d', 'volume_mesh'))
     ])
 
+def build_pyvista_tab():
+    """Builds the layout for the PyVista 3D visualization tab (simplified version)."""
+    # Import here to avoid initialization at module import time
+    from ..components.pyvista_simple import simple_pyvista_integration
+    
+    return html.Div(className="mt-4", children=[
+        html.H4("3D Volume Mesh (PyVista Renderer)"),
+        dbc.Alert(
+            [
+                html.I(className="bi bi-info-circle me-2"),
+                "High-performance 3D visualization with hardware acceleration. ",
+                html.Strong("10-100x faster"), " than Plotly for large meshes."
+            ],
+            color="info",
+            className="mb-3"
+        ),
+        dbc.Row([
+            dbc.Col([
+                dbc.Button(
+                    "Initialize PyVista Renderer",
+                    id="init-pyvista-btn",
+                    color="primary",
+                    size="lg",
+                    className="w-100"
+                )
+            ], width=6),
+            dbc.Col([
+                dbc.Button(
+                    "Export Mesh (STL)",
+                    id="export-pyvista-stl-btn",
+                    color="secondary",
+                    size="lg",
+                    className="w-100",
+                    disabled=True
+                )
+            ], width=6)
+        ], className="mb-3"),
+        html.Div(id="pyvista-status-message", className="text-center mb-3"),
+        html.Div(id="pyvista-export-status", className="text-center mb-2"),
+        # Use the simplified component
+        simple_pyvista_integration.get_placeholder_component(),
+        # Hidden store for state
+        dcc.Store(id="pyvista-initialized", data=False)
+    ])
+
 def build_gcode_tab():
     """Builds the layout for the new G-code visualization tab."""
     return html.Div(className="mt-4", children=[
@@ -446,6 +491,11 @@ def build_app_body_with_tabs():
             'id': '3d-volume-mesh',
             'label': '3D Volume Mesh',
             'content': build_mesh_plot_tab()
+        },
+        {
+            'id': 'pyvista-3d',
+            'label': '3D PyVista (Beta)',
+            'content': build_pyvista_tab()
         },
         {
             'id': 'gcode-visualization',
