@@ -366,48 +366,25 @@ def build_mesh_plot_tab():
     ])
 
 def build_pyvista_tab():
-    """Builds the layout for the PyVista 3D visualization tab (simplified version)."""
+    """Builds the layout for the PyVista 3D visualization tab with standalone viewer."""
     # Import here to avoid initialization at module import time
-    from ..components.pyvista_simple import simple_pyvista_integration
+    from ..components.standalone_integration import standalone_integration
     
     return html.Div(className="mt-4", children=[
-        html.H4("3D Volume Mesh (PyVista Renderer)"),
+        html.H4("3D Volume Mesh (PyVista Standalone Viewer)"),
         dbc.Alert(
             [
                 html.I(className="bi bi-info-circle me-2"),
-                "High-performance 3D visualization with hardware acceleration. ",
-                html.Strong("10-100x faster"), " than Plotly for large meshes."
+                "High-performance 3D visualization with full OpenGL support. ",
+                html.Strong("Interactive viewer opens in separate window"), " for best performance on your NVIDIA RTX 5090."
             ],
             color="info",
             className="mb-3"
         ),
-        dbc.Row([
-            dbc.Col([
-                dbc.Button(
-                    "Initialize PyVista Renderer",
-                    id="init-pyvista-btn",
-                    color="primary",
-                    size="lg",
-                    className="w-100"
-                )
-            ], width=6),
-            dbc.Col([
-                dbc.Button(
-                    "Export Mesh (STL)",
-                    id="export-pyvista-stl-btn",
-                    color="secondary",
-                    size="lg",
-                    className="w-100",
-                    disabled=True
-                )
-            ], width=6)
-        ], className="mb-3"),
-        html.Div(id="pyvista-status-message", className="text-center mb-3"),
-        html.Div(id="pyvista-export-status", className="text-center mb-2"),
-        # Use the simplified component
-        simple_pyvista_integration.get_placeholder_component(),
-        # Hidden store for state
-        dcc.Store(id="pyvista-initialized", data=False)
+        # Get the standalone integration component
+        standalone_integration.get_component(),
+        # Store for mesh data readiness
+        dcc.Store(id="pyvista-mesh-ready", data=False)
     ])
 
 def build_gcode_tab():
