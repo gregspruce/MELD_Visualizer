@@ -1,3 +1,20 @@
+# MELD Visualizer API Reference
+
+## Overview
+
+The MELD Visualizer API provides a set of endpoints for interacting with the application programmatically.
+
+## Endpoints
+
+- **`POST /_dash-update-component`:** Internal endpoint for Dash component updates.
+- **`POST /upload/csv`:** Upload a CSV file containing MELD manufacturing data.
+- **`POST /upload/gcode`:** Upload a G-code (.nc) file for toolpath visualization.
+- **`GET /config`:** Retrieve the current application configuration.
+- **`PUT /config`:** Update application configuration settings.
+
+## API Playground
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,3 +125,4 @@
     </script>
 </body>
 </html>
+```
