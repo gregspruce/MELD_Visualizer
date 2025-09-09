@@ -1,114 +1,235 @@
 # MELD Visualizer Developer Guide
 
-## Introduction
+This guide provides comprehensive information for developers contributing to the MELD Visualizer project.
 
-This guide provides a comprehensive overview of the MELD Visualizer application for developers. It covers the project's architecture, components, development workflow, and more.
-
-## Getting Started
+## 1. Getting Started
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- Git
+*   Python 3.8+
+*   Git
 
-### Installation
+### Installation for Development
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/gregspruce/MELD_Visualizer.git
+    cd MELD_Visualizer
+    ```
+
+2.  **Install dependencies:**
+    Install the project in editable mode with all development, testing, and build dependencies.
+    ```bash
+    pip install -e ".[dev,test,playwright,build]"
+    ```
+
+### Running the Application in Development Mode
+
+Once installed, you can run the application using the following command:
 
 ```bash
-# Clone the repository
-git clone https://github.com/gregspruce/MELD_Visualizer.git
-cd MELD_Visualizer
-
-# Install in development mode with all dependencies
-pip install -e ".[dev,test,playwright,build]"
+meld-visualizer
 ```
 
-## Architecture
+The application will be available at `http://127.0.0.1:8050`.
 
-The MELD Visualizer is a Dash web application with a modular, MVC-like architecture.
-
--   **Frontend (View):** The frontend is built with Dash and Dash Bootstrap Components. The UI is defined in the `src/meld_visualizer/core/layout.py` module.
--   **Backend (Controller):** The backend is built with Python and Flask. The application's logic is handled by callbacks in the `src/meld_visualizer/callbacks/` directory.
--   **Data Processing (Model):** The data processing layer is responsible for parsing and processing data from CSV and G-code files. The core logic is in `src/meld_visualizer/core/data_processing.py`.
-
-For more details and diagrams, see the main [Architecture Document](../architecture/architecture.md).
-
-## Components
-
--   **Main Application (`app.py`):** The entry point of the application.
--   **Layout (`layout.py`):** Defines the structure of the user interface.
--   **Callbacks (`callbacks/`):** Contains the application's controller logic.
--   **Data Processing (`data_processing.py`):** Handles the parsing and processing of data.
--   **Services (`services/`):** Provides services for caching, data management, and file handling.
--   **Configuration (`config.py`):** Manages the application's configuration.
-
-## Development Workflow
-
-### Running the Application
-
+To run in debug mode for development, use:
 ```bash
-# Run the application in development mode
-meld-visualizer
-
-# Run with debug mode enabled
 DEBUG=1 meld-visualizer
 ```
 
-### Testing
+You can also run it as a Python module:
+```bash
+python -m src.meld_visualizer.app
+```
+
+## 2. Project Architecture
+
+The MELD Visualizer is built on a modular, MVC-like architecture using Python, Dash, and Plotly.
+
+### Core Modules
+
+*   **`src/meld_visualizer/app.py`**: Main entry point. Creates Dash app, loads layout/callbacks, starts server.
+*   **`src/meld_visualizer/core/layout.py`**: UI components and structure (View layer).
+*   **`src/meld_visualizer/callbacks/`**: Modular callback system (Controller layer).
+*   **`src/meld_visualizer/core/data_processing.py`**: Data parsing, mesh generation, G-code processing (Model layer).
+*   **`src/meld_visualizer/services/`**: Business logic layer.
+*   **`src/meld_visualizer/config.py`**: Configuration loading, theme management, constants.
+*   **`src/meld_visualizer/utils/`**: Utility modules.
+
+For a more detailed explanation and diagrams, please see the [Architecture Documentation](architecture/architecture.md).
+
+## 3. Development Workflow
+
+### Running Tests
+
+The project uses `pytest` for testing. To run the full test suite:
 
 ```bash
-# Run all tests
 pytest
-
-# Run unit tests only
-pytest -m "unit"
 ```
+
+You can also run specific types of tests using markers (e.g., `pytest -m unit`).
+
+*   **Run all tests:**
+    ```bash
+    pytest
+    ```
+*   **Run with coverage reporting:**
+    ```bash
+    pytest --cov=src/meld_visualizer --cov-report=html
+    ```
+*   **Run specific test categories:**
+    ```bash
+    pytest -m "unit"
+    pytest -m "not e2e"
+    ```
 
 ### Code Quality
 
-```bash
-# Format code
-black src/ tests/
+This project uses `black` for code formatting, `ruff` for linting, and `mypy` for type checking.
 
-# Lint code
-ruff check src/ tests/
+*   **Format code:**
+    ```bash
+    black src/ tests/
+    ```
+*   **Lint code:**
+    ```bash
+    ruff check src/ tests/
+    ```
+*   **Type check:**
+    ```bash
+    mypy src/
+    ```
 
-# Type check code
-mypy src/
-```
+### Building and Packaging
 
-## Enhanced UI
+*   **Python Package Build:**
+    ```bash
+    # Build wheel and source distribution
+    python -m build
+    ```
+*   **Executable Build:**
+    ```bash
+    # Build the executable using PyInstaller
+    pyinstaller MELD-Visualizer.spec
+    ```
 
-The MELD Visualizer features an enhanced desktop UI with improved navigation, control panel organization, and user feedback.
+## 4. Technical Decisions
 
-### Enhanced UI Architecture
+This section logs key technical decisions made throughout the MELD Visualizer project.
 
-The Enhanced UI System is a layer on top of the existing Dash framework that provides a desktop-optimized user experience. It introduces a more organized and maintainable approach to UI development.
+### UI/UX and Frontend
 
-The architecture is composed of three main layers:
+*   **Enhanced Desktop UI**: Implemented a desktop-first responsive design strategy targeting resolutions from 1024x768 to 2560x1440+.
+*   **Client-Side Management**: Created a JavaScript `EnhancedUIManager` class to manage complex UI interactions, such as toast notifications and tab scrolling, on the client side.
+*   **Theming**: Adopted CSS custom properties (variables) for theming to ensure consistency with the Bootstrap theme and allow for dynamic theme switching.
+*   **Accessibility**: Committed to WCAG 2.1 compliance, implementing features like focus management, ARIA labels, and keyboard navigation.
+*   **Z-Axis Scaling**: The 3D plot Z-axis scaling is a direct, user-configurable "stretch factor" (e.g., 2 = 2x taller Z-axis) for intuitive control.
 
-1.  **Python Layer (Server-Side):** This layer is responsible for creating the UI components and handling the application’s logic. It uses a factory pattern to create consistent UI elements.
-    -   **`EnhancedUIComponents` Factory:** A central factory in `src/meld_visualizer/core/enhanced_ui.py` for creating enhanced UI components like tabs, control panels, and toast notifications.
-    -   **Modular Callbacks:** Callbacks are organized into modules based on their functionality in `src/meld_visualizer/callbacks/`.
+### Backend and Architecture
 
-2.  **JavaScript Layer (Client-Side):** This layer manages the UI’s client-side interactions, such as animations, event handling, and communication with the Dash server.
-    -   **`EnhancedUIManager` Class:** A client-side class in `src/meld_visualizer/static/js/enhanced-ui.js` that manages all enhanced UI functionality.
+*   **MVC-like Architecture**: Organized the application into a Model-View-Controller-like structure to separate concerns:
+    *   **View**: `layout.py`
+    *   **Controller**: `callbacks/` modules
+    *   **Model**: `data_processing.py` and `services/` modules
+*   **G-Code Parser**: Implemented a G-code parser to produce a DataFrame compatible with existing mesh/toolpath generation logic, maximizing code reuse.
+*   **Default G-Code Coloring**: G-code mesh is colored by Z-position as a sensible default, since process data is unavailable in the source file.
+*   **Layout Flexibility**: The application supports both `get_layout(app)` and `create_layout()` functions in the layout module for flexibility.
+*   **Local Server**: The application binds to `127.0.0.1` by default for security.
 
-3.  **CSS Layer (Styling):** This layer provides the styling for the enhanced UI components, with a responsive design that adapts to different desktop screen sizes.
-    -   **Responsive Design:** The CSS in `src/meld_visualizer/static/css/enhanced-desktop-ui.css` is designed with a desktop-first approach.
-    -   **CSS Custom Properties:** The styling leverages CSS custom properties to ensure consistency with the selected Bootstrap theme.
+### Testing and Dependencies
 
-### Working with the Enhanced UI
+*   **Dependency Management**: Split dependencies into production and test environments, managed via `pyproject.toml`.
+*   **Test Configuration**: A repository-controlled test switch with an environment variable override is used for test execution.
+*   **Idempotent Setup**: The setup process is idempotent, and Chrome is optional (only required for E2E tests).
+*   **E2E Assertions**: End-to-end tests assert the application title, the presence of the upload control, and the labels of all tabs.
 
--   **Use the Factory:** When creating enhanced UI components, always use the `EnhancedUIComponents` factory to ensure consistency.
--   **Separate Concerns:** Keep the UI layout, component creation, and callback logic in their respective modules.
--   **Explore the Code:** The best way to understand the enhanced UI is to explore the code in the following locations:
-    -   `src/meld_visualizer/core/layout.py`: See how the enhanced UI components are used to build the application's layout.
-    -   `src/meld_visualizer/callbacks/`: Review the callbacks to understand how the enhanced UI components are controlled.
-    -   `src/meld_visualizer/static/css/enhanced-desktop-ui.css`: Examine the CSS to understand how the enhanced UI is styled.
-    -   `src/meld_visualizer/static/js/enhanced-ui.js`: Read the JavaScript to understand the client-side interactions.
+## 5. Volume Calculation System
 
-## Project Management
+The MELD Visualizer volume calculation system provides accurate 3D visualization of extruded material volume based on process parameters. This section explains the physics, implementation, and calibration of the volume calculation system.
 
--   **Roadmap:** The project's development roadmap is outlined in the `docs/PR.md` file.
--   **Decisions:** Key technical decisions are logged in the `docs/DECISIONS.md` file.
--   **TODO:** The project's TODO list is in the `docs/TODO.md` file.
+### Overview
+
+Successfully refactored the MELD Visualizer volume calculation system to be more modular, maintainable, and easier to tune for matching physical print results.
+
+### Physical Principles
+
+The fundamental principle is the conservation of mass:
+
+`Volume_in = Volume_out`
+
+`Feed_velocity × Feedstock_area = Path_velocity × Bead_area`
+
+Therefore, the bead area can be calculated as:
+
+`Bead_area = (Feed_velocity × Feedstock_area) / Path_velocity`
+
+### Module Structure
+
+The volume calculation system is organized into the following modules:
+
+*   **`src/meld_visualizer/core/volume_calculations.py`:** Handles the core physics calculations, including bead area and thickness.
+*   **`src/meld_visualizer/core/volume_mesh.py`:** Generates the 3D mesh for visualization based on the calculated volumes.
+*   **`src/meld_visualizer/services/data_service.py`:** Integrates the volume calculation components with the main application, providing caching and data management.
+
+### Calibration
+
+The system can be calibrated to match the physical output of the MELD machine. The calibration process involves:
+
+1.  **Printing a test part:** A test part with known parameters is printed.
+2.  **Measuring the actual volume:** The actual volume of the printed part is measured.
+3.  **Calculating the theoretical volume:** The theoretical volume is calculated based on the process parameters.
+4.  **Determining the correction factor:** The correction factor is calculated by dividing the actual volume by the theoretical volume.
+5.  **Applying the correction factor:** The correction factor is applied to all subsequent volume calculations.
+
+### Configuration
+
+The volume calculation system is configured through the `config/volume_calibration.json` file. This file allows you to specify the feedstock parameters, bead geometry, and calibration settings.
+
+### Benefits of the New Architecture
+
+*   **Separation of Concerns**: Physics, mesh generation, and visualization are now separate.
+*   **Easier Testing**: Each component can be tested independently.
+*   **Better Documentation**: Clear interfaces and comprehensive docs.
+*   **Type Hints**: Added throughout for better IDE support.
+*   **Calibration Factors**: Easy adjustment via `correction_factor` and `area_offset`.
+*   **Configuration File**: Parameters persist between sessions.
+*   **Validation Workflow**: Clear process for comparing with physical prints.
+*   **Statistics**: Built-in analysis of volume distribution.
+
+### Key Improvements
+
+1.  **Correct Feedstock Area**: Fixed calculation to use actual square rod area (161.3 mm²).
+2.  **Modular Design**: Each component has a single responsibility.
+3.  **Calibration Support**: Built-in from the ground up.
+4.  **Documentation**: Comprehensive docs for users and developers.
+5.  **Backward Compatibility**: Existing code continues to work.
+
+## 6. Contribution Guidelines
+
+Contributions are welcome! Please refer to the `PR_TEMPLATE.md` for guidelines on creating pull requests.
+
+### Core Features and Enhancements (Roadmap)
+
+*   **Data Pipeline and Caching:** The application uses a data pipeline that caches CSV data to Parquet for faster loading times.
+*   **Configuration and Column Mapping:** The application supports configuration validation and allows users to map CSV columns to the application's data model.
+*   **Performance and Level of Detail (LOD):** The application includes performance optimizations such as data decimation and a payload cap to ensure smooth interaction with large datasets.
+*   **Voxelization and Isosurface Mode:** The application can visualize large datasets as voxelized volumes and isosurfaces.
+*   **Region of Interest (ROI) Selection and Cross-filtering:** Users can select a region of interest in the 3D view and filter the data in other plots accordingly.
+*   **Error Handling and User Feedback:** The application includes an error panel and provides users with feedback during long-running operations.
+*   **Session Management and Export:** Users can save and load their sessions and export visualizations to images.
+*   **Enhanced Desktop UI:** The application features an enhanced desktop UI with improved navigation, control panel organization, and user feedback.
+
+### Development Roadmap
+
+1.  **Infrastructure and CI/CD:** Set up the project structure, dependencies, and CI/CD pipeline.
+2.  **Data Pipeline:** Implement the data pipeline with CSV to Parquet caching.
+3.  **Configuration and UI:** Develop the configuration validation and column mapping UI.
+4.  **Performance Optimizations:** Implement performance optimizations suchs as LOD and data decimation.
+5.  **Advanced Visualization:** Add support for voxelization and isosurface rendering.
+6.  **Interactivity:** Implement ROI selection and cross-filtering.
+7.  **UX and Error Handling:** Improve the user experience with better error handling and feedback.
+8.  **Session Management:** Add support for saving and loading sessions.
+9.  **Testing:** Enhance the test suite with snapshot and property-based testing.
+10. **Packaging and Release:** Package the application for Windows and set up a release pipeline.

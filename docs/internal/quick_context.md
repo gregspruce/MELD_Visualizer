@@ -8,9 +8,9 @@ python -m meld_visualizer
 ```
 
 ## ✅ Recent Critical Fixes (ALL COMPLETE)
-1. **Volume Calculation**: Fixed 27% error (square rod, not wire)
-2. **Import Errors**: Added `__main__.py`, fixed relative imports
-3. **Repository URLs**: Corrected to `gregspruce/MELD_Visualizer`
+1.  **Volume Calculation**: Fixed 27% error (square rod, not wire)
+2.  **Import Errors**: Added `__main__.py`, fixed relative imports
+3.  **Repository URLs**: Corrected to `gregspruce/MELD_Visualizer`
 
 ## 📁 Project Structure
 ```
@@ -23,15 +23,15 @@ src/meld_visualizer/
 ```
 
 ## 🔑 Key Values
-- **FEEDSTOCK_AREA_MM2**: 161.29 (was 126.7 - FIXED)
-- **Square Rod**: 0.5 inches (12.7mm) per side
-- **Repository**: https://github.com/gregspruce/MELD_Visualizer
+*   **FEEDSTOCK_AREA_MM2**: 161.29 (was 126.7 - FIXED)
+*   **Square Rod**: 0.5 inches (12.7mm) per side
+*   **Repository**: https://github.com/gregspruce/MELD_Visualizer
 
 ## 🎯 Current Status
-- **Branch**: main (clean)
-- **State**: Fully functional
-- **Tests**: All passing
-- **Blockers**: None
+*   **Branch**: main (clean)
+*   **State**: Fully functional
+*   **Tests**: All passing
+*   **Blockers**: None
 
 ## 🛠️ Common Commands
 ```bash
@@ -48,7 +48,7 @@ pip install -e .
 ```
 
 ## ⚠️ Remember
-- NEVER use `python src/meld_visualizer/app.py` directly
-- config.json changes need restart
-- All fixes are merged to main
-- Volume calculations now accurate (27% improvement)
+*   NEVER use `python src/meld_visualizer/app.py` directly
+*   config.json changes need restart
+*   All fixes are merged to main
+*   Volume calculations now accurate (27% improvement)

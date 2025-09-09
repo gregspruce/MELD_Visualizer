@@ -94,16 +94,16 @@ This project uses `black` for code formatting, `ruff` for linting, and `mypy` fo
 
 ## Documentation
 
-Comprehensive project documentation is located in the `/docs` directory.
+Comprehensive project documentation is now organized into the following sections:
 
--   **[Developer Guide](docs/developer_guide/index.md):** The central guide for developers, covering architecture, components, and workflow.
--   **[Architecture](docs/architecture/architecture.md):** Detailed system architecture and data flow diagrams.
--   **[Volume Calculations](docs/VOLUME_CALCULATIONS.md):** In-depth explanation of the volume calculation and mesh generation system.
--   **[Technical Decisions](docs/DECISIONS.md):** A log of key technical decisions made during the project.
+-   **[User Guide](docs/user_guide/index.md):** A comprehensive guide for end-users, covering features, installation, running, UI usage, and interactive tools.
+-   **[Developer Guide](docs/developer_guide/index.md):** A comprehensive guide for contributors, covering architecture, development setup, testing, code quality, building, and detailed technical explanations.
+-   **[API Reference](docs/api_reference/index.md):** Documentation for the application's API.
+-   **[Internal Documentation](docs/internal/):** Specific guidance for AI agents, quick project context, and project TODOs.
 
 ## Contributing
 
-Contributions are welcome! Please refer to the `PR_TEMPLATE.md` and existing `docs/PR.md` for guidelines on creating pull requests.
+Contributions are welcome! Please refer to the `PR_TEMPLATE.md` for guidelines on creating pull requests.
 
 ## License
 
