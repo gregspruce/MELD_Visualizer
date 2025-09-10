@@ -12,17 +12,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TODO.md file for systematic task tracking
 - CHANGELOG.md file following Keep a Changelog format
 - Systematic improvement process with regression prevention measures
+- Centralized constants in constants.py for magic numbers elimination
+- New constants for processing, networking, UI timing, security, and logging
+- Import structure to use centralized constants across all modules
 
 ### Fixed
 - Updated improvement plan to reflect actual codebase state vs. documentation claims
 - Corrected PyVista integration assessment (moved from "missing feature" to "legacy cleanup")
+- Eliminated magic numbers by extracting to named constants
+- Removed duplicate constant definitions across multiple files
+- Fixed test imports to use centralized constants
 
 ### Changed
 - Improvement plan now focuses on cleanup and optimization rather than major new features
 - Updated roadmap priorities based on comprehensive triage analysis
+- Refactored all hardcoded values to use named constants from constants.py
+- Updated import statements across modules to use centralized constants
+- Modified JavaScript code generation to use constant values dynamically
 
 ### Removed
 - References to PyVista as a missing feature (reclassified as legacy cleanup)
+- Duplicate INCH_TO_MM definitions from data_processing.py and volume_calculations.py
+- Duplicate BEAD_LENGTH and BEAD_RADIUS definitions from data_processing.py
+- Hardcoded network configuration values (127.0.0.1, 8050) from app.py
+- Hardcoded log file size constants from logging_config.py
+- Hardcoded security limits from security_utils.py
+- Hardcoded UI timing and dimension values from callback files
 
 ## [1.0.0] - 2024-08-XX
 

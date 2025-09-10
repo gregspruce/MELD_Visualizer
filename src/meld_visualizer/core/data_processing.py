@@ -6,8 +6,11 @@ import re  # <-- Added import for regular expressions
 import pandas as pd
 import numpy as np
 
-# --- Constants ---
-INCH_TO_MM = 25.4
+# Import constants from centralized location
+from ..constants import (
+    INCH_TO_MM, MELD_FEED_VELOCITY_SCALE_FACTOR, SECONDS_PER_MINUTE,
+    MESH_VERTICES_PER_CROSS_SECTION, BEAD_LENGTH_MM, BEAD_RADIUS_MM
+)
 
 def parse_contents(contents, filename):
     """
@@ -63,7 +66,7 @@ def parse_contents(contents, filename):
             converted_units = True
             cols_to_convert = ['XPos', 'YPos', 'ZPos', 'FeedVel', 'PathVel', 'XVel', 'YVel', 'ZVel']
             for col in [c for c in cols_to_convert if c in df.columns]:
-                df[col] *= 25.4
+                df[col] *= INCH_TO_MM
         return df, None, converted_units
     except Exception as e:
         return None, f"An unexpected error occurred: {e}", False
@@ -145,7 +148,7 @@ def parse_gcode_file(contents, filename):
                     state['extrusion_on'] = True
                     if 'S' in words:
                         # Per documentation: S value is mm/min x 10
-                        state['feed_vel'] = float(words['S']) / 10.0
+                        state['feed_vel'] = float(words['S']) / MELD_FEED_VELOCITY_SCALE_FACTOR
                 elif m_code == 35:
                     state['extrusion_on'] = False
 
@@ -170,7 +173,7 @@ def parse_gcode_file(contents, filename):
                     time_segment_seconds = 0
                     if distance > 1e-9 and state['path_vel'] > 1e-9:
                         # F is in mm/min, so we convert segment time to seconds
-                        time_segment_seconds = (distance / state['path_vel']) * 60.0
+                        time_segment_seconds = (distance / state['path_vel']) * SECONDS_PER_MINUTE
                     state['time_counter'] += time_segment_seconds
 
                     # Extrusion only occurs during G1 moves
@@ -211,7 +214,7 @@ def parse_gcode_file(contents, filename):
     return df, f"Successfully parsed G-code file: {filename}", False
 
 
-def get_cross_section_vertices(p, v_dir, T, L, R, N=12):
+def get_cross_section_vertices(p, v_dir, T, L, R, N=MESH_VERTICES_PER_CROSS_SECTION):
     """
     Calculates the vertices of a single cross-section for the mesh.
     This defines the shape of the extruded bead at a single point.
@@ -270,8 +273,7 @@ def generate_volume_mesh(df_active, color_col):
 
     # --- Bead Geometry Constants ---
     # These values define the physical properties of the extrusion material.
-    BEAD_LENGTH = 2.0  # Length of the rectangular part of the bead cross-section (mm)
-    BEAD_RADIUS = BEAD_LENGTH / 2.0 # Radius of the semi-circular ends (mm)
+    # Using constants from centralized location (constants.py)
     
     # Feedstock geometry - MELD uses 0.5" × 0.5" square rod, not circular wire
     FEEDSTOCK_DIMENSION_INCHES = 0.5  # Square rod dimension (inches)
@@ -282,7 +284,7 @@ def generate_volume_mesh(df_active, color_col):
     WIRE_AREA = FEEDSTOCK_AREA_MM2  # Corrected: actual square rod area, not diameter squared
     
     MAX_BEAD_THICKNESS = 1.0 * INCH_TO_MM # Safety clip for bead thickness (mm)
-    POINTS_PER_SECTION = 12 # Number of vertices in each cross-section circle
+    POINTS_PER_SECTION = MESH_VERTICES_PER_CROSS_SECTION  # Number of vertices in each cross-section circle
 
     # --- Bead Geometry Calculation ---
     # This section calculates the cross-sectional geometry of the bead at each point
@@ -291,7 +293,7 @@ def generate_volume_mesh(df_active, color_col):
     df_active = df_active.copy()
     df_active['Bead_Area'] = (df_active['FeedVel'] * WIRE_AREA) / df_active['PathVel']
     # The thickness T is derived from the area of the idealized bead shape (rectangle + circle)
-    df_active['T'] = (df_active['Bead_Area'] - (np.pi * BEAD_RADIUS**2)) / BEAD_LENGTH
+    df_active['T'] = (df_active['Bead_Area'] - (np.pi * BEAD_RADIUS_MM**2)) / BEAD_LENGTH_MM
     df_active['T_clipped'] = df_active['T'].clip(0.0, MAX_BEAD_THICKNESS)
 
     # --- Vertex and Face Generation ---
@@ -301,7 +303,7 @@ def generate_volume_mesh(df_active, color_col):
 
     all_vertices, all_faces, vertex_colors = [], [], []
     vertex_offset = 0
-    N_points_per_section = 12 # Number of vertices in each cross-section circle
+    N_points_per_section = MESH_VERTICES_PER_CROSS_SECTION  # Number of vertices in each cross-section circle
 
     for i in range(len(points) - 1):
         p1, p2 = points[i], points[i+1]
@@ -313,8 +315,8 @@ def generate_volume_mesh(df_active, color_col):
             continue
 
         # Generate the vertices for the cross-sections at the start and end of the segment
-        verts1 = get_cross_section_vertices(p1, v_direction, g1[0], BEAD_LENGTH, BEAD_RADIUS, N=POINTS_PER_SECTION)
-        verts2 = get_cross_section_vertices(p2, v_direction, g2[0], BEAD_LENGTH, BEAD_RADIUS, N=POINTS_PER_SECTION)
+        verts1 = get_cross_section_vertices(p1, v_direction, g1[0], BEAD_LENGTH_MM, BEAD_RADIUS_MM, N=POINTS_PER_SECTION)
+        verts2 = get_cross_section_vertices(p2, v_direction, g2[0], BEAD_LENGTH_MM, BEAD_RADIUS_MM, N=POINTS_PER_SECTION)
 
         all_vertices.extend(verts1)
         all_vertices.extend(verts2)

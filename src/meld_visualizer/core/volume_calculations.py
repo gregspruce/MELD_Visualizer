@@ -12,11 +12,10 @@ from typing import Dict, Optional, Tuple, Union
 from dataclasses import dataclass
 import logging
 
-logger = logging.getLogger(__name__)
+# Import constants from centralized location
+from ..constants import INCH_TO_MM, MM_TO_INCH
 
-# Physical constants
-INCH_TO_MM = 25.4
-MM_TO_INCH = 1.0 / INCH_TO_MM
+logger = logging.getLogger(__name__)
 
 
 @dataclass

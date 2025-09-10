@@ -17,7 +17,9 @@ from meld_visualizer.utils.security_utils import (
     ConfigurationManager,
     ErrorHandler,
     SecurityError,
-    secure_parse_gcode,
+    secure_parse_gcode
+)
+from meld_visualizer.constants import (
     ALLOWED_FILE_EXTENSIONS,
     MAX_FILE_SIZE_MB,
     MAX_CONFIG_SIZE_KB,

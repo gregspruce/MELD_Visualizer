@@ -7,6 +7,19 @@ Contains all magic numbers, thresholds, and configuration constants.
 INCH_TO_MM = 25.4
 MM_TO_INCH = 1.0 / 25.4
 
+# Processing and Calculation Constants
+MELD_FEED_VELOCITY_SCALE_FACTOR = 10.0  # Scale factor for feed velocity processing
+SECONDS_PER_MINUTE = 60.0  # Conversion factor for time calculations
+MM3_TO_CM3 = 1000.0  # Volume conversion factor
+MESH_VERTICES_PER_CROSS_SECTION = 12  # Number of vertices in mesh cross-sections
+
+# Network Configuration
+DEFAULT_HOST = "127.0.0.1"  # Default server host address
+DEFAULT_PORT = 8050  # Default server port
+
+# Performance Monitoring
+PERFORMANCE_WARNING_THRESHOLD_SECONDS = 2.0  # Warning threshold for slow operations
+
 # Data Processing Thresholds
 IMPERIAL_VELOCITY_THRESHOLD = 100  # Max velocity in imperial units (inch/min)
 MIN_PATH_VELOCITY = 1e-6  # Minimum path velocity to consider as active
@@ -58,6 +71,25 @@ DEFAULT_ASPECT_MODE = 'data'
 DEFAULT_Z_STRETCH_FACTOR = 1.0
 MIN_Z_STRETCH_FACTOR = 0.1
 MAX_Z_STRETCH_FACTOR = 10.0
+
+# UI Timing Constants (milliseconds)
+UI_DEBOUNCE_DELAY_MS = 300  # Debounce delay for UI interactions
+VIEWPORT_CHECK_INTERVAL_MS = 5000  # Interval for viewport dimension checks
+CONFIG_ALERT_DURATION_MS = 10000  # Duration for configuration alert messages
+ALERT_DURATION_SUCCESS_MS = 4000  # Success alert duration
+ALERT_DURATION_ERROR_MS = 6000  # Error alert duration
+ALERT_DURATION_INFO_MS = 3000  # Info alert duration
+ALERT_DURATION_DEFAULT_MS = 5000  # Default alert duration
+
+# UI Dimensions and Scaling
+DEFAULT_VIEWPORT_WIDTH = 1920  # Default viewport width in pixels
+DEFAULT_VIEWPORT_HEIGHT = 1080  # Default viewport height in pixels
+UI_SCROLL_AMOUNT_PX = 200  # Amount to scroll in pixels
+UI_SCROLL_WIDTH_RATIO = 0.3  # Ratio of container width for scrolling
+UI_NUMERIC_INPUT_STEP = 0.1  # Step size for numeric inputs
+
+# 3D Visualization Defaults
+DEFAULT_CAMERA_POSITION = {'x': 1.5, 'y': 1.5, 'z': 1.5}  # Default 3D camera position
 
 # Responsive Plot Scaling Constants for Desktop Environments
 # Optimized for standard desktop resolutions: 1920x1080, 1440x900, 1366x768, 1280x1024
@@ -141,11 +173,18 @@ GCODE_LINEAR_MOVE = 'G1'  # Linear interpolation
 GCODE_COMMENT_CHARS = ['(', ';']  # Comment indicators
 
 # Security Configuration
+MAX_GCODE_WORD_LENGTH = 20  # Reasonable max length for a G-code word
+MAX_CONFIG_LIST_LENGTH = 50  # Maximum length for configuration list values
 SAFE_CONFIG_KEYS = {
     'default_theme', 'plotly_template', 'graph_1_options', 
     'graph_2_options', 'plot_2d_y_options', 'plot_2d_color_options',
     'feedstock_type', 'feedstock_dimension_inches'
 }
+
+# Logging Configuration Constants
+LOG_FILE_MAX_BYTES = 10 * 1024 * 1024  # 10MB maximum log file size
+ERROR_LOG_FILE_MAX_BYTES = 5 * 1024 * 1024  # 5MB maximum error log file size
+LOG_BACKUP_COUNT = 10  # Number of backup log files to retain
 
 # Error Messages
 ERROR_NO_FILE = "Please upload a file to begin."

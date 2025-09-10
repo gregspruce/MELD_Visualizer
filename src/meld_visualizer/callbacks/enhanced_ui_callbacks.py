@@ -13,6 +13,11 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
 from ..core.enhanced_ui import UserFeedbackManager
+from ..constants import (
+    UI_DEBOUNCE_DELAY_MS, UI_SCROLL_AMOUNT_PX, UI_SCROLL_WIDTH_RATIO,
+    ALERT_DURATION_SUCCESS_MS, ALERT_DURATION_ERROR_MS, ALERT_DURATION_INFO_MS,
+    DEFAULT_VIEWPORT_WIDTH, DEFAULT_VIEWPORT_HEIGHT
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,26 +37,26 @@ def register_tab_navigation_callbacks(app):
     
     # Tab scrolling functionality (client-side)
     clientside_callback(
-        """
-        function(left_clicks, right_clicks) {
+        f"""
+        function(left_clicks, right_clicks) {{
             const scrollContainer = document.querySelector('.enhanced-tabs-scroll-container');
             if (!scrollContainer) return [false, false];
             
             // Calculate scroll amount based on container width
-            const scrollAmount = Math.min(200, scrollContainer.clientWidth * 0.3);
+            const scrollAmount = Math.min({UI_SCROLL_AMOUNT_PX}, scrollContainer.clientWidth * {UI_SCROLL_WIDTH_RATIO});
             
             // Handle left scroll
-            if (left_clicks && left_clicks > 0) {
-                scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-            }
+            if (left_clicks && left_clicks > 0) {{
+                scrollContainer.scrollBy({{ left: -scrollAmount, behavior: 'smooth' }});
+            }}
             
             // Handle right scroll
-            if (right_clicks && right_clicks > 0) {
-                scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-            }
+            if (right_clicks && right_clicks > 0) {{
+                scrollContainer.scrollBy({{ left: scrollAmount, behavior: 'smooth' }});
+            }}
             
             // Update button states after scroll
-            setTimeout(() => {
+            setTimeout(() => {{
                 const isAtStart = scrollContainer.scrollLeft <= 0;
                 const isAtEnd = scrollContainer.scrollLeft >= 
                     scrollContainer.scrollWidth - scrollContainer.clientWidth - 1;
@@ -61,10 +66,10 @@ def register_tab_navigation_callbacks(app):
                 
                 if (leftBtn) leftBtn.disabled = isAtStart;
                 if (rightBtn) rightBtn.disabled = isAtEnd;
-            }, 300);
+            }}, {UI_DEBOUNCE_DELAY_MS});
             
             return [false, false];
-        }
+        }}
         """,
         [Output('tab-scroll-left', 'disabled', allow_duplicate=True),
          Output('tab-scroll-right', 'disabled', allow_duplicate=True)],
@@ -196,7 +201,7 @@ def register_toast_notification_callbacks(app):
                     toast_type="success",
                     title="File Loaded",
                     message=f"Successfully loaded: {filename}",
-                    duration=4000
+                    duration=ALERT_DURATION_SUCCESS_MS
                 )
                 ui_state['last_toast'] = toast_config
                 return current_trigger + 1, ui_state
@@ -207,7 +212,7 @@ def register_toast_notification_callbacks(app):
                     toast_type="success",
                     title="G-code Loaded",
                     message="G-code file successfully loaded and ready for visualization",
-                    duration=4000
+                    duration=ALERT_DURATION_SUCCESS_MS
                 )
                 ui_state['last_toast'] = toast_config
                 return current_trigger + 1, ui_state
@@ -242,7 +247,7 @@ def register_toast_notification_callbacks(app):
                     toast_type="warning",
                     title="Configuration Warning",
                     message=warning_text,
-                    duration=6000
+                    duration=ALERT_DURATION_ERROR_MS
                 )
                 ui_state['last_toast'] = toast_config
                 return current_trigger + 1, ui_state
@@ -273,7 +278,7 @@ def register_toast_notification_callbacks(app):
                     toast_type="success",
                     title="Settings Saved",
                     message="Configuration has been saved successfully!",
-                    duration=3000
+                    duration=ALERT_DURATION_INFO_MS
                 )
                 ui_state['last_toast'] = toast_config
                 return current_trigger + 1, ui_state
@@ -367,13 +372,13 @@ def register_control_panel_callbacks(app):
             
             from ..core.enhanced_ui import ResponsiveLayoutManager
             
-            viewport_width = viewport_data.get('width', 1920)
+            viewport_width = viewport_data.get('width', DEFAULT_VIEWPORT_WIDTH)
             layout_config = ResponsiveLayoutManager.get_layout_config(viewport_width)
             breakpoint_class = ResponsiveLayoutManager.get_desktop_breakpoint_class(viewport_width)
             
             ui_state.update({
                 'viewport_width': viewport_width,
-                'viewport_height': viewport_data.get('height', 1080),
+                'viewport_height': viewport_data.get('height', DEFAULT_VIEWPORT_HEIGHT),
                 'layout_config': layout_config,
                 'breakpoint_class': breakpoint_class,
                 'responsive_updated': time.time()

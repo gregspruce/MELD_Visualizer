@@ -3,7 +3,10 @@
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 from ..config import APP_CONFIG, THEMES, PLOTLY_TEMPLATE, SCATTER_3D_HEIGHT, get_responsive_plot_style
-from ..constants import DEFAULT_Z_STRETCH_FACTOR
+from ..constants import (
+    DEFAULT_Z_STRETCH_FACTOR, DEFAULT_VIEWPORT_WIDTH, DEFAULT_VIEWPORT_HEIGHT,
+    VIEWPORT_CHECK_INTERVAL_MS, UI_NUMERIC_INPUT_STEP, CONFIG_ALERT_DURATION_MS
+)
 # Temporarily disabled - components not integrated properly
 # from .enhanced_ui import EnhancedUIComponents, UserFeedbackManager
 
@@ -53,8 +56,8 @@ def create_responsive_graph(graph_id, plot_type='scatter_3d', **kwargs):
 def add_viewport_detection():
     """Add client-side viewport detection for responsive plot scaling."""
     return html.Div([
-        dcc.Store(id='viewport-dimensions', data={'width': 1920, 'height': 1080}),
-        dcc.Interval(id='viewport-check-interval', interval=5000, n_intervals=0, disabled=True),
+        dcc.Store(id='viewport-dimensions', data={'width': DEFAULT_VIEWPORT_WIDTH, 'height': DEFAULT_VIEWPORT_HEIGHT}),
+        dcc.Interval(id='viewport-check-interval', interval=VIEWPORT_CHECK_INTERVAL_MS, n_intervals=0, disabled=True),
         html.Script("""
         // Detect initial viewport size and update on resize
         function updateViewportDimensions() {
@@ -129,7 +132,7 @@ def create_filter_controls(control_id_prefix, filter_label):
         html.H6(f"Filter by {filter_label}"),
             dcc.RangeSlider(
                 id={'type': 'range-slider', 'index': control_id_prefix},
-                min=0, max=1, step=0.1, value=[0, 1],
+                min=0, max=1, step=UI_NUMERIC_INPUT_STEP, value=[0, 1],
                 tooltip={"placement": "bottom", "always_visible": True}, 
                 marks=None,
                 className="mb-3"
@@ -140,7 +143,7 @@ def create_filter_controls(control_id_prefix, filter_label):
                         dbc.InputGroupText("Lower Bound"),
                         dbc.Input(
                             id={'type': 'lower-bound-input', 'index': control_id_prefix}, 
-                            type="number", step=0.1, debounce=True
+                            type="number", step=UI_NUMERIC_INPUT_STEP, debounce=True
                         )
                     ]), width=6
                 ),
@@ -149,7 +152,7 @@ def create_filter_controls(control_id_prefix, filter_label):
                         dbc.InputGroupText("Upper Bound"),
                         dbc.Input(
                             id={'type': 'upper-bound-input', 'index': control_id_prefix}, 
-                            type="number", step=0.1, debounce=True
+                            type="number", step=UI_NUMERIC_INPUT_STEP, debounce=True
                         )
                     ]), width=6
                 ),
@@ -160,7 +163,7 @@ def create_filter_controls(control_id_prefix, filter_label):
                         dbc.InputGroupText("Slider Min"),
                         dbc.Input(
                             id={'type': 'slider-min-input', 'index': control_id_prefix}, 
-                            type="number", step=0.1, debounce=True
+                            type="number", step=UI_NUMERIC_INPUT_STEP, debounce=True
                         )
                     ]), width=6
                 ),
@@ -169,7 +172,7 @@ def create_filter_controls(control_id_prefix, filter_label):
                         dbc.InputGroupText("Slider Max"),
                         dbc.Input(
                             id={'type': 'slider-max-input', 'index': control_id_prefix}, 
-                            type="number", step=0.1, debounce=True
+                            type="number", step=UI_NUMERIC_INPUT_STEP, debounce=True
                         )
                     ]), width=6
                 ),
@@ -311,7 +314,7 @@ def build_config_tab():
         ]), html.Hr(),
         dbc.Row(dbc.Col([
             dbc.Button("Save Configuration", id="save-config-button", color="primary", n_clicks=0),
-            dbc.Alert(id='save-config-alert', is_open=False, duration=10000, color="success", className="mt-3"),
+            dbc.Alert(id='save-config-alert', is_open=False, duration=CONFIG_ALERT_DURATION_MS, color="success", className="mt-3"),
             html.P("📌 Theme changes apply instantly! Graph option changes apply immediately after saving.", className="text-success small mt-2")
         ]))
     ])
@@ -325,7 +328,7 @@ def build_line_plot_tab():
                 dbc.InputGroup(
                     [
                         dbc.InputGroupText("Z-Axis Stretch Factor"),
-                        dbc.Input(id='line-plot-z-stretch-input', type='number', value=1.0, min=0.1, step=0.1),
+                        dbc.Input(id='line-plot-z-stretch-input', type='number', value=1.0, min=0.1, step=UI_NUMERIC_INPUT_STEP),
                     ],
                     className="mb-3",
                 ),
@@ -352,7 +355,7 @@ def build_mesh_plot_tab():
                 dbc.InputGroup(
                     [
                         dbc.InputGroupText("Z-Axis Stretch Factor"),
-                        dbc.Input(id='mesh-plot-z-stretch-input', type='number', value=1.0, min=0.1, step=0.1),
+                        dbc.Input(id='mesh-plot-z-stretch-input', type='number', value=1.0, min=0.1, step=UI_NUMERIC_INPUT_STEP),
                     ],
                     className="mb-3",
                 ),
@@ -397,7 +400,7 @@ def build_gcode_tab():
                 dbc.InputGroup(
                     [
                         dbc.InputGroupText("Z-Axis Stretch Factor"),
-                        dbc.Input(id='gcode-z-stretch-input', type='number', value=DEFAULT_Z_STRETCH_FACTOR, min=0.1, step=0.1),
+                        dbc.Input(id='gcode-z-stretch-input', type='number', value=DEFAULT_Z_STRETCH_FACTOR, min=0.1, step=UI_NUMERIC_INPUT_STEP),
                     ],
                     className="mb-3",
                 ),

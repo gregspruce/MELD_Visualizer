@@ -85,6 +85,11 @@ class MeshGenerator:
         vertices = []
         half_n = self.points_per_section // 2
         
+        # Ensure we have at least 2 points per semi-circle to avoid division by zero
+        if half_n < 2:
+            half_n = 2
+            logger.warning(f"Adjusting points_per_section from {self.points_per_section} to 4 to avoid degenerate geometry")
+        
         # First semi-circle (left side)
         center_left = position - h_vec * effective_thickness / 2.0
         for i in range(half_n):
@@ -195,6 +200,24 @@ class MeshGenerator:
         thicknesses = df['Bead_Thickness_mm'].values.astype(np.float32)
         colors = df[color_column].values.astype(np.float32)
         
+        # Validate for NaN/Inf values to prevent invalid mesh generation
+        positions_valid = np.isfinite(positions).all(axis=1)
+        thicknesses_valid = np.isfinite(thicknesses) & (thicknesses > 0)
+        colors_valid = np.isfinite(colors)
+        valid_mask = positions_valid & thicknesses_valid & colors_valid
+        
+        if not np.any(valid_mask):
+            logger.warning("No valid data points after filtering NaN/Inf values")
+            return None
+            
+        if np.sum(~valid_mask) > 0:
+            logger.info(f"Filtered {np.sum(~valid_mask)} invalid data points (NaN/Inf values)")
+        
+        # Filter to valid data only
+        positions = positions[valid_mask]
+        thicknesses = thicknesses[valid_mask]
+        colors = colors[valid_mask]
+        
         # Pre-allocate lists for efficiency
         all_vertices = []
         all_faces = []
@@ -267,6 +290,15 @@ class MeshGenerator:
         Returns:
             Dictionary with vertices, faces, and vertex_colors
         """
+        # Validate geometric parameters to prevent invalid mesh generation
+        if bead_length <= 0 or bead_radius <= 0:
+            logger.error(f"Invalid geometric parameters: length={bead_length}, radius={bead_radius}")
+            return None
+            
+        if width_multiplier <= 0:
+            logger.error(f"Invalid width_multiplier: {width_multiplier}")
+            return None
+        
         # Adjust points per section based on LOD
         lod_settings = {
             'low': {'points': 6, 'skip': 4},

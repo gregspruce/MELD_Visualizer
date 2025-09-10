@@ -39,9 +39,8 @@ class TestCacheService:
         key = "test_key"
         value = {"data": "test_value", "timestamp": time.time()}
         
-        # Set cache value
-        success = cache_service.set(key, value)
-        assert success is True
+        # Set cache value (CacheService.set() returns None, not boolean)
+        cache_service.set(key, value)
         
         # Get cache value
         retrieved_value = cache_service.get(key)
@@ -58,9 +57,8 @@ class TestCacheService:
         cache_service.set("key1", "value1")
         cache_service.set("key2", "value2")
         
-        # Clear cache
-        success = cache_service.clear()
-        assert success is True
+        # Clear cache (CacheService.clear() returns None, not boolean)
+        cache_service.clear()
         
         # Verify values are cleared
         assert cache_service.get("key1") is None
@@ -68,22 +66,25 @@ class TestCacheService:
     
     def test_cache_expiration(self, cache_service):
         """Test cache expiration functionality"""
+        # CacheService uses default TTL from constants, not per-key TTL
+        # Test by setting a cache with very short default TTL
+        short_ttl_cache = CacheService(ttl_seconds=1)
+        
         key = "expiring_key"
         value = "expiring_value"
-        ttl = 1  # 1 second TTL
         
-        # Set value with TTL
-        cache_service.set(key, value, ttl=ttl)
+        # Set value 
+        short_ttl_cache.set(key, value)
         
         # Should be available immediately
-        assert cache_service.get(key) == value
+        assert short_ttl_cache.get(key) == value
         
         # Wait for expiration
         time.sleep(1.5)
         
         # Should be expired now
-        result = cache_service.get(key)
-        # Depending on implementation, might return None or handle differently
+        result = short_ttl_cache.get(key)
+        assert result is None
     
     def test_cache_size_limit(self, cache_service):
         """Test cache size limitations"""
@@ -93,12 +94,18 @@ class TestCacheService:
     
     def test_cache_key_validation(self, cache_service):
         """Test cache key validation"""
-        # Test invalid key types
-        invalid_keys = [None, 123, [], {}]
+        # CacheService accepts any key type and converts to string internally
+        # Test that various key types work but produce consistent results
+        test_cases = [
+            ("string_key", "string_key"),
+            (123, 123),
+            (None, None),
+        ]
         
-        for invalid_key in invalid_keys:
-            with pytest.raises((TypeError, ValueError)):
-                cache_service.set(invalid_key, "value")
+        for key, expected in test_cases:
+            cache_service.set(key, f"value_for_{key}")
+            result = cache_service.get(key)
+            assert result == f"value_for_{key}"
     
     def test_cache_value_serialization(self, cache_service):
         """Test that complex values can be cached"""

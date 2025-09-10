@@ -16,7 +16,8 @@ from ..constants import (
     DEFAULT_GRAPH_MARGIN, DEFAULT_ASPECT_MODE, DEFAULT_MARKER_SIZE,
     DEFAULT_LINE_WIDTH, DEFAULT_COLORSCALE, DEFAULT_FONT_SIZE,
     ERROR_NO_DATA, ERROR_COLUMN_NOT_FOUND, ERROR_NO_ACTIVE_DATA,
-    MIN_FEED_VELOCITY, MIN_PATH_VELOCITY, DEFAULT_Z_STRETCH_FACTOR
+    MIN_FEED_VELOCITY, MIN_PATH_VELOCITY, DEFAULT_Z_STRETCH_FACTOR,
+    DEFAULT_CAMERA_POSITION
 )
 from ..config import PLOTLY_TEMPLATE
 
@@ -84,7 +85,7 @@ def register_graph_callbacks(app=None):
                 margin=DEFAULT_GRAPH_MARGIN, 
                 scene_aspectmode=DEFAULT_ASPECT_MODE,
                 scene_camera=dict(
-                    eye=dict(x=1.5, y=1.5, z=1.5),
+                    eye=dict(x=DEFAULT_CAMERA_POSITION['x'], y=DEFAULT_CAMERA_POSITION['y'], z=DEFAULT_CAMERA_POSITION['z']),
                     center=dict(x=0, y=0, z=0),
                     up=dict(x=0, y=0, z=1)
                 )
@@ -133,7 +134,7 @@ def register_graph_callbacks(app=None):
                 margin=DEFAULT_GRAPH_MARGIN, 
                 scene_aspectmode=DEFAULT_ASPECT_MODE,
                 scene_camera=dict(
-                    eye=dict(x=1.5, y=1.5, z=1.5),
+                    eye=dict(x=DEFAULT_CAMERA_POSITION['x'], y=DEFAULT_CAMERA_POSITION['y'], z=DEFAULT_CAMERA_POSITION['z']),
                     center=dict(x=0, y=0, z=0),
                     up=dict(x=0, y=0, z=1)
                 )
@@ -228,7 +229,7 @@ def register_graph_callbacks(app=None):
                 margin=DEFAULT_GRAPH_MARGIN, 
                 scene_aspectmode=DEFAULT_ASPECT_MODE,
                 scene_camera=dict(
-                    eye=dict(x=1.5, y=1.5, z=1.5),
+                    eye=dict(x=DEFAULT_CAMERA_POSITION['x'], y=DEFAULT_CAMERA_POSITION['y'], z=DEFAULT_CAMERA_POSITION['z']),
                     center=dict(x=0, y=0, z=0),
                     up=dict(x=0, y=0, z=1)
                 )

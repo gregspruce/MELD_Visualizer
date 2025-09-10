@@ -4,6 +4,8 @@ import webbrowser
 from dash import Dash, html
 import dash_bootstrap_components as dbc
 
+from .constants import DEFAULT_HOST, DEFAULT_PORT
+
 APP_TITLE = "Volumetric Data Plotter"
 
 def _resolve_external_stylesheets():
@@ -99,13 +101,13 @@ app = create_app(testing=False)
 
 def open_browser():
     """Opens the default web browser to the Dash app's URL."""
-    webbrowser.open_new("http://127.0.0.1:8050")
+    webbrowser.open_new(f"http://{DEFAULT_HOST}:{DEFAULT_PORT}")
 
 def main():
     """Main entry point for the application."""
     # Bind ONLY to local interface
-    host = "127.0.0.1"
-    port = 8050
+    host = DEFAULT_HOST
+    port = DEFAULT_PORT
     debug = os.environ.get("DEBUG", "0") in ("1", "true", "True")
     
     # The Timer is used to delay opening the browser, ensuring the server has started.

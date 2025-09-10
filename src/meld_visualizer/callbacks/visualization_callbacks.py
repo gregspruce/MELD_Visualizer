@@ -16,7 +16,7 @@ from ..constants import (
     DEFAULT_GRAPH_MARGIN, DEFAULT_MARKER_SIZE, DEFAULT_LINE_WIDTH,
     DEFAULT_COLORSCALE, DEFAULT_Z_STRETCH_FACTOR, MIN_Z_STRETCH_FACTOR,
     ERROR_NO_ACTIVE_DATA, ERROR_MESH_GENERATION,
-    MIN_FEED_VELOCITY, MIN_PATH_VELOCITY
+    MIN_FEED_VELOCITY, MIN_PATH_VELOCITY, DEFAULT_CAMERA_POSITION
 )
 from ..config import PLOTLY_TEMPLATE, TABLE_STYLE_DARK, TABLE_STYLE_LIGHT
 
@@ -72,7 +72,7 @@ def register_visualization_callbacks(app=None):
                 aspectmode='data' if z_stretch_factor == 1.0 else 'manual',
                 aspectratio=aspect_ratio,
                 camera=dict(
-                    eye=dict(x=1.5, y=1.5, z=1.5),
+                    eye=dict(x=DEFAULT_CAMERA_POSITION['x'], y=DEFAULT_CAMERA_POSITION['y'], z=DEFAULT_CAMERA_POSITION['z']),
                     center=dict(x=0, y=0, z=0),
                     up=dict(x=0, y=0, z=1)
                 )
@@ -155,7 +155,7 @@ def register_visualization_callbacks(app=None):
                 aspectmode='data' if z_stretch_factor == 1.0 else 'manual',
                 aspectratio=aspect_ratio,
                 camera=dict(
-                    eye=dict(x=1.5, y=1.5, z=1.5),
+                    eye=dict(x=DEFAULT_CAMERA_POSITION['x'], y=DEFAULT_CAMERA_POSITION['y'], z=DEFAULT_CAMERA_POSITION['z']),
                     center=dict(x=0, y=0, z=0),
                     up=dict(x=0, y=0, z=1)
                 )
@@ -210,7 +210,7 @@ def register_visualization_callbacks(app=None):
                     aspectmode='data' if z_stretch_factor == 1.0 else 'manual',
                     aspectratio=custom_aspect_ratio,
                     camera=dict(
-                        eye=dict(x=1.5, y=1.5, z=1.5),
+                        eye=dict(x=DEFAULT_CAMERA_POSITION['x'], y=DEFAULT_CAMERA_POSITION['y'], z=DEFAULT_CAMERA_POSITION['z']),
                         center=dict(x=0, y=0, z=0),
                         up=dict(x=0, y=0, z=1)
                     )
@@ -249,7 +249,7 @@ def register_visualization_callbacks(app=None):
                     aspectmode='data' if z_stretch_factor == 1.0 else 'manual',
                     aspectratio=custom_aspect_ratio,
                     camera=dict(
-                        eye=dict(x=1.5, y=1.5, z=1.5),
+                        eye=dict(x=DEFAULT_CAMERA_POSITION['x'], y=DEFAULT_CAMERA_POSITION['y'], z=DEFAULT_CAMERA_POSITION['z']),
                         center=dict(x=0, y=0, z=0),
                         up=dict(x=0, y=0, z=1)
                     )

@@ -11,21 +11,18 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 import logging
 
+# Import security constants from centralized location
+from ..constants import (
+    MAX_FILE_SIZE_MB, ALLOWED_FILE_EXTENSIONS, MAX_CONFIG_SIZE_KB,
+    MAX_GCODE_WORD_LENGTH, MAX_CONFIG_LIST_LENGTH, SAFE_CONFIG_KEYS,
+    MAX_GCODE_LINE_LENGTH
+)
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Security constants
-MAX_FILE_SIZE_MB = 10
-ALLOWED_FILE_EXTENSIONS = {'.csv', '.nc', '.txt'}
-MAX_CONFIG_SIZE_KB = 100
-SAFE_CONFIG_KEYS = {
-    'default_theme', 'plotly_template', 'graph_1_options', 
-    'graph_2_options', 'plot_2d_y_options', 'plot_2d_color_options'
-}
-
 # Regex patterns with timeout protection
 SAFE_GCODE_PATTERN = re.compile(r'^([A-Z])([-+]?\d{0,10}(?:\.\d{0,6})?)$')
-MAX_GCODE_LINE_LENGTH = 1000
 
 
 class SecurityError(Exception):
@@ -181,7 +178,7 @@ class InputValidator:
         sanitized_words = []
         
         for word in words:
-            if len(word) > 20:  # Reasonable max length for a G-code word
+            if len(word) > MAX_GCODE_WORD_LENGTH:  # Reasonable max length for a G-code word
                 continue
                 
             # Check if it matches safe pattern
@@ -252,7 +249,7 @@ class ConfigurationManager:
         elif key == 'plotly_template':
             return isinstance(value, str) and len(value) < 100
         elif key in ['graph_1_options', 'graph_2_options', 'plot_2d_y_options', 'plot_2d_color_options']:
-            return isinstance(value, list) and len(value) < 50 and all(
+            return isinstance(value, list) and len(value) < MAX_CONFIG_LIST_LENGTH and all(
                 isinstance(item, str) and len(item) < 100 for item in value
             )
         return False

@@ -11,6 +11,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
+from ..constants import LOG_FILE_MAX_BYTES, ERROR_LOG_FILE_MAX_BYTES, LOG_BACKUP_COUNT
+
 # Create logs directory if it doesn't exist
 LOGS_DIR = Path("logs")
 LOGS_DIR.mkdir(exist_ok=True)
@@ -71,7 +73,7 @@ class PerformanceLogger:
         if not self.logger.handlers:
             handler = logging.handlers.RotatingFileHandler(
                 PERFORMANCE_LOG_FILE,
-                maxBytes=10*1024*1024,  # 10MB
+                maxBytes=LOG_FILE_MAX_BYTES,  # 10MB
                 backupCount=5
             )
             handler.setFormatter(logging.Formatter(DETAILED_FORMAT))
@@ -106,7 +108,7 @@ class SecurityLogger:
         if not self.logger.handlers:
             handler = logging.handlers.RotatingFileHandler(
                 SECURITY_LOG_FILE,
-                maxBytes=10*1024*1024,  # 10MB
+                maxBytes=LOG_FILE_MAX_BYTES,  # 10MB
                 backupCount=10
             )
             handler.setFormatter(logging.Formatter(DETAILED_FORMAT))
@@ -182,7 +184,7 @@ def setup_logging(
         # Error file handler
         error_handler = logging.handlers.RotatingFileHandler(
             ERROR_LOG_FILE,
-            maxBytes=5*1024*1024,  # 5MB
+            maxBytes=ERROR_LOG_FILE_MAX_BYTES,  # 5MB
             backupCount=3
         )
         error_handler.setLevel(logging.ERROR)

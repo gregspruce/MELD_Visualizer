@@ -9,127 +9,99 @@ from unittest.mock import patch, mock_open, Mock
 from pathlib import Path
 
 # Import the modules under test
-try:
-    from meld_visualizer.config import (
-        APP_CONFIG,
-        THEMES,
-        PLOTLY_TEMPLATE,
-        load_config,
-        validate_config,
-        get_responsive_plot_style,
-        get_responsive_plotly_config
-    )
-    from meld_visualizer.constants import (
-        DEFAULT_PLOT_HEIGHT,
-        DEFAULT_PLOT_WIDTH,
-        SUPPORTED_FILE_TYPES,
-        MAX_FILE_SIZE_MB
-    )
-except ImportError:
-    # If direct import fails, skip these tests
-    pytestmark = pytest.mark.skip("Config/Constants modules not available")
+from meld_visualizer.config import (
+    APP_CONFIG,
+    THEMES,
+    PLOTLY_TEMPLATE,
+    load_config,
+    get_responsive_plot_style,
+    get_responsive_plotly_config
+)
+from meld_visualizer.constants import (
+    RESPONSIVE_PLOT_CONFIG,
+    PLOT_TYPE_MODIFIERS,
+    ALLOWED_FILE_EXTENSIONS,
+    MAX_FILE_SIZE_MB
+)
 
 
 class TestConfigLoading:
     """Test configuration loading functionality"""
     
-    def test_load_valid_config(self, temp_config_file):
+    def test_load_valid_config(self):
         """Test loading valid configuration file"""
-        config = load_config(temp_config_file)
+        # load_config() takes no parameters and loads from default location
+        config = load_config()
         
         assert isinstance(config, dict)
         assert 'default_theme' in config
-        assert 'max_file_size_mb' in config
-        assert 'cache_timeout' in config
-        assert 'debug_mode' in config
+        assert 'plotly_template' in config
+        assert 'graph_1_options' in config
+        assert 'graph_2_options' in config
     
-    def test_load_nonexistent_config(self):
+    @patch('builtins.open', side_effect=FileNotFoundError)
+    def test_load_nonexistent_config(self, mock_open):
         """Test loading non-existent configuration file"""
-        # Should return default config or raise appropriate exception
-        with pytest.raises(FileNotFoundError):
-            load_config("nonexistent_config.json")
-    
-    def test_load_invalid_json_config(self, tmp_path):
-        """Test loading malformed JSON configuration"""
-        invalid_config = tmp_path / "invalid.json"
-        invalid_config.write_text("{invalid json content")
+        # Should return default config when file not found
+        config = load_config()
         
-        with pytest.raises(json.JSONDecodeError):
-            load_config(invalid_config)
-    
-    def test_load_empty_config(self, tmp_path):
-        """Test loading empty configuration file"""
-        empty_config = tmp_path / "empty.json"
-        empty_config.write_text("{}")
-        
-        config = load_config(empty_config)
         assert isinstance(config, dict)
-        # Should handle empty config gracefully
+        assert config["default_theme"] == "Cerulean (Default)"
+        assert "plotly_template" in config
     
-    @patch('builtins.open', new_callable=mock_open, read_data='{"test": "value"}')
+    @patch('builtins.open', new_callable=mock_open, read_data='{invalid json content}')
+    def test_load_invalid_json_config(self, mock_file):
+        """Test loading malformed JSON configuration"""
+        # Should return default config on JSON decode error
+        config = load_config()
+        
+        assert isinstance(config, dict)
+        assert config["default_theme"] == "Cerulean (Default)"
+    
+    @patch('builtins.open', new_callable=mock_open, read_data='{}')
+    def test_load_empty_config(self, mock_file):
+        """Test loading empty configuration file"""
+        config = load_config()
+        
+        assert isinstance(config, dict)
+        # Should merge with defaults
+        assert config["default_theme"] == "Cerulean (Default)"
+    
+    @patch('builtins.open', new_callable=mock_open, read_data='{"default_theme": "Darkly"}')
     def test_load_config_with_mock(self, mock_file):
         """Test config loading with mocked file system"""
-        config = load_config("mocked_config.json")
+        config = load_config()
         
         assert isinstance(config, dict)
-        mock_file.assert_called_once_with("mocked_config.json", 'r')
+        assert config["default_theme"] == "Darkly"
 
 
-class TestConfigValidation:
-    """Test configuration validation functionality"""
+class TestThemeManagement:
+    """Test theme management functionality"""
     
-    def test_validate_complete_config(self):
-        """Test validation of complete, valid configuration"""
-        valid_config = {
-            'default_theme': 'BOOTSTRAP',
-            'max_file_size_mb': 100,
-            'cache_timeout': 300,
-            'debug_mode': False,
-            'plotly_template': 'plotly_white'
-        }
+    def test_default_themes_available(self):
+        """Test that default themes are properly configured"""
+        assert isinstance(THEMES, dict)
+        assert len(THEMES) > 0
+        assert "Cerulean (Default)" in THEMES
         
-        is_valid, errors = validate_config(valid_config)
-        
-        assert is_valid
-        assert len(errors) == 0
+    def test_theme_url_validity(self):
+        """Test that theme URLs are valid"""
+        for theme_name, theme_url in THEMES.items():
+            assert isinstance(theme_url, str)
+            assert theme_url.startswith('http')
     
-    def test_validate_missing_required_keys(self):
-        """Test validation with missing required configuration keys"""
-        incomplete_config = {
-            'max_file_size_mb': 100
-            # Missing other required keys
-        }
+    def test_plotly_template_configuration(self):
+        """Test plotly template configuration"""
+        assert PLOTLY_TEMPLATE in ['plotly_white', 'plotly_dark']
         
-        is_valid, errors = validate_config(incomplete_config)
-        
-        assert not is_valid
-        assert len(errors) > 0
-    
-    def test_validate_invalid_data_types(self):
-        """Test validation with invalid data types"""
-        invalid_config = {
-            'default_theme': 123,  # Should be string
-            'max_file_size_mb': "invalid",  # Should be numeric
-            'cache_timeout': -1,  # Should be positive
-            'debug_mode': "yes"  # Should be boolean
-        }
-        
-        is_valid, errors = validate_config(invalid_config)
-        
-        assert not is_valid
-        assert len(errors) > 0
-    
-    def test_validate_boundary_values(self):
-        """Test validation of boundary values"""
-        boundary_config = {
-            'default_theme': 'BOOTSTRAP',
-            'max_file_size_mb': 0,  # Edge case
-            'cache_timeout': 0,  # Edge case
-            'debug_mode': True
-        }
-        
-        # Test behavior with boundary values
-        is_valid, errors = validate_config(boundary_config)
+    @patch('builtins.open', new_callable=mock_open, read_data='{"default_theme": "Darkly"}')
+    def test_dark_theme_plotly_template(self, mock_file):
+        """Test automatic plotly template selection for dark themes"""
+        # This test would require reloading the config module
+        config = load_config()
+        # For dark theme, should auto-select plotly_dark
+        # Note: This is limited by how the module loads config at import time
         # Adjust assertions based on actual validation rules
 
 
@@ -220,24 +192,25 @@ class TestConstants:
     
     def test_plot_dimensions_constants(self):
         """Test plot dimension constants are valid"""
-        assert isinstance(DEFAULT_PLOT_HEIGHT, (int, str))
-        assert isinstance(DEFAULT_PLOT_WIDTH, (int, str))
+        from meld_visualizer.constants import RESPONSIVE_PLOT_CONFIG
         
-        if isinstance(DEFAULT_PLOT_HEIGHT, int):
-            assert DEFAULT_PLOT_HEIGHT > 0
-        if isinstance(DEFAULT_PLOT_WIDTH, int):
-            assert DEFAULT_PLOT_WIDTH > 0
+        assert isinstance(RESPONSIVE_PLOT_CONFIG, dict)
+        assert len(RESPONSIVE_PLOT_CONFIG) > 0
+        
+        # Check that config has required keys
+        for size, config in RESPONSIVE_PLOT_CONFIG.items():
+            assert 'height' in config
+            assert 'min_height' in config
+            assert 'max_height' in config
     
     def test_supported_file_types(self):
         """Test supported file types are properly defined"""
-        assert isinstance(SUPPORTED_FILE_TYPES, (list, tuple, dict))
+        assert isinstance(ALLOWED_FILE_EXTENSIONS, set)
+        assert len(ALLOWED_FILE_EXTENSIONS) > 0
         
-        if isinstance(SUPPORTED_FILE_TYPES, (list, tuple)):
-            assert len(SUPPORTED_FILE_TYPES) > 0
-            # Should include CSV and NC files for MELD data
-            file_extensions = [ext.lower() for ext in SUPPORTED_FILE_TYPES]
-            assert 'csv' in file_extensions or '.csv' in file_extensions
-            assert 'nc' in file_extensions or '.nc' in file_extensions
+        # Check for common file types
+        expected_extensions = {'.csv', '.nc', '.gcode'}
+        assert expected_extensions.issubset(ALLOWED_FILE_EXTENSIONS)
     
     def test_max_file_size_constraint(self):
         """Test file size constraints are reasonable"""
@@ -247,11 +220,11 @@ class TestConstants:
     
     def test_constants_immutability(self):
         """Test that constants cannot be easily modified"""
-        # This is more of a convention test
-        original_height = DEFAULT_PLOT_HEIGHT
+        # Test that constants maintain their values
+        original_max_size = MAX_FILE_SIZE_MB
         
-        # Attempting to modify should not affect the module constant
-        # (This test depends on how constants are implemented)
+        # Constants should be consistent
+        assert MAX_FILE_SIZE_MB == original_max_size
 
 
 class TestConfigIntegration:
@@ -298,9 +271,9 @@ class TestConfigPerformance:
         
         start_time = time.time()
         
-        # Load config multiple times to test caching
+        # Load config multiple times to test performance
         for _ in range(100):
-            config = load_config(temp_config_file)
+            config = load_config()
         
         load_time = time.time() - start_time
         

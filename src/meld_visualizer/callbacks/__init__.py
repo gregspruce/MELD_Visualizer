@@ -9,7 +9,7 @@ from .graph_callbacks import register_graph_callbacks
 from .config_callbacks import register_config_callbacks
 from .visualization_callbacks import register_visualization_callbacks
 from .filter_callbacks import register_filter_callbacks
-from .enhanced_ui_callbacks import register_enhanced_ui_callbacks
+# Enhanced UI callbacks removed - components not integrated into layout
 
 def register_all_callbacks(app=None):
     """
@@ -37,10 +37,6 @@ def register_all_callbacks(app=None):
         
         logger.info("Registering visualization callbacks...")
         register_visualization_callbacks(app)
-        
-        # Temporarily disabled - callbacks reference non-existent components
-        # logger.info("Registering enhanced UI callbacks...")
-        # register_enhanced_ui_callbacks(app)
         
         logger.info("All core callbacks registered successfully")
     except Exception as e:
