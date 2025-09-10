@@ -63,9 +63,9 @@ MAX_Z_STRETCH_FACTOR = 10.0
 # Optimized for standard desktop resolutions: 1920x1080, 1440x900, 1366x768, 1280x1024
 RESPONSIVE_PLOT_CONFIG = {
     'desktop_large': {     # 1920x1080+, 2560x1440+
-        'height': '500px',  # Fixed height for consistent appearance
+        'height': '700px',  # Fixed height for consistent appearance
         'min_height': '450px',
-        'max_height': '550px',
+        'max_height': '1550px',
         'breakpoint': 1920
     },
     'desktop_medium': {    # 1440x900, 1600x900, 1680x1050

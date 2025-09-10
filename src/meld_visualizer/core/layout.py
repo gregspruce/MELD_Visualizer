@@ -3,6 +3,7 @@
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 from ..config import APP_CONFIG, THEMES, PLOTLY_TEMPLATE, SCATTER_3D_HEIGHT, get_responsive_plot_style
+from ..constants import DEFAULT_Z_STRETCH_FACTOR
 # Temporarily disabled - components not integrated properly
 # from .enhanced_ui import EnhancedUIComponents, UserFeedbackManager
 
@@ -396,7 +397,7 @@ def build_gcode_tab():
                 dbc.InputGroup(
                     [
                         dbc.InputGroupText("Z-Axis Stretch Factor"),
-                        dbc.Input(id='gcode-z-stretch-input', type='number', value=2.0, min=0.1, step=0.1),
+                        dbc.Input(id='gcode-z-stretch-input', type='number', value=DEFAULT_Z_STRETCH_FACTOR, min=0.1, step=0.1),
                     ],
                     className="mb-3",
                 ),

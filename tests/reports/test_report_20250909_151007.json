@@ -1,0 +1,52 @@
+{
+  "timestamp": "2025-09-09T15:10:07.965004",
+  "summary": {
+    "total_passed": 0,
+    "total_failed": 1,
+    "total_skipped": 0,
+    "total_time": 0.20256948471069336,
+    "success_rate": 0.0,
+    "details": {
+      "python_unit": {
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "errors": [
+          "ERROR: c:\\VSCode\\AFSD_Programs\\MELD_Visualizer\\tests\\python\\pytest.ini:68: unexpected line: ']'\n\n"
+        ]
+      },
+      "playwright_e2e": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": []
+      },
+      "playwright_integration": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": []
+      },
+      "playwright_performance": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": []
+      },
+      "playwright_visual": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": []
+      }
+    }
+  },
+  "configuration": {
+    "app_url": "http://localhost:8050",
+    "test_types_run": [
+      "python_unit"
+    ],
+    "python_version": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "project_root": "c:\\VSCode\\AFSD_Programs\\MELD_Visualizer"
+  }
+}

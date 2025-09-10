@@ -139,6 +139,8 @@ def setup_logging(
     file: bool = True,
     colored: bool = True
 ) -> None:
+    print(f"DEBUG: setup_logging() called with MELD_LOGGING={os.environ.get('MELD_LOGGING')}")
+    print(f"DEBUG: setup_logging() called with MELD_LOGGING={os.environ.get('MELD_LOGGING')}")
     """
     Set up logging configuration for the application.
     

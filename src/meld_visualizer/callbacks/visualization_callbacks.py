@@ -207,7 +207,7 @@ def register_visualization_callbacks(app=None):
                     xaxis_title='X Position (mm)',
                     yaxis_title='Y Position (mm)',
                     zaxis_title='Z Position (mm)',
-                    aspectmode='manual',
+                    aspectmode='data' if z_stretch_factor == 1.0 else 'manual',
                     aspectratio=custom_aspect_ratio,
                     camera=dict(
                         eye=dict(x=1.5, y=1.5, z=1.5),
@@ -246,7 +246,7 @@ def register_visualization_callbacks(app=None):
                     xaxis_title='X Position (mm)',
                     yaxis_title='Y Position (mm)',
                     zaxis_title='Z Position (mm)',
-                    aspectmode='manual',
+                    aspectmode='data' if z_stretch_factor == 1.0 else 'manual',
                     aspectratio=custom_aspect_ratio,
                     camera=dict(
                         eye=dict(x=1.5, y=1.5, z=1.5),
