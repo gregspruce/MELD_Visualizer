@@ -17,19 +17,29 @@ The MELD Visualizer is a well-structured Dash application with solid foundations
 
 ## 🔴 Critical Issues (Must Fix)
 
-### 1. Missing Core Features Referenced in Documentation
+### 1. Legacy Code and Documentation Cleanup
 **Priority:** CRITICAL  
 **Impact:** HIGH  
-**Effort:** HIGH  
+**Effort:** MEDIUM  
 
-- **PyVista Integration Missing**: Documentation extensively references PyVista 3D visualization capabilities, but no PyVista code exists in main branch
+- **PyVista Remnants**: Extensive PyVista code exists only in backup files (.bak) and git stash from `pyvista_test_branch`
 - **Enhanced UI Components**: `enhanced_ui_callbacks.py` is disabled due to non-existent UI components
-- **Standalone Viewer**: Documentation mentions PyVista standalone viewer but implementation is missing
+- **Inconsistent Documentation**: Current documentation doesn't mention PyVista, but improvement plan incorrectly referenced it
+
+**PyVista Remnants Found:**
+- `src/meld_visualizer/components/pyvista_simple.py.bak` (backup file)
+- `src/meld_visualizer/components/trame_integration.py.bak` (backup file)
+- `src/meld_visualizer/callbacks/pyvista_callbacks.py.bak` (backup file)
+- `src/meld_visualizer/callbacks/pyvista_simple_callbacks.py.bak` (backup file)
+- Git stash and `pyvista_test_branch` references
+- Error logs containing PyVista import failures
 
 **Action Required:**
-- Implement PyVista integration or remove from documentation
+- Remove all .bak files containing PyVista code
+- Clean up git stash and branch references
+- Purge PyVista-related error logs
 - Complete enhanced UI components or remove callback references
-- Clarify feature roadmap vs. current capabilities
+- Update any remaining documentation references
 
 ### 2. Incomplete Callback System
 **Priority:** CRITICAL  
@@ -354,22 +364,20 @@ src/meld_visualizer/
 
 ## 🚀 Feature Gaps
 
-### 19. Missing PyVista 3D Visualization
-**Priority:** HIGH  
-**Impact:** HIGH  
-**Effort:** HIGH
+### 19. Legacy Feature Cleanup
+**Priority:** MEDIUM  
+**Impact:** LOW  
+**Effort:** LOW
 
-**Documentation Claims:**
-- "PyVista Integration: High-performance 3D rendering with 10-100x speed improvement"
-- "PyVista Standalone Viewer: Opens in separate window"
-- "Interactive controls: left-drag rotate, right-drag zoom"
-
-**Reality:** No PyVista code in main branch
+**Current State:**
+- PyVista integration was attempted but abandoned (exists only in backup files)
+- No current documentation references PyVista functionality
+- Legacy backup files and git history contain incomplete implementation
 
 **Action Required:**
-- Implement PyVista integration as documented
-- Create standalone 3D viewer component
-- Add interactive controls and export capabilities
+- Remove PyVista backup files and clean up git history
+- Ensure no dead code references remain
+- Document decision to not pursue PyVista integration
 
 ### 20. Missing Advanced Volume Calculations
 **Priority:** MEDIUM  
@@ -390,12 +398,14 @@ src/meld_visualizer/
 
 ## 📋 Recommended Roadmap
 
-### Phase 1: Foundation (2-3 weeks)
+### Phase 1: Foundation & Cleanup (2-3 weeks)
 **Goal:** Establish reliable foundation
 
-1. **Critical Fixes**
+1. **Critical Fixes & Cleanup**
    - Create missing TODO.md and CHANGELOG.md
    - Fix or remove broken enhanced_ui_callbacks
+   - Remove all PyVista backup files and legacy code
+   - Clean up git stash and branch references
    - Document actual vs. planned features clearly
 
 2. **Test Infrastructure**
@@ -426,13 +436,13 @@ src/meld_visualizer/
    - Implement progress indicators
    - Add performance monitoring
 
-### Phase 3: Feature Completion (4-6 weeks)
-**Goal:** Feature parity with documentation
+### Phase 3: Feature Enhancement (4-6 weeks)
+**Goal:** Feature enhancement and optimization
 
-1. **PyVista Integration**
-   - Implement 3D visualization with PyVista
-   - Create standalone viewer component
-   - Add interactive controls and export
+1. **Legacy Code Cleanup**
+   - Remove PyVista backup files
+   - Clean up git branch references
+   - Purge error logs from failed attempts
 
 2. **Advanced Features**
    - Complete enhanced UI components
@@ -476,7 +486,7 @@ src/meld_visualizer/
 - [ ] Performance benchmarks established
 
 ### Feature Metrics
-- [ ] PyVista integration completed
+- [ ] Legacy PyVista code cleaned up
 - [ ] Enhanced UI components functional
 - [ ] All documented features implemented
 - [ ] User acceptance criteria met
