@@ -3,18 +3,21 @@ Tune the bead width to match physical overlap observed in prints.
 Based on analysis of 20250722163434 build.
 """
 
-import sys
-import os
-import pandas as pd
-import numpy as np
 import json
+import os
+import sys
+
+import numpy as np
+import pandas as pd
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.meld_visualizer.core.volume_calculations import (
-    VolumeCalculator, FeedstockParameters, BeadGeometry
+    BeadGeometry,
+    VolumeCalculator,
 )
+
 
 def calculate_optimal_parameters(track_spacing_mm, desired_overlap_percent=20):
     """
@@ -31,7 +34,7 @@ def calculate_optimal_parameters(track_spacing_mm, desired_overlap_percent=20):
     # Calculate required bead width for desired overlap
     # If tracks are spaced S mm apart and we want O% overlap:
     # Bead width W = S / (1 - O/100)
-    required_width = track_spacing_mm / (1 - desired_overlap_percent/100)
+    required_width = track_spacing_mm / (1 - desired_overlap_percent / 100)
     print(f"Required Bead Width: {required_width:.2f} mm")
 
     # Current default parameters
@@ -59,7 +62,7 @@ def calculate_optimal_parameters(track_spacing_mm, desired_overlap_percent=20):
 
     # Let's try different radius values and solve for the rest
     best_config = None
-    best_error = float('inf')
+    best_error = float("inf")
 
     for radius_factor in np.linspace(3.0, 10.0, 50):
         new_radius = radius_factor
@@ -80,11 +83,11 @@ def calculate_optimal_parameters(track_spacing_mm, desired_overlap_percent=20):
         if area_error < best_error:
             best_error = area_error
             best_config = {
-                'radius': new_radius,
-                'length': new_length,
-                'thickness': thickness_for_width,
-                'width': required_width,
-                'area': calculated_area
+                "radius": new_radius,
+                "length": new_length,
+                "thickness": thickness_for_width,
+                "width": required_width,
+                "area": calculated_area,
             }
 
     if best_config:
@@ -93,7 +96,9 @@ def calculate_optimal_parameters(track_spacing_mm, desired_overlap_percent=20):
         print(f"  Bead Length: {best_config['length']:.2f} mm (was {default_length:.2f} mm)")
         print(f"  Resulting Thickness: {best_config['thickness']:.2f} mm")
         print(f"  Resulting Width: {best_config['width']:.2f} mm")
-        print(f"  Cross-sectional Area: {best_config['area']:.2f} mm² (target: {target_area:.2f} mm²)")
+        print(
+            f"  Cross-sectional Area: {best_config['area']:.2f} mm² (target: {target_area:.2f} mm²)"
+        )
         print(f"  Area Error: {best_error:.2f} mm² ({(best_error/target_area)*100:.1f}%)")
 
         return best_config
@@ -118,30 +123,30 @@ def create_calibrated_config(track_spacing_mm=36.26):
         "feedstock": {
             "dimension_inches": 0.5,
             "shape": "square",
-            "comments": "Standard 0.5 inch square rod feedstock"
+            "comments": "Standard 0.5 inch square rod feedstock",
         },
         "bead_geometry": {
-            "length_mm": optimal['length'],
-            "radius_mm": optimal['radius'],
+            "length_mm": optimal["length"],
+            "radius_mm": optimal["radius"],
             "max_thickness_mm": 50.0,  # Increased to accommodate wider beads
-            "comments": f"Calibrated for {track_spacing_mm:.1f}mm track spacing with 20% overlap"
+            "comments": f"Calibrated for {track_spacing_mm:.1f}mm track spacing with 20% overlap",
         },
         "calibration": {
             "correction_factor": 1.0,
             "area_offset": 0.0,
-            "comments": "Geometry adjusted to match physical bead spreading"
+            "comments": "Geometry adjusted to match physical bead spreading",
         },
         "validation": {
             "track_spacing_mm": track_spacing_mm,
-            "calculated_width_mm": optimal['width'],
+            "calculated_width_mm": optimal["width"],
             "overlap_percent": 20,
-            "source_file": "20250722163434.csv"
-        }
+            "source_file": "20250722163434.csv",
+        },
     }
 
     # Save configuration
-    config_path = 'config/volume_calibration_corrected.json'
-    with open(config_path, 'w') as f:
+    config_path = "config/volume_calibration_corrected.json"
+    with open(config_path, "w") as f:
         json.dump(config, f, indent=2)
 
     print("\n=== Configuration Saved ===")
@@ -150,7 +155,7 @@ def create_calibrated_config(track_spacing_mm=36.26):
     return config
 
 
-def test_calibration(csv_file='data/csv/20250722163434.csv'):
+def test_calibration(csv_file="data/csv/20250722163434.csv"):
     """
     Test the calibrated configuration with actual data.
     """
@@ -158,25 +163,25 @@ def test_calibration(csv_file='data/csv/20250722163434.csv'):
     print("\n=== Testing Calibrated Configuration ===")
 
     # Load the calibrated configuration
-    config_path = 'config/volume_calibration_corrected.json'
+    config_path = "config/volume_calibration_corrected.json"
     if not os.path.exists(config_path):
         print(f"Configuration file not found: {config_path}")
         return
 
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config = json.load(f)
 
     # Create calculator with calibrated parameters
     calc = VolumeCalculator()
     calc.bead_geometry = BeadGeometry(
-        length_mm=config['bead_geometry']['length_mm'],
-        radius_mm=config['bead_geometry']['radius_mm'],
-        max_thickness_mm=config['bead_geometry']['max_thickness_mm']
+        length_mm=config["bead_geometry"]["length_mm"],
+        radius_mm=config["bead_geometry"]["radius_mm"],
+        max_thickness_mm=config["bead_geometry"]["max_thickness_mm"],
     )
 
     # Load and process CSV data
     df = pd.read_csv(csv_file)
-    df_active = df[(df['FeedVel'] > 0.1) & (df['PathVel'] > 0.1)]
+    df_active = df[(df["FeedVel"] > 0.1) & (df["PathVel"] > 0.1)]
 
     print(f"Processing {len(df_active)} active extrusion points...")
     df_processed = calc.process_dataframe(df_active)
@@ -194,13 +199,13 @@ def test_calibration(csv_file='data/csv/20250722163434.csv'):
     print(f"  Bead Thickness: {stats['thickness']['mean']:.2f} mm")
 
     # Calculate effective bead width
-    avg_thickness = stats['thickness']['mean']
+    avg_thickness = stats["thickness"]["mean"]
     bead_width = avg_thickness + 2 * calc.bead_geometry.radius_mm
 
     print(f"  Effective Bead Width: {bead_width:.2f} mm")
 
     # Compare with track spacing
-    track_spacing = config['validation']['track_spacing_mm']
+    track_spacing = config["validation"]["track_spacing_mm"]
     print("\nValidation:")
     print(f"  Track Spacing: {track_spacing:.2f} mm")
 

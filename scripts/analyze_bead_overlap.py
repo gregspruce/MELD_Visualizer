@@ -3,10 +3,11 @@ Analyze bead overlap issue from 20250722163434 build.
 The physical print shows overlapping beads but the volume plot shows gaps.
 """
 
-import sys
 import os
-import pandas as pd
+import sys
+
 import numpy as np
+import pandas as pd
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -24,7 +25,7 @@ def analyze_track_spacing(csv_path):
     print(f"Loaded {len(df)} rows from CSV")
 
     # Filter for active extrusion
-    df_active = df[(df['FeedVel'] > 0.1) & (df['PathVel'] > 0.1)].copy()
+    df_active = df[(df["FeedVel"] > 0.1) & (df["PathVel"] > 0.1)].copy()
     print(f"Active extrusion points: {len(df_active)}")
 
     # Calculate volume data
@@ -41,7 +42,7 @@ def analyze_track_spacing(csv_path):
     print("\n--- Track Spacing Analysis ---")
 
     # Detect layer changes (significant Z changes)
-    z_diff = df_active['ZPos'].diff()
+    z_diff = df_active["ZPos"].diff()
     layer_changes = df_active[z_diff.abs() > 0.5].index
     print(f"Found {len(layer_changes)} layer changes")
 
@@ -53,17 +54,17 @@ def analyze_track_spacing(csv_path):
         layer_data = df_active.loc[start_idx:end_idx]
 
         # Find the dominant movement direction (X or Y)
-        x_range = layer_data['XPos'].max() - layer_data['XPos'].min()
-        y_range = layer_data['YPos'].max() - layer_data['YPos'].min()
+        x_range = layer_data["XPos"].max() - layer_data["XPos"].min()
+        y_range = layer_data["YPos"].max() - layer_data["YPos"].min()
 
         if x_range > y_range:
             # Tracks run mainly in X direction, spaced in Y
-            track_coord = 'YPos'
-            along_coord = 'XPos'
+            track_coord = "YPos"
+            along_coord = "XPos"
         else:
             # Tracks run mainly in Y direction, spaced in X
-            track_coord = 'XPos'
-            along_coord = 'YPos'
+            track_coord = "XPos"
+            along_coord = "YPos"
 
         # Detect track changes (reversals in the along direction)
         along_diff = layer_data[along_coord].diff()
@@ -79,30 +80,34 @@ def analyze_track_spacing(csv_path):
             track_spacings = np.diff(sorted(track_positions))
             if len(track_spacings) > 0:
                 avg_spacing = np.mean(np.abs(track_spacings))
-                layers.append({
-                    'layer': i,
-                    'z_pos': layer_data['ZPos'].mean(),
-                    'track_spacing': avg_spacing,
-                    'num_tracks': len(track_starts)
-                })
+                layers.append(
+                    {
+                        "layer": i,
+                        "z_pos": layer_data["ZPos"].mean(),
+                        "track_spacing": avg_spacing,
+                        "num_tracks": len(track_starts),
+                    }
+                )
 
     if layers:
-        avg_track_spacing = np.mean([layer_info['track_spacing'] for layer_info in layers])
+        avg_track_spacing = np.mean([layer_info["track_spacing"] for layer_info in layers])
         print(f"Average track-to-track spacing: {avg_track_spacing:.2f} mm")
 
         # Sample a few layers for detail
         print("\nSample layer details:")
         for layer in layers[:5]:
-            print("  Layer {layer['layer']}: Z={layer['z_pos']:.2f}mm, "
-                  "Spacing={layer['track_spacing']:.2f}mm, "
-                  f"Tracks={layer['num_tracks']}")
+            print(
+                "  Layer {layer['layer']}: Z={layer['z_pos']:.2f}mm, "
+                "Spacing={layer['track_spacing']:.2f}mm, "
+                f"Tracks={layer['num_tracks']}"
+            )
 
     # Calculate theoretical bead width based on volume
     print("\n--- Bead Width Analysis ---")
 
     # Current bead geometry (capsule shape)
     bead_radius = calc.bead_geometry.radius_mm  # 1.0 mm
-    avg_thickness = stats['thickness']['mean']
+    avg_thickness = stats["thickness"]["mean"]
 
     # Effective bead width (capsule width)
     # Width = thickness + 2 * radius
@@ -125,8 +130,10 @@ def analyze_track_spacing(csv_path):
 
             # Calculate required bead width for overlap
             desired_overlap_percent = 20  # Typical overlap for good fusion
-            required_bead_width = avg_track_spacing / (1 - desired_overlap_percent/100)
-            print(f"\nRequired bead width for {desired_overlap_percent}% overlap: {required_bead_width:.2f} mm")
+            required_bead_width = avg_track_spacing / (1 - desired_overlap_percent / 100)
+            print(
+                f"\nRequired bead width for {desired_overlap_percent}% overlap: {required_bead_width:.2f} mm"
+            )
 
             # Calculate new bead geometry parameters
             # For a capsule: width = T + 2*R
@@ -143,7 +150,7 @@ def analyze_track_spacing(csv_path):
             # Option 2: Increase bead radius (wider bead shape)
             # Assuming we keep the same cross-sectional area
             # Area = π*R² + L*T
-            current_area = stats['bead_area']['mean']
+            current_area = stats["bead_area"]["mean"]
 
             # Try different radius values
             print("\nOption 2: Adjust bead shape parameters")
@@ -177,25 +184,26 @@ def create_tuned_volume_config(csv_path):
             "feedstock": {
                 "dimension_inches": 0.5,
                 "shape": "square",
-                "comments": "Standard 0.5 inch square rod"
+                "comments": "Standard 0.5 inch square rod",
             },
             "bead_geometry": {
                 "length_mm": new_length,
                 "radius_mm": new_radius,
                 "max_thickness_mm": 25.4,
-                "comments": "Tuned for {track_spacing:.2f}mm track spacing with overlap"
+                "comments": "Tuned for {track_spacing:.2f}mm track spacing with overlap",
             },
             "calibration": {
                 "correction_factor": 1.0,
                 "area_offset": 0.0,
-                "comments": "Tuned from {os.path.basename(csv_path)}"
-            }
+                "comments": "Tuned from {os.path.basename(csv_path)}",
+            },
         }
 
         # Save to a new config file
         import json
-        config_path = 'config/volume_calibration_tuned.json'
-        with open(config_path, 'w') as f:
+
+        config_path = "config/volume_calibration_tuned.json"
+        with open(config_path, "w") as f:
             json.dump(config, f, indent=2)
         print(f"\nSaved tuned configuration to {config_path}")
 
@@ -221,19 +229,19 @@ if __name__ == "__main__":
 
         calc = VolumeCalculator()
         calc.bead_geometry = BeadGeometry(
-            length_mm=config['bead_geometry']['length_mm'],
-            radius_mm=config['bead_geometry']['radius_mm']
+            length_mm=config["bead_geometry"]["length_mm"],
+            radius_mm=config["bead_geometry"]["radius_mm"],
         )
 
         # Reprocess data
         df = pd.read_csv(csv_file)
-        df_active = df[(df['FeedVel'] > 0.1) & (df['PathVel'] > 0.1)]
+        df_active = df[(df["FeedVel"] > 0.1) & (df["PathVel"] > 0.1)]
         df_processed = calc.process_dataframe(df_active)
 
         stats = calc.get_statistics(df_processed)
-        avg_thickness = stats['thickness']['mean']
+        avg_thickness = stats["thickness"]["mean"]
 
         # Calculate new bead width
-        new_width = avg_thickness + 2 * config['bead_geometry']['radius_mm']
+        new_width = avg_thickness + 2 * config["bead_geometry"]["radius_mm"]
         print(f"New bead width: {new_width:.2f} mm")
         print("This should now show overlapping beads in the volume plot!")

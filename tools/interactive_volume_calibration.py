@@ -1,14 +1,17 @@
-import sys
-import os
-import pandas as pd
 import json
 import logging
+import os
+import sys
+
+import pandas as pd
 
 # Add parent directory to path to allow importing from src.meld_visualizer
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.meld_visualizer.core.volume_calculations import (  # noqa: E402
-    VolumeCalculator, FeedstockParameters, BeadGeometry
+    BeadGeometry,
+    FeedstockParameters,
+    VolumeCalculator,
 )
 
 # Set the logging level for the root logger to WARNING
@@ -22,14 +25,14 @@ logging.getLogger("src.meld_visualizer").setLevel(logging.WARNING)
 # from src.meld_visualizer.core.volume_mesh import VolumePlotter
 
 
-def load_calibration_config(config_path='config/volume_calibration.json'):
+def load_calibration_config(config_path="config/volume_calibration.json"):
     """Load calibration configuration from JSON file."""
     # Adjust path for interactive script if necessary, assuming config is relative to project root
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     full_config_path = os.path.join(project_root, config_path)
 
     if os.path.exists(full_config_path):
-        with open(full_config_path, 'r') as f:
+        with open(full_config_path, "r") as f:
             config = json.load(f)
         print(f"Loaded configuration from {full_config_path}")
         return config
@@ -38,13 +41,13 @@ def load_calibration_config(config_path='config/volume_calibration.json'):
         return None
 
 
-def save_calibration_config(config, config_path='config/volume_calibration.json'):
+def save_calibration_config(config, config_path="config/volume_calibration.json"):
     """Save calibration configuration to JSON file."""
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     full_config_path = os.path.join(project_root, config_path)
     os.makedirs(os.path.dirname(full_config_path), exist_ok=True)  # Ensure config directory exists
 
-    with open(full_config_path, 'w') as f:
+    with open(full_config_path, "w") as f:
         json.dump(config, f, indent=2)
     print(f"Saved configuration to {full_config_path}")
 
@@ -77,21 +80,21 @@ def calibrate_from_physical_measurement(csv_file_path, actual_volume_cm3):
 
     # Initialize calculator with configuration
     calc = VolumeCalculator()
-    if config and 'feedstock' in config and 'bead_geometry' in config:
+    if config and "feedstock" in config and "bead_geometry" in config:
         calc.feedstock = FeedstockParameters(
-            dimension_inches=config['feedstock']['dimension_inches'],
-            shape=config['feedstock']['shape']
+            dimension_inches=config["feedstock"]["dimension_inches"],
+            shape=config["feedstock"]["shape"],
         )
         calc.bead_geometry = BeadGeometry(
-            length_mm=config['bead_geometry']['length_mm'],
-            radius_mm=config['bead_geometry']['radius_mm'],
-            max_thickness_mm=config['bead_geometry']['max_thickness_mm']
+            length_mm=config["bead_geometry"]["length_mm"],
+            radius_mm=config["bead_geometry"]["radius_mm"],
+            max_thickness_mm=config["bead_geometry"]["max_thickness_mm"],
         )
         print("Using feedstock and bead geometry from config.")
     else:
         print("Using default feedstock and bead geometry.")
 
-    print(f"\nFeedstock: {calc.feedstock.dimension_inches}\" {calc.feedstock.shape}")
+    print(f'\nFeedstock: {calc.feedstock.dimension_inches}" {calc.feedstock.shape}')
     print(f"Feedstock Area: {calc.feedstock.cross_sectional_area_mm2:.2f} mm²")
 
     # Calculate theoretical volume (uncalibrated)
@@ -100,13 +103,17 @@ def calibrate_from_physical_measurement(csv_file_path, actual_volume_cm3):
     stats = calc.get_statistics(df_processed)
 
     theoretical_volume_cm3 = 0.0
-    if 'total_volume' in stats:
-        theoretical_volume_cm3 = stats['total_volume']['cm3']
+    if "total_volume" in stats:
+        theoretical_volume_cm3 = stats["total_volume"]["cm3"]
         print(f"Theoretical Volume: {theoretical_volume_cm3:.2f} cm³")
     else:
-        print("Warning: Could not calculate total volume (missing position data?). Estimating from feed rate.")
-        total_time_min = df_processed['TimeInSeconds'].max() / 60.0
-        avg_volume_rate = stats['process']['feed_vel_mean'] * calc.feedstock.cross_sectional_area_mm2
+        print(
+            "Warning: Could not calculate total volume (missing position data?). Estimating from feed rate."
+        )
+        total_time_min = df_processed["TimeInSeconds"].max() / 60.0
+        avg_volume_rate = (
+            stats["process"]["feed_vel_mean"] * calc.feedstock.cross_sectional_area_mm2
+        )
         theoretical_volume_cm3 = (avg_volume_rate * total_time_min) / 1000.0
         print(f"Estimated from feed rate: {theoretical_volume_cm3:.2f} cm³")
 
@@ -120,7 +127,9 @@ def calibrate_from_physical_measurement(csv_file_path, actual_volume_cm3):
         return None
 
     correction_factor = actual_volume_cm3 / theoretical_volume_cm3
-    print(f"Correction Factor = {actual_volume_cm3:.2f} / {theoretical_volume_cm3:.2f} = {correction_factor:.4f}")
+    print(
+        f"Correction Factor = {actual_volume_cm3:.2f} / {theoretical_volume_cm3:.2f} = {correction_factor:.4f}"
+    )
 
     percentage_error = (correction_factor - 1.0) * 100
     if percentage_error > 0:
@@ -138,12 +147,14 @@ def calibrate_from_physical_measurement(csv_file_path, actual_volume_cm3):
     stats_calibrated = calc.get_statistics(df_calibrated)
 
     calibrated_volume_cm3 = 0.0
-    if 'total_volume' in stats_calibrated:
-        calibrated_volume_cm3 = stats_calibrated['total_volume']['cm3']
+    if "total_volume" in stats_calibrated:
+        calibrated_volume_cm3 = stats_calibrated["total_volume"]["cm3"]
     else:
         # Recalculate estimated volume with correction factor
-        total_time_min = df_calibrated['TimeInSeconds'].max() / 60.0
-        avg_volume_rate = stats_calibrated['process']['feed_vel_mean'] * calc.feedstock.cross_sectional_area_mm2
+        total_time_min = df_calibrated["TimeInSeconds"].max() / 60.0
+        avg_volume_rate = (
+            stats_calibrated["process"]["feed_vel_mean"] * calc.feedstock.cross_sectional_area_mm2
+        )
         calibrated_volume_cm3 = (avg_volume_rate * total_time_min * correction_factor) / 1000.0
 
     print(f"Calibrated Volume: {calibrated_volume_cm3:.2f} cm³")
@@ -161,22 +172,22 @@ def calibrate_from_physical_measurement(csv_file_path, actual_volume_cm3):
     # Save calibration
     print("\n--- Step 5: Save Calibration ---")
     new_config = {
-        'feedstock': {
-            'dimension_inches': calc.feedstock.dimension_inches,
-            'shape': calc.feedstock.shape,
-            'comments': f"Calibrated from {os.path.basename(csv_file_path)}"
+        "feedstock": {
+            "dimension_inches": calc.feedstock.dimension_inches,
+            "shape": calc.feedstock.shape,
+            "comments": f"Calibrated from {os.path.basename(csv_file_path)}",
         },
-        'bead_geometry': {
-            'length_mm': calc.bead_geometry.length_mm,
-            'radius_mm': calc.bead_geometry.radius_mm,
-            'max_thickness_mm': calc.bead_geometry.max_thickness_mm,
-            'comments': "Default capsule geometry"
+        "bead_geometry": {
+            "length_mm": calc.bead_geometry.length_mm,
+            "radius_mm": calc.bead_geometry.radius_mm,
+            "max_thickness_mm": calc.bead_geometry.max_thickness_mm,
+            "comments": "Default capsule geometry",
         },
-        'calibration': {
-            'correction_factor': correction_factor,
-            'area_offset': 0.0,
-            'comments': f"Calibrated to match {actual_volume_cm3} cm³ physical measurement"
-        }
+        "calibration": {
+            "correction_factor": correction_factor,
+            "area_offset": 0.0,
+            "comments": f"Calibrated to match {actual_volume_cm3} cm³ physical measurement",
+        },
     }
 
     save_calibration_config(new_config)
@@ -204,12 +215,14 @@ def analyze_volume_distribution(csv_file_path):
     config = load_calibration_config()
     calc = VolumeCalculator()
 
-    if config and 'calibration' in config:
+    if config and "calibration" in config:
         calc.set_calibration(
-            correction_factor=config['calibration']['correction_factor'],
-            area_offset=config['calibration']['area_offset']
+            correction_factor=config["calibration"]["correction_factor"],
+            area_offset=config["calibration"]["area_offset"],
         )
-        print(f"Using calibration from config (factor: {config['calibration']['correction_factor']:.4f}).")
+        print(
+            f"Using calibration from config (factor: {config['calibration']['correction_factor']:.4f})."
+        )
     else:
         print("No calibration found in config, using uncalibrated calculator.")
 
@@ -217,31 +230,33 @@ def analyze_volume_distribution(csv_file_path):
     df_processed = calc.process_dataframe(df)
 
     # Analyze by layer (Z position)
-    if 'ZPos' in df_processed.columns:
+    if "ZPos" in df_processed.columns:
         # Group by Z layer (round to nearest 0.5mm)
-        df_processed['Layer'] = (df_processed['ZPos'] / 0.5).round() * 0.5
+        df_processed["Layer"] = (df_processed["ZPos"] / 0.5).round() * 0.5
 
-        layer_stats = df_processed.groupby('Layer').agg({
-            'Bead_Area_mm2': ['mean', 'std'],
-            'Bead_Thickness_mm': ['mean', 'std'],
-            'FeedVel': 'mean',
-            'PathVel': 'mean'
-        })
+        layer_stats = df_processed.groupby("Layer").agg(
+            {
+                "Bead_Area_mm2": ["mean", "std"],
+                "Bead_Thickness_mm": ["mean", "std"],
+                "FeedVel": "mean",
+                "PathVel": "mean",
+            }
+        )
 
         print("\nLayer-by-layer analysis:")
         print(layer_stats.head(10))
 
         # Check for variations
-        if not df_processed['Bead_Area_mm2'].empty:
-            area_mean = df_processed['Bead_Area_mm2'].mean()
-            area_std = df_processed['Bead_Area_mm2'].std()
+        if not df_processed["Bead_Area_mm2"].empty:
+            area_mean = df_processed["Bead_Area_mm2"].mean()
+            area_std = df_processed["Bead_Area_mm2"].std()
             area_variation = area_std / area_mean if area_mean != 0 else 0
         else:
             area_variation = 0
 
-        if not df_processed['Bead_Thickness_mm'].empty:
-            thickness_mean = df_processed['Bead_Thickness_mm'].mean()
-            thickness_std = df_processed['Bead_Thickness_mm'].std()
+        if not df_processed["Bead_Thickness_mm"].empty:
+            thickness_mean = df_processed["Bead_Thickness_mm"].mean()
+            thickness_std = df_processed["Bead_Thickness_mm"].std()
             thickness_variation = thickness_std / thickness_mean if thickness_mean != 0 else 0
         else:
             thickness_variation = 0
@@ -270,7 +285,7 @@ def main_menu():
 
         choice = input("Enter your choice (1-3): ")
 
-        if choice == '1':
+        if choice == "1":
             csv_path = input("Enter path to CSV file (e.g., data/csv/20250707144618.csv): ")
             try:
                 actual_volume_cm3 = float(input("Enter measured physical volume in cm³: "))
@@ -279,13 +294,13 @@ def main_menu():
                 print("Invalid volume. Please enter a number.")
             except Exception as e:
                 print(f"An error occurred during calibration: {e}")
-        elif choice == '2':
+        elif choice == "2":
             csv_path = input("Enter path to CSV file (e.g., data/csv/20250707144618.csv): ")
             try:
                 analyze_volume_distribution(csv_path)
             except Exception as e:
                 print(f"An error occurred during analysis: {e}")
-        elif choice == '3':
+        elif choice == "3":
             print("Exiting MELD Volume Calibration Tool. Goodbye!")
             break
         else:
