@@ -1,0 +1,103 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  # Built-in hooks for basic file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: "tests/reports/"
+      - id: end-of-file-fixer
+        exclude: "tests/reports/"
+      - id: check-yaml
+        exclude: "tests/reports/"
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-toml
+      - id: check-json
+        exclude: "tests/reports/"
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      - id: check-merge-conflict
+
+  # Python code formatting with black
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+        language_version: python3
+        args: [--config=pyproject.toml]
+
+  # Import sorting with isort
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile=black, --line-length=100]
+
+  # Linting with flake8
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-docstrings, flake8-import-order]
+        exclude: "tests/reports/"
+
+  # Type checking with mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [
+          types-requests,
+          pandas-stubs,
+          numpy,
+          typing-extensions
+        ]
+        args: [--config-file=pyproject.toml]
+        exclude: "tests/reports/"
+
+  # Security checks with bandit (temporarily disabled due to dependency issue)
+  # - repo: https://github.com/pycqa/bandit
+  #   rev: 1.7.5
+  #   hooks:
+  #     - id: bandit
+  #       args: [--config=pyproject.toml]
+  #       exclude: "tests/"
+
+  # Check for common mistakes
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-check-blanket-noqa
+      - id: python-check-blanket-type-ignore
+      - id: python-no-log-warn
+      - id: python-use-type-annotations
+      - id: text-unicode-replacement-char
+
+  # Additional Python linting
+  - repo: https://github.com/pycqa/autoflake
+    rev: v2.2.1
+    hooks:
+      - id: autoflake
+        args: [
+          --in-place,
+          --remove-all-unused-imports,
+          --remove-unused-variables,
+          --remove-duplicate-keys,
+          --ignore-init-module-imports
+        ]
+        exclude: "tests/reports/"
+
+# Configuration for local development
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

@@ -38,36 +38,38 @@ BEAD_THICKNESS_RATIO = 0.8  # Ratio of actual to maximum thickness
 # MELD uses 0.5" × 0.5" square rod feedstock, not circular wire
 FEEDSTOCK_DIMENSION_INCHES = 0.5  # Square rod dimension (inches)
 FEEDSTOCK_DIMENSION_MM = FEEDSTOCK_DIMENSION_INCHES * INCH_TO_MM  # Convert to mm
-FEEDSTOCK_AREA_MM2 = FEEDSTOCK_DIMENSION_MM ** 2  # Square rod area (mm²)
+FEEDSTOCK_AREA_MM2 = FEEDSTOCK_DIMENSION_MM**2  # Square rod area (mm²)
 
 # Legacy constants for backward compatibility
-WIRE_DIAMETER_MM = FEEDSTOCK_DIMENSION_MM  # For backward compatibility (now represents square dimension)
+WIRE_DIAMETER_MM = (
+    FEEDSTOCK_DIMENSION_MM  # For backward compatibility (now represents square dimension)
+)
 
 # Feedstock type configuration
 FEEDSTOCK_TYPES = {
-    'square': {
-        'dimension_mm': FEEDSTOCK_DIMENSION_MM,
-        'area_mm2': FEEDSTOCK_AREA_MM2,
-        'description': 'Square rod feedstock (0.5" × 0.5")'
+    "square": {
+        "dimension_mm": FEEDSTOCK_DIMENSION_MM,
+        "area_mm2": FEEDSTOCK_AREA_MM2,
+        "description": 'Square rod feedstock (0.5" × 0.5")',
     },
-    'circular': {
-        'diameter_mm': FEEDSTOCK_DIMENSION_MM,
-        'area_mm2': 3.14159 * (FEEDSTOCK_DIMENSION_MM / 2) ** 2,
-        'description': 'Circular wire feedstock (0.5" diameter)'
-    }
+    "circular": {
+        "diameter_mm": FEEDSTOCK_DIMENSION_MM,
+        "area_mm2": 3.14159 * (FEEDSTOCK_DIMENSION_MM / 2) ** 2,
+        "description": 'Circular wire feedstock (0.5" diameter)',
+    },
 }
-DEFAULT_FEEDSTOCK_TYPE = 'square'  # MELD uses square rod
+DEFAULT_FEEDSTOCK_TYPE = "square"  # MELD uses square rod
 
 # File Processing Limits
 MAX_FILE_SIZE_MB = 10  # Maximum upload file size
 MAX_GCODE_LINES = 100000  # Maximum number of G-code lines to process
 MAX_GCODE_LINE_LENGTH = 1000  # Maximum length of a single G-code line
 MAX_CONFIG_SIZE_KB = 100  # Maximum configuration file size
-ALLOWED_FILE_EXTENSIONS = {'.csv', '.nc', '.gcode', '.txt'}  # Allowed upload file types
+ALLOWED_FILE_EXTENSIONS = {".csv", ".nc", ".gcode", ".txt"}  # Allowed upload file types
 
 # UI Display Constants
 DEFAULT_GRAPH_MARGIN = dict(l=0, r=0, b=0, t=0)
-DEFAULT_ASPECT_MODE = 'data'
+DEFAULT_ASPECT_MODE = "data"
 DEFAULT_Z_STRETCH_FACTOR = 1.0
 MIN_Z_STRETCH_FACTOR = 0.1
 MAX_Z_STRETCH_FACTOR = 10.0
@@ -89,51 +91,67 @@ UI_SCROLL_WIDTH_RATIO = 0.3  # Ratio of container width for scrolling
 UI_NUMERIC_INPUT_STEP = 0.1  # Step size for numeric inputs
 
 # 3D Visualization Defaults
-DEFAULT_CAMERA_POSITION = {'x': 1.5, 'y': 1.5, 'z': 1.5}  # Default 3D camera position
+DEFAULT_CAMERA_POSITION = {"x": 1.5, "y": 1.5, "z": 1.5}  # Default 3D camera position
+
+# Error Handling Constants
+DEFAULT_ERROR_MESSAGE = "An unexpected error occurred. Please try again."
+TECHNICAL_ERROR_CONTEXT_MAX_LENGTH = 200  # Max length for context strings in logs
+ERROR_LOG_FORMAT = "[{error_code}] {message}"  # Standard error log format
+MAX_ERROR_STACK_DEPTH = 10  # Maximum error chaining depth to prevent infinite loops
+
+# User Message Templates
+USER_ERROR_MESSAGES = {
+    "file_upload": "Unable to process the uploaded file. Please check the format and try again.",
+    "data_processing": "Failed to process the data. Please verify your input and try again.",
+    "visualization": "Could not generate the visualization. Please try with different data.",
+    "configuration": "Configuration error detected. Please check your settings.",
+    "security": "The file failed security validation. Please ensure it meets the requirements.",
+    "network": "Network error occurred. Please check your connection and try again.",
+}
 
 # Responsive Plot Scaling Constants for Desktop Environments
 # Optimized for standard desktop resolutions: 1920x1080, 1440x900, 1366x768, 1280x1024
 RESPONSIVE_PLOT_CONFIG = {
-    'desktop_large': {     # 1920x1080+, 2560x1440+
-        'height': '700px',  # Fixed height for consistent appearance
-        'min_height': '450px',
-        'max_height': '1550px',
-        'breakpoint': 1920
+    "desktop_large": {  # 1920x1080+, 2560x1440+
+        "height": "700px",  # Fixed height for consistent appearance
+        "min_height": "450px",
+        "max_height": "1550px",
+        "breakpoint": 1920,
     },
-    'desktop_medium': {    # 1440x900, 1600x900, 1680x1050
-        'height': '450px',  # Fixed height for consistent appearance
-        'min_height': '400px',
-        'max_height': '500px',
-        'breakpoint': 1440
+    "desktop_medium": {  # 1440x900, 1600x900, 1680x1050
+        "height": "450px",  # Fixed height for consistent appearance
+        "min_height": "400px",
+        "max_height": "500px",
+        "breakpoint": 1440,
     },
-    'desktop_small': {     # 1366x768, 1280x1024, 1280x800
-        'height': '400px',  # Fixed height for consistent appearance
-        'min_height': '350px',
-        'max_height': '450px', 
-        'breakpoint': 1280
+    "desktop_small": {  # 1366x768, 1280x1024, 1280x800
+        "height": "400px",  # Fixed height for consistent appearance
+        "min_height": "350px",
+        "max_height": "450px",
+        "breakpoint": 1280,
     },
-    'desktop_compact': {   # 1024x768, smaller desktop displays
-        'height': '350px',  # Fixed height for consistent appearance
-        'min_height': '300px',
-        'max_height': '400px',
-        'breakpoint': 1024
-    }
+    "desktop_compact": {  # 1024x768, smaller desktop displays
+        "height": "350px",  # Fixed height for consistent appearance
+        "min_height": "300px",
+        "max_height": "400px",
+        "breakpoint": 1024,
+    },
 }
 
 # Plot Type Specific Adjustments
 PLOT_TYPE_MODIFIERS = {
-    'scatter_3d': 1.0,        # Standard height
-    'volume_mesh': 1.1,       # Slightly taller for complex 3D data
-    'toolpath_3d': 1.0,       # Standard height 
-    'time_series_2d': 0.8,    # Shorter for 2D plots
-    'gcode_viz': 1.0,         # Standard height
-    'custom_3d': 1.0          # Standard height
+    "scatter_3d": 1.0,  # Standard height
+    "volume_mesh": 1.1,  # Slightly taller for complex 3D data
+    "toolpath_3d": 1.0,  # Standard height
+    "time_series_2d": 0.8,  # Shorter for 2D plots
+    "gcode_viz": 1.0,  # Standard height
+    "custom_3d": 1.0,  # Standard height
 }
 
 # Plotly Visualization Constants
 DEFAULT_MARKER_SIZE = 2
 DEFAULT_LINE_WIDTH = 4
-DEFAULT_COLORSCALE = 'Viridis'
+DEFAULT_COLORSCALE = "Viridis"
 DEFAULT_FONT_SIZE = 16
 
 # Data Table Display
@@ -151,34 +169,39 @@ MESH_LOD_MEDIUM = 45  # Medium quality mesh angle step
 MESH_LOD_LOW = 60  # Low quality mesh angle step
 
 # Column Name Mappings (commonly used)
-POSITION_COLUMNS = ['XPos', 'YPos', 'ZPos']
-VELOCITY_COLUMNS = ['FeedVel', 'PathVel']
-TEMPERATURE_COLUMNS = ['ToolTemp', 'SubstrateTemp']
-FORCE_COLUMNS = ['ForceZ', 'ForceX', 'ForceY']
-SPINDLE_COLUMNS = ['SpinVel', 'SpinTrq', 'SpinPwr']
-TIME_COLUMNS = ['Time', 'TimeInSeconds']
+POSITION_COLUMNS = ["XPos", "YPos", "ZPos"]
+VELOCITY_COLUMNS = ["FeedVel", "PathVel"]
+TEMPERATURE_COLUMNS = ["ToolTemp", "SubstrateTemp"]
+FORCE_COLUMNS = ["ForceZ", "ForceX", "ForceY"]
+SPINDLE_COLUMNS = ["SpinVel", "SpinTrq", "SpinPwr"]
+TIME_COLUMNS = ["Time", "TimeInSeconds"]
 
 # Default Column Selections
-DEFAULT_X_AXIS = 'XPos'
-DEFAULT_Y_AXIS = 'YPos'
-DEFAULT_Z_AXIS = 'ZPos'
-DEFAULT_COLOR_COLUMN = 'ToolTemp'
-DEFAULT_FILTER_COLUMN = 'ZPos'
+DEFAULT_X_AXIS = "XPos"
+DEFAULT_Y_AXIS = "YPos"
+DEFAULT_Z_AXIS = "ZPos"
+DEFAULT_COLOR_COLUMN = "ToolTemp"
+DEFAULT_FILTER_COLUMN = "ZPos"
 
 # G-code Processing Constants
-GCODE_FEED_ON_CMD = 'M34'  # Material feed on
-GCODE_FEED_OFF_CMD = 'M35'  # Material feed off
-GCODE_RAPID_MOVE = 'G0'  # Rapid positioning
-GCODE_LINEAR_MOVE = 'G1'  # Linear interpolation
-GCODE_COMMENT_CHARS = ['(', ';']  # Comment indicators
+GCODE_FEED_ON_CMD = "M34"  # Material feed on
+GCODE_FEED_OFF_CMD = "M35"  # Material feed off
+GCODE_RAPID_MOVE = "G0"  # Rapid positioning
+GCODE_LINEAR_MOVE = "G1"  # Linear interpolation
+GCODE_COMMENT_CHARS = ["(", ";"]  # Comment indicators
 
 # Security Configuration
 MAX_GCODE_WORD_LENGTH = 20  # Reasonable max length for a G-code word
 MAX_CONFIG_LIST_LENGTH = 50  # Maximum length for configuration list values
 SAFE_CONFIG_KEYS = {
-    'default_theme', 'plotly_template', 'graph_1_options', 
-    'graph_2_options', 'plot_2d_y_options', 'plot_2d_color_options',
-    'feedstock_type', 'feedstock_dimension_inches'
+    "default_theme",
+    "plotly_template",
+    "graph_1_options",
+    "graph_2_options",
+    "plot_2d_y_options",
+    "plot_2d_color_options",
+    "feedstock_type",
+    "feedstock_dimension_inches",
 }
 
 # Logging Configuration Constants
@@ -198,3 +221,46 @@ ERROR_NO_ACTIVE_DATA = "No active printing data found (FeedVel > 0)."
 SUCCESS_FILE_LOADED = "File loaded successfully."
 SUCCESS_CONFIG_SAVED = "Settings saved successfully!"
 SUCCESS_UNITS_CONVERTED = "Imperial units detected and converted to metric."
+
+# Processing and Calculation Constants
+MELD_FEED_VELOCITY_SCALE_FACTOR = 10.0  # MELD S value is mm/min × 10
+SECONDS_PER_MINUTE = 60.0
+MM3_TO_CM3 = 1000.0
+MESH_VERTICES_PER_CROSS_SECTION = 12
+
+# Network Configuration
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 8050
+
+# Performance Thresholds
+PERFORMANCE_WARNING_THRESHOLD_SECONDS = 2.0
+
+# UI Timing Constants (milliseconds)
+UI_DEBOUNCE_DELAY_MS = 300
+VIEWPORT_CHECK_INTERVAL_MS = 5000
+CONFIG_ALERT_DURATION_MS = 10000
+ALERT_DURATION_SUCCESS_MS = 4000
+ALERT_DURATION_ERROR_MS = 6000
+ALERT_DURATION_INFO_MS = 3000
+DEFAULT_TOAST_DURATION_MS = 5000
+TOAST_SHOW_DELAY_MS = 10
+PROGRESS_COMPLETE_DELAY_MS = 500
+
+# UI Dimensions and Ratios
+DEFAULT_VIEWPORT_WIDTH = 1920
+DEFAULT_VIEWPORT_HEIGHT = 1080
+UI_SCROLL_AMOUNT_PX = 200
+UI_SCROLL_WIDTH_RATIO = 0.3
+UI_NUMERIC_INPUT_STEP = 0.1
+
+# 3D Visualization Defaults
+DEFAULT_CAMERA_POSITION = {"x": 1.5, "y": 1.5, "z": 1.5}
+
+# Security Limits
+MAX_GCODE_WORD_LENGTH = 20
+MAX_CONFIG_LIST_LENGTH = 50
+
+# Logging Configuration
+LOG_FILE_MAX_BYTES = 10 * 1024 * 1024  # 10MB
+ERROR_LOG_FILE_MAX_BYTES = 5 * 1024 * 1024  # 5MB
+LOG_BACKUP_COUNT = 10

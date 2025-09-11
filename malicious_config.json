@@ -1,0 +1,12 @@
+{
+  "default_theme": "dark",
+  "plotly_template": "plotly_dark",
+  "graph_1_options": [
+    "option1",
+    "option2"
+  ],
+  "graph_2_options": [
+    "option3",
+    "option4"
+  ]
+}

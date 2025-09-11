@@ -16,6 +16,7 @@ __author__ = "MELD Manufacturing Team"
 # Optional app import - only import if dependencies are available
 try:
     from .app import app
+
     __all__ = ["app"]
 except ImportError:
     __all__ = []
