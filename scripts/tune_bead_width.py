@@ -13,10 +13,7 @@ import pandas as pd
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.meld_visualizer.core.volume_calculations import (
-    BeadGeometry,
-    VolumeCalculator,
-)
+from src.meld_visualizer.core.volume_calculations import BeadGeometry, VolumeCalculator
 
 
 def calculate_optimal_parameters(track_spacing_mm, desired_overlap_percent=20):

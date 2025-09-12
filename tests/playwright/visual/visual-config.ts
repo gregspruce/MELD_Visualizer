@@ -8,15 +8,15 @@ export interface VisualTestConfig {
   threshold: number;
   maxDiffPixels: number;
   pixelRatio: number;
-  
+
   // Animation and timing
   animations: 'disabled' | 'allow';
   caret: 'hide' | 'initial';
   mode: 'light' | 'dark' | 'forced-colors' | 'no-preference';
-  
+
   // Viewport settings
   scale: 'css' | 'device';
-  
+
   // Masking and clipping
   mask?: Array<{selector: string}>;
   clip?: {x: number, y: number, width: number, height: number};
@@ -126,44 +126,44 @@ export const COMPONENT_SELECTORS = {
   navigation: '[data-testid="navigation-tabs"]',
   mainContent: '[data-testid="main-content"]',
   footer: '[data-testid="app-footer"]',
-  
+
   // File upload components
   fileUpload: '[data-testid="file-upload"]',
   fileUploadDropzone: '[data-testid="file-upload-dropzone"]',
   fileUploadProgress: '[data-testid="file-upload-progress"]',
   fileUploadError: '[data-testid="file-upload-error"]',
   fileUploadSuccess: '[data-testid="file-upload-success"]',
-  
+
   // Tab components
   tabContent: '[data-testid="tab-content"]',
   tabOverview: '[data-testid="tab-overview"]',
   tabVisualization: '[data-testid="tab-visualization"]',
   tabDataTable: '[data-testid="tab-data-table"]',
   tabExport: '[data-testid="tab-export"]',
-  
+
   // Plotly graphs
   plotlyGraph: '.js-plotly-plot',
   scatter3dPlot: '[data-testid="scatter-3d-plot"]',
   volumePlot: '[data-testid="volume-plot"]',
-  
+
   // Data table components
   dataTable: '[data-testid="data-table"]',
   dataTablePagination: '[data-testid="data-table-pagination"]',
   dataTableSearch: '[data-testid="data-table-search"]',
-  
+
   // Export components
   exportSection: '[data-testid="export-section"]',
   exportButtons: '[data-testid="export-buttons"]',
   exportProgress: '[data-testid="export-progress"]',
-  
+
   // Theme switcher
   themeSwitcher: '[data-testid="theme-switcher"]',
   themeToggle: '[data-testid="theme-toggle"]',
-  
+
   // Loading states
   loadingSpinner: '[data-testid="loading-spinner"]',
   loadingOverlay: '[data-testid="loading-overlay"]',
-  
+
   // Error states
   errorMessage: '[data-testid="error-message"]',
   errorBoundary: '[data-testid="error-boundary"]'
@@ -196,14 +196,14 @@ export const ACCESSIBILITY_CONFIG = {
 export const PERFORMANCE_THRESHOLDS = {
   // Layout shift thresholds
   cumulativeLayoutShift: 0.1,
-  
+
   // Paint timing thresholds (ms)
   firstContentfulPaint: 1500,
   largestContentfulPaint: 2500,
-  
+
   // Interaction timing (ms)
   firstInputDelay: 100,
-  
+
   // Resource loading (ms)
   cssLoadTime: 500,
   imageLoadTime: 1000

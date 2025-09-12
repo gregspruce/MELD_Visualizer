@@ -18,19 +18,19 @@ export const enhancedTest = base.extend<{
     lifecycle: import('./dash-react-test-helpers').DashComponentLifecycleTester;
     performance: import('./dash-react-test-helpers').DashPerformanceProfiler;
   };
-  
+
   dashAppReady: void;
-  
+
   componentStateValidator: (componentId: string, expectedProps: Record<string, any>) => Promise<{
     valid: boolean;
     errors: string[];
   }>;
-  
+
   callbackOrderValidator: (expectedOrder: string[]) => Promise<{
     startMonitoring: () => Promise<void>;
     validateOrder: () => Promise<{ valid: boolean; issues: string[] }>;
   }>;
-  
+
   reactRenderProfiler: (componentId: string) => Promise<{
     startProfiling: () => Promise<void>;
     getProfile: () => Promise<{
@@ -39,26 +39,26 @@ export const enhancedTest = base.extend<{
       heavyRenders: Array<{ timestamp: number; duration: number }>;
     }>;
   }>;
-  
+
   dashComponentTester: {
     testComponentMount: (componentId: string) => Promise<{
       mounted: boolean;
       mountTime: number;
       hasCallbacks: boolean;
     }>;
-    
+
     testComponentUpdate: (componentId: string, triggerUpdate: () => Promise<void>) => Promise<{
       updated: boolean;
       renderTime: number;
       propsChanged: boolean;
     }>;
-    
+
     testCallbackChain: (triggerElement: string, expectedCallbacks: string[]) => Promise<{
       executed: boolean;
       order: Array<{ callbackId: string; timestamp: number; duration: number }>;
       errors: string[];
     }>;
-    
+
     testFormValidation: (formId: string, testData: Record<string, string>) => Promise<{
       validated: boolean;
       errors: Array<{ field: string; message: string }>;
@@ -79,18 +79,18 @@ export const enhancedTest = base.extend<{
    */
   dashAppReady: async ({ page }, use) => {
     await DashTestIntegration.waitForDashAppReady(page);
-    
+
     // Additional readiness checks for MELD Visualizer
-    await page.waitForSelector('[data-testid="app-container"], .dash-app-content, #app', { 
-      timeout: 30000 
+    await page.waitForSelector('[data-testid="app-container"], .dash-app-content, #app', {
+      timeout: 30000
     });
-    
+
     // Wait for initial theme application
     await page.waitForFunction(() => {
       const body = document.body;
       return body.classList.length > 0 || body.style.length > 0;
     }, { timeout: 10000 });
-    
+
     await use();
   },
 
@@ -101,7 +101,7 @@ export const enhancedTest = base.extend<{
     const validator = async (componentId: string, expectedProps: Record<string, any>) => {
       return await dashReactContext.inspector.validateComponentProps(componentId, expectedProps);
     };
-    
+
     await use(validator);
   },
 
@@ -122,7 +122,7 @@ export const enhancedTest = base.extend<{
         }
       };
     };
-    
+
     await use(createValidator);
   },
 
@@ -132,13 +132,13 @@ export const enhancedTest = base.extend<{
   reactRenderProfiler: async ({ dashReactContext }, use) => {
     const createProfiler = async (componentId: string) => {
       const tracker = await dashReactContext.inspector.trackReRenders(componentId);
-      
+
       return {
         startProfiling: tracker.startTracking,
         getProfile: async () => {
           const stats = await tracker.stopTracking();
           const performance = await dashReactContext.performance.profileComponentRender(componentId);
-          
+
           return {
             renderCount: stats.renderCount,
             averageRenderTime: stats.averageRenderTime,
@@ -147,7 +147,7 @@ export const enhancedTest = base.extend<{
         }
       };
     };
-    
+
     await use(createProfiler);
   },
 
@@ -159,7 +159,7 @@ export const enhancedTest = base.extend<{
       testComponentMount: async (componentId: string) => {
         const result = await dashReactContext.lifecycle.testComponentMount(componentId);
         const callbacks = await dashReactContext.callbacks.getComponentCallbacks(componentId);
-        
+
         return {
           mounted: result.mounted,
           mountTime: result.mountTime,
@@ -170,19 +170,19 @@ export const enhancedTest = base.extend<{
       testComponentUpdate: async (componentId: string, triggerUpdate: () => Promise<void>) => {
         const tracker = await dashReactContext.inspector.trackReRenders(componentId);
         await tracker.startTracking();
-        
+
         const startTime = performance.now();
         const initialState = await dashReactContext.inspector.getComponentState(componentId);
-        
+
         await triggerUpdate();
-        
+
         // Wait for update to propagate
         await page.waitForTimeout(500);
-        
+
         const finalState = await dashReactContext.inspector.getComponentState(componentId);
         const renderStats = await tracker.stopTracking();
         const updateTime = performance.now() - startTime;
-        
+
         return {
           updated: true,
           renderTime: updateTime,
@@ -194,22 +194,22 @@ export const enhancedTest = base.extend<{
         const monitor = await dashReactContext.callbacks.monitorCallbackExecution({
           trackOrder: true
         });
-        
+
         await monitor.startMonitoring();
-        
+
         // Trigger the callback chain
         const element = page.locator(`#${triggerElement}`);
         await element.click();
-        
+
         // Wait for callbacks to complete
         await page.waitForTimeout(2000);
-        
+
         const execution = await monitor.stopMonitoring();
         const validation = await dashReactContext.callbacks.validateCallbackOrder(
-          expectedCallbacks, 
+          expectedCallbacks,
           execution
         );
-        
+
         return {
           executed: execution.length > 0,
           order: execution,
@@ -219,7 +219,7 @@ export const enhancedTest = base.extend<{
 
       testFormValidation: async (formId: string, testData: Record<string, string>) => {
         const result = await dashReactContext.events.testFormFlow(formId, testData);
-        
+
         return {
           validated: result.validationErrors.length === 0,
           errors: result.validationErrors.map(error => {
@@ -230,7 +230,7 @@ export const enhancedTest = base.extend<{
         };
       }
     };
-    
+
     await use(tester);
   }
 });
@@ -243,25 +243,25 @@ export const dashExpect = {
    * Validate that a Dash component has proper React state
    */
   async toHaveValidReactState(
-    componentId: string, 
+    componentId: string,
     expectedState: Record<string, any>,
     dashContext: any
   ) {
     const state = await dashContext.inspector.getComponentState(componentId);
-    
-    const missingProps = Object.keys(expectedState).filter(key => 
+
+    const missingProps = Object.keys(expectedState).filter(key =>
       !(key in state.props) && expectedState[key].required !== false
     );
-    
+
     const invalidTypes = Object.keys(expectedState).filter(key => {
       if (key in state.props && expectedState[key].type) {
         return typeof state.props[key] !== expectedState[key].type;
       }
       return false;
     });
-    
+
     const valid = missingProps.length === 0 && invalidTypes.length === 0;
-    
+
     return {
       pass: valid,
       message: () => valid
@@ -279,7 +279,7 @@ export const dashExpect = {
     callbackTester: any
   ) {
     const validation = await callbackTester.validateCallbackOrder(expectedOrder, actualExecution);
-    
+
     return {
       pass: validation.valid,
       message: () => validation.valid
@@ -296,11 +296,11 @@ export const dashExpect = {
     thresholds: { maxRenderTime?: number; maxHeavyRenders?: number }
   ) {
     const { maxRenderTime = 50, maxHeavyRenders = 2 } = thresholds;
-    
-    const performant = 
+
+    const performant =
       profileData.averageRenderTime <= maxRenderTime &&
       profileData.heavyRenders.length <= maxHeavyRenders;
-    
+
     return {
       pass: performant,
       message: () => performant
@@ -318,7 +318,7 @@ export const dashExpect = {
     eventSimulator: any
   ) {
     const result = await eventSimulator.testControlledBehavior(componentId, testValue);
-    
+
     return {
       pass: result.isControlled,
       message: () => result.isControlled

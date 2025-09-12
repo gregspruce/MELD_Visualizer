@@ -193,21 +193,31 @@ class MeshGenerator:
         Returns:
             Dictionary with vertices, faces, and vertex_colors
         """
-        # Validate required columns
-        required_cols = ["XPos", "YPos", "ZPos", "Bead_Thickness_mm"]
-        missing_cols = [col for col in required_cols if col not in df.columns]
-        if missing_cols:
-            logger.error(f"Missing required columns: {missing_cols}")
-            return None
+        try:
+            # Validate required columns
+            required_cols = ["XPos", "YPos", "ZPos", "Bead_Thickness_mm"]
+            missing_cols = [col for col in required_cols if col not in df.columns]
+            if missing_cols:
+                logger.error(f"Missing required columns: {missing_cols}")
+                return None
 
-        if color_column not in df.columns:
-            logger.error(f"Color column '{color_column}' not found")
-            return None
+            if color_column not in df.columns:
+                logger.error(f"Color column '{color_column}' not found")
+                return None
 
-        # Extract data as numpy arrays
-        positions = df[["XPos", "YPos", "ZPos"]].values.astype(np.float32)
-        thicknesses = df["Bead_Thickness_mm"].values.astype(np.float32)
-        colors = df[color_column].values.astype(np.float32)
+            # Check for sufficient data
+            if len(df) < 2:
+                logger.error(f"Insufficient data for mesh generation: {len(df)} rows")
+                return None
+
+            # Extract data as numpy arrays
+            positions = df[["XPos", "YPos", "ZPos"]].values.astype(np.float32)
+            thicknesses = df["Bead_Thickness_mm"].values.astype(np.float32)
+            colors = df[color_column].values.astype(np.float32)
+
+        except Exception as e:
+            logger.error(f"Error extracting data for mesh generation: {str(e)}", exc_info=True)
+            return None
 
         # Validate for NaN/Inf values to prevent invalid mesh generation
         positions_valid = np.isfinite(positions).all(axis=1)
@@ -233,37 +243,42 @@ class MeshGenerator:
         vertex_colors = []
         vertex_offset = 0
 
-        # Process each segment
-        n_segments = len(positions) - 1
-        for i in range(n_segments):
-            # Generate segment mesh
-            seg_verts, seg_faces = self.generate_segment_mesh(
-                positions[i],
-                positions[i + 1],
-                thicknesses[i],
-                thicknesses[i + 1],
-                bead_length,
-                bead_radius,
-                width_multiplier,
-            )
+        try:
+            # Process each segment
+            n_segments = len(positions) - 1
+            for i in range(n_segments):
+                # Generate segment mesh
+                seg_verts, seg_faces = self.generate_segment_mesh(
+                    positions[i],
+                    positions[i + 1],
+                    thicknesses[i],
+                    thicknesses[i + 1],
+                    bead_length,
+                    bead_radius,
+                    width_multiplier,
+                )
 
-            # Skip empty segments
-            if len(seg_verts) == 0:
-                continue
+                # Skip empty segments
+                if len(seg_verts) == 0:
+                    continue
 
-            # Add vertices
-            all_vertices.append(seg_verts)
+                # Add vertices
+                all_vertices.append(seg_verts)
 
-            # Add faces with proper offset
-            if len(seg_faces) > 0:
-                all_faces.append(seg_faces + vertex_offset)
+                # Add faces with proper offset
+                if len(seg_faces) > 0:
+                    all_faces.append(seg_faces + vertex_offset)
 
-            # Add colors for all vertices in segment
-            n_verts = len(seg_verts)
-            vertex_colors.extend([colors[i]] * (n_verts // 2))
-            vertex_colors.extend([colors[i + 1]] * (n_verts // 2))
+                # Add colors for all vertices in segment
+                n_verts = len(seg_verts)
+                vertex_colors.extend([colors[i]] * (n_verts // 2))
+                vertex_colors.extend([colors[i + 1]] * (n_verts // 2))
 
-            vertex_offset += n_verts
+                vertex_offset += n_verts
+
+        except Exception as e:
+            logger.error(f"Error processing mesh segments: {str(e)}", exc_info=True)
+            return None
 
         # Combine all data
         if not all_vertices:
@@ -300,51 +315,73 @@ class MeshGenerator:
         Returns:
             Dictionary with vertices, faces, and vertex_colors
         """
-        # Validate geometric parameters to prevent invalid mesh generation
-        if bead_length <= 0 or bead_radius <= 0:
-            logger.error(
-                f"Invalid geometric parameters: length={bead_length}, radius={bead_radius}"
+        try:
+            # Validate input DataFrame
+            if df is None or df.empty:
+                logger.error("DataFrame is None or empty")
+                return None
+
+            # Validate geometric parameters to prevent invalid mesh generation
+            if bead_length <= 0 or bead_radius <= 0:
+                logger.error(
+                    f"Invalid geometric parameters: length={bead_length}, radius={bead_radius}"
+                )
+                return None
+
+            if width_multiplier <= 0:
+                logger.error(f"Invalid width_multiplier: {width_multiplier}")
+                return None
+
+            # Validate LOD parameter
+            if lod not in ["low", "medium", "high"]:
+                logger.warning(f"Invalid LOD '{lod}', using 'high' as default")
+                lod = "high"
+
+        except Exception as e:
+            logger.error(f"Error validating mesh generation parameters: {str(e)}", exc_info=True)
+            return None
+
+        try:
+            # Adjust points per section based on LOD
+            lod_settings = {
+                "low": {"points": 6, "skip": 4},
+                "medium": {"points": 8, "skip": 2},
+                "high": {"points": 12, "skip": 1},
+            }
+
+            settings = lod_settings.get(lod, lod_settings["high"])
+            original_points = self.points_per_section
+
+            # Temporarily adjust points per section
+            self.points_per_section = settings["points"]
+
+            # Downsample DataFrame if using lower LOD
+            if settings["skip"] > 1:
+                df_sampled = df.iloc[:: settings["skip"]].copy()
+                # Ensure we keep the last point
+                if len(df) > 0 and df.index[-1] not in df_sampled.index:
+                    df_sampled = pd.concat([df_sampled, df.iloc[[-1]]])
+            else:
+                df_sampled = df
+
+            # Generate mesh with adjusted settings
+            result = self.generate_mesh(
+                df_sampled, color_column, bead_length, bead_radius, width_multiplier
             )
+
+            # Restore original setting
+            self.points_per_section = original_points
+
+            if result:
+                logger.info(f"Generated {lod} LOD mesh with {len(result['vertices'])} vertices")
+
+            return result
+
+        except Exception as e:
+            # Make sure to restore original setting even if there's an error
+            self.points_per_section = original_points
+            logger.error(f"Error in mesh LOD generation: {str(e)}", exc_info=True)
             return None
-
-        if width_multiplier <= 0:
-            logger.error(f"Invalid width_multiplier: {width_multiplier}")
-            return None
-
-        # Adjust points per section based on LOD
-        lod_settings = {
-            "low": {"points": 6, "skip": 4},
-            "medium": {"points": 8, "skip": 2},
-            "high": {"points": 12, "skip": 1},
-        }
-
-        settings = lod_settings.get(lod, lod_settings["high"])
-        original_points = self.points_per_section
-
-        # Temporarily adjust points per section
-        self.points_per_section = settings["points"]
-
-        # Downsample DataFrame if using lower LOD
-        if settings["skip"] > 1:
-            df_sampled = df.iloc[:: settings["skip"]].copy()
-            # Ensure we keep the last point
-            if len(df) > 0 and df.index[-1] not in df_sampled.index:
-                df_sampled = pd.concat([df_sampled, df.iloc[[-1]]])
-        else:
-            df_sampled = df
-
-        # Generate mesh with adjusted settings
-        result = self.generate_mesh(
-            df_sampled, color_column, bead_length, bead_radius, width_multiplier
-        )
-
-        # Restore original setting
-        self.points_per_section = original_points
-
-        if result:
-            logger.info(f"Generated {lod} LOD mesh with {len(result['vertices'])} vertices")
-
-        return result
 
 
 class VolumePlotter:

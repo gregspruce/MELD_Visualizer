@@ -33,13 +33,13 @@ Two files: `meld_gcodes_compact.csv` and `meld_mcodes_compact.csv`.
 
 
 ### Micro examples
-**Q:** How do I start the spindle and wait for speed?  
+**Q:** How do I start the spindle and wait for speed?
 **A:** Use `M04 S{rpm}` (handshake; waits to ≥95% setpoint). Example: `M04 S350`.
 
-**Q:** What forces a precise stop at a corner?  
+**Q:** What forces a precise stop at a corner?
 **A:** `G60` modal accurate stop (reset by `G00`) or block-level `G09`.
 
-**Q:** Safe program end?  
+**Q:** Safe program end?
 **A:** Put `G04 X0.5` on the line before `M30`, ensure a newline after `M30`.
 
 

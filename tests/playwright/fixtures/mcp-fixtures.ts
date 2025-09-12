@@ -5,18 +5,18 @@
 
 import { test as base, expect, Page, BrowserContext } from '@playwright/test';
 import { PlaywrightMCPUtils } from '../config/mcp-utils';
-import { 
-  HomePageObject, 
-  UploadPageObject, 
-  VisualizationPageObject, 
-  SettingsPageObject 
+import {
+  HomePageObject,
+  UploadPageObject,
+  VisualizationPageObject,
+  SettingsPageObject
 } from '../utils/page-objects';
 import { resolve, join } from 'path';
 import { writeFile, mkdir, rm, readFile } from 'fs/promises';
-import type { 
-  TestTypes, 
-  MELDData, 
-  DashComponents, 
+import type {
+  TestTypes,
+  MELDData,
+  DashComponents,
   PlotlyTypes,
   HomePage,
   UploadPage,
@@ -83,15 +83,15 @@ class MELDTestDataGenerator {
   generateDataPoints(): MELDData.DataPoint[] {
     const points: MELDData.DataPoint[] = [];
     const { count, seed = 12345 } = this.config;
-    
+
     // Simple seeded random generator for reproducible tests
     let random = this.createSeededRandom(seed);
-    
+
     const baseDate = new Date('2024-01-15T10:00:00.000Z');
-    
+
     for (let i = 0; i < count; i++) {
       const timestamp = new Date(baseDate.getTime() + i * 1000);
-      
+
       points.push({
         Date: timestamp.toISOString().split('T')[0],
         Time: timestamp.toTimeString().split(' ')[0] + '.00',
@@ -125,7 +125,7 @@ class MELDTestDataGenerator {
         Tool2Temp: this.generateValue('Tool2Temp', random, 50, 100)
       });
     }
-    
+
     return points;
   }
 
@@ -134,15 +134,15 @@ class MELDTestDataGenerator {
    */
   generateCSV(points: MELDData.DataPoint[]): string {
     if (points.length === 0) return '';
-    
+
     const headers = Object.keys(points[0]);
     const csvLines = [
       headers.join(','),
-      ...points.map(point => 
+      ...points.map(point =>
         headers.map(header => point[header as keyof MELDData.DataPoint]).join(',')
       )
     ];
-    
+
     return csvLines.join('\n');
   }
 
@@ -160,17 +160,17 @@ class MELDTestDataGenerator {
    * Generate value with optional range and distribution
    */
   private generateValue(
-    field: keyof MELDData.DataPoint, 
-    random: () => number, 
-    min: number, 
+    field: keyof MELDData.DataPoint,
+    random: () => number,
+    min: number,
     max: number
   ): number {
     const range = this.config.ranges?.[field];
     const actualMin = range ? range[0] : min;
     const actualMax = range ? range[1] : max;
-    
+
     const distribution = this.config.distributions?.[field] || 'uniform';
-    
+
     switch (distribution) {
       case 'normal':
         // Box-Muller transform for normal distribution
@@ -180,11 +180,11 @@ class MELDTestDataGenerator {
         const mean = (actualMin + actualMax) / 2;
         const stdDev = (actualMax - actualMin) / 6; // 99.7% within range
         return Math.max(actualMin, Math.min(actualMax, mean + z0 * stdDev));
-      
+
       case 'exponential':
         const lambda = 1 / ((actualMax - actualMin) / 2);
         return actualMin - Math.log(random()) / lambda;
-      
+
       default: // uniform
         return actualMin + random() * (actualMax - actualMin);
     }
@@ -199,7 +199,7 @@ export const test = base.extend<{
   mcpUtils: PlaywrightMCPUtils;
   mcpContext: BrowserContext;
   mcpPage: Page;
-  
+
   // MELD-specific fixtures
   testFiles: TestTypes.TestFixtures;
   performanceMonitor: TestTypes.PerformanceMetrics;
@@ -221,7 +221,7 @@ export const test = base.extend<{
     expectNoErrors: () => void;
     expectNoWarnings: () => void;
   };
-  
+
   // Page objects
   homePage: HomePage;
   uploadPage: UploadPage;
@@ -243,7 +243,7 @@ export const test = base.extend<{
         allowedExtensions: ['.csv', '.tsv', '.nc', '.gcode']
       }
     };
-    
+
     const utils = new PlaywrightMCPUtils(config);
     await use(utils);
   },
@@ -255,13 +255,13 @@ export const test = base.extend<{
     const context = await mcpUtils.createMCPContext(browser, {
       recordVideo: {
         dir: process.env.VIDEOS_DIR || resolve(__dirname, '../../reports/videos/'),
-        size: { 
-          width: parseInt(process.env.VIDEO_SIZE_WIDTH || '1920'), 
+        size: {
+          width: parseInt(process.env.VIDEO_SIZE_WIDTH || '1920'),
           height: parseInt(process.env.VIDEO_SIZE_HEIGHT || '1080')
         }
       }
     });
-    
+
     await use(context);
     await context.close();
   },
@@ -271,36 +271,36 @@ export const test = base.extend<{
    */
   mcpPage: async ({ mcpContext, mcpUtils }, use, testInfo) => {
     const page = await mcpContext.newPage();
-    
+
     // Navigate to MELD Visualizer
     await page.goto('/');
-    
+
     // Wait for Dash app to be ready
     if (process.env.WAIT_FOR_DASH_READY !== 'false') {
-      await page.waitForSelector(DEFAULT_SELECTORS.app.container, { 
+      await page.waitForSelector(DEFAULT_SELECTORS.app.container, {
         timeout: parseInt(process.env.NAVIGATION_TIMEOUT || '30000')
       });
-      
+
       // Wait for initial JavaScript to load
       await page.waitForFunction(() => {
         return (window as any).dash_clientside && (window as any).Plotly;
       }, { timeout: 15000 });
     }
-    
+
     await use(page);
-    
+
     // Export logs after test with enhanced metadata
     const logs = mcpUtils.exportLogs();
     if (logs.summary.consoleErrors > 0 || logs.summary.networkErrors > 0) {
       console.log(`📊 Test "${testInfo.title}" logs:`, JSON.stringify(logs.summary, null, 2));
-      
+
       // Save detailed logs for failed tests
       if (testInfo.status === 'failed') {
         const logFile = await mcpUtils.saveLogsToFile(`${testInfo.title}-${Date.now()}.json`);
         console.log(`💾 Detailed logs saved to: ${logFile}`);
       }
     }
-    
+
     await page.close();
   },
 
@@ -310,7 +310,7 @@ export const test = base.extend<{
   testFiles: async ({}, use, testInfo) => {
     const testDataDir = resolve(__dirname, 'test_data');
     await mkdir(testDataDir, { recursive: true });
-    
+
     const generator = new MELDTestDataGenerator({
       seed: 12345,
       count: 100,
@@ -330,11 +330,11 @@ export const test = base.extend<{
     // Generate test data
     const validData = generator.generateDataPoints();
     const validCSV = generator.generateCSV(validData);
-    
+
     // Create minimal data (3 points)
     const minimalData = validData.slice(0, 3);
     const minimalCSV = generator.generateCSV(minimalData);
-    
+
     // Create large dataset (1000 points)
     const largeGenerator = new MELDTestDataGenerator({
       seed: 54321,
@@ -348,14 +348,14 @@ export const test = base.extend<{
 
     // Create test files with proper metadata
     const createTestFile = async (
-      filename: string, 
-      content: string, 
+      filename: string,
+      content: string,
       type: TestTypes.TestFileType,
       description: string
     ): Promise<TestTypes.TestDataFile> => {
       const filePath = join(testDataDir, filename);
       await writeFile(filePath, content, 'utf-8');
-      
+
       return {
         name: filename,
         path: filePath,
@@ -386,47 +386,47 @@ export const test = base.extend<{
 
     const files: TestTypes.TestFixtures = {
       validMELDData: await createTestFile(
-        'valid_meld_data.csv', 
-        validCSV, 
+        'valid_meld_data.csv',
+        validCSV,
         'csv',
         'Valid MELD manufacturing data with 100 points'
       ),
-      
+
       invalidMELDData: await createTestFile(
         'invalid_meld_data.csv',
         'Invalid,Header,Structure\n1,2,3\nfoo,bar,baz',
         'csv',
         'Invalid MELD data with wrong headers and non-numeric values'
       ),
-      
+
       minimalMELDData: await createTestFile(
         'minimal_meld_data.csv',
         minimalCSV,
         'csv',
         'Minimal MELD data with only 3 data points'
       ),
-      
+
       largeMELDData: await createTestFile(
         'large_meld_data.csv',
         largeCSV,
         'csv',
         'Large MELD dataset with 1000 data points for performance testing'
       ),
-      
+
       sampleGCode: await createTestFile(
         'sample_toolpath.nc',
         await readFile(resolve(__dirname, 'test_data/sample_toolpath.nc'), 'utf-8'),
         'gcode',
         'Sample G-code toolpath for MELD manufacturing'
       ),
-      
+
       corruptedFile: await createTestFile(
         'corrupted_file.csv',
         'Date,Time,XPos\n\x00\x01\x02corrupted\x03\x04',
         'csv',
         'Corrupted file with binary characters'
       ),
-      
+
       emptyFile: await createTestFile(
         'empty_file.csv',
         '',
@@ -434,9 +434,9 @@ export const test = base.extend<{
         'Empty file for testing error handling'
       )
     };
-    
+
     await use(files);
-    
+
     // Cleanup test files
     try {
       await rm(testDataDir, { recursive: true, force: true });
@@ -451,7 +451,7 @@ export const test = base.extend<{
   performanceMonitor: async ({ mcpPage, mcpUtils }, use) => {
     let startTime = Date.now();
     const checkpoints: Array<{ name: string; timestamp: number; elapsed: number }> = [];
-    
+
     const monitor = {
       loadTime: 0,
       renderTime: 0,
@@ -461,7 +461,7 @@ export const test = base.extend<{
       networkRequests: 0,
       bundleSize: 0,
       timestamp: new Date().toISOString(),
-      
+
       // Helper methods
       mark: (name: string) => {
         checkpoints.push({
@@ -470,36 +470,36 @@ export const test = base.extend<{
           elapsed: Date.now() - startTime
         });
       },
-      
+
       getMetrics: async () => {
         const metrics = await mcpUtils.getPerformanceMetrics(mcpPage);
         Object.assign(monitor, metrics);
         return metrics;
       },
-      
+
       reset: () => {
         startTime = Date.now();
         checkpoints.length = 0;
       }
     };
-    
+
     // Initial metrics collection
     try {
       await monitor.getMetrics();
     } catch (error) {
       console.warn('Failed to collect initial performance metrics:', error);
     }
-    
+
     await use(monitor);
-    
+
     // Log performance summary
     const finalMetrics = await monitor.getMetrics();
     const loadThreshold = parseInt(process.env.LOAD_TIME_THRESHOLD || '5000');
-    
+
     if (finalMetrics.loadTime > loadThreshold) {
       console.warn(`⚠️  Slow load time: ${finalMetrics.loadTime}ms (threshold: ${loadThreshold}ms)`);
     }
-    
+
     if (checkpoints.length > 0) {
       console.log('📊 Performance checkpoints:', checkpoints);
     }
@@ -513,11 +513,11 @@ export const test = base.extend<{
       takeScreenshot: async (name: string, options: TestTypes.ScreenshotOptions = {}) => {
         return await mcpUtils.takeScreenshot(mcpPage, `${testInfo.title}-${name}`, options);
       },
-      
+
       compareScreenshot: async (name: string, options: TestTypes.VisualTestConfig = {}) => {
         const screenshotName = `${testInfo.title}-${name}`;
         const threshold = options.threshold || 0.2;
-        
+
         try {
           await expect(mcpPage).toHaveScreenshot(`${screenshotName}.png`, {
             threshold,
@@ -526,26 +526,26 @@ export const test = base.extend<{
             fullPage: options.fullPage !== false,
             mask: options.mask
           });
-          
+
           return { passed: true, name: screenshotName, diffPixels: 0, totalPixels: 0, diffRatio: 0, threshold };
         } catch (error) {
           console.warn(`📸 Visual diff detected for ${screenshotName}:`, error);
-          return { 
-            passed: false, 
-            name: screenshotName, 
-            diffPixels: 0, 
-            totalPixels: 0, 
-            diffRatio: 1, 
-            threshold 
+          return {
+            passed: false,
+            name: screenshotName,
+            diffPixels: 0,
+            totalPixels: 0,
+            diffRatio: 1,
+            threshold
           };
         }
       },
-      
+
       waitForPlotlyGraph: async (selector = '.js-plotly-plot', options: TestTypes.PlotlyWaitOptions = {}) => {
         await mcpUtils.waitForPlotlyGraph(mcpPage, selector, options);
       }
     };
-    
+
     await use(visual);
   },
 
@@ -560,7 +560,7 @@ export const test = base.extend<{
             multi: true,
             response: { [outputId]: mockData }
           };
-          
+
           await route.fulfill({
             status: 200,
             contentType: 'application/json',
@@ -568,7 +568,7 @@ export const test = base.extend<{
           });
         });
       },
-      
+
       mockFileUpload: async (response: Partial<TestTypes.FileUploadResponse> = {}) => {
         const defaultResponse: TestTypes.FileUploadResponse = {
           success: true,
@@ -582,7 +582,7 @@ export const test = base.extend<{
           },
           ...response
         };
-        
+
         await mcpContext.route('**/upload*', async (route) => {
           await route.fulfill({
             status: defaultResponse.success ? 200 : 400,
@@ -591,13 +591,13 @@ export const test = base.extend<{
           });
         });
       },
-      
+
       mockApiError: async (endpoint: string, errorCode = 500) => {
         await mcpContext.route(`**${endpoint}**`, async (route) => {
           await route.fulfill({
             status: errorCode,
             contentType: 'application/json',
-            body: JSON.stringify({ 
+            body: JSON.stringify({
               error: 'Mock API error for testing',
               code: errorCode,
               timestamp: new Date().toISOString()
@@ -606,7 +606,7 @@ export const test = base.extend<{
         });
       }
     };
-    
+
     await use(mocker);
   },
 
@@ -617,21 +617,21 @@ export const test = base.extend<{
     const errors: TestTypes.ConsoleLog[] = [];
     const warnings: TestTypes.ConsoleLog[] = [];
     const allLogs: TestTypes.ConsoleLog[] = [];
-    
+
     const monitor = {
       errors,
       warnings,
-      
+
       getErrors: () => errors.slice(),
       getWarnings: () => warnings.slice(),
-      
+
       expectNoErrors: () => {
         if (errors.length > 0) {
           const errorMessages = errors.map(e => `${e.type}: ${e.text}`).join('\n');
           throw new Error(`Expected no console errors, but found ${errors.length}:\n${errorMessages}`);
         }
       },
-      
+
       expectNoWarnings: () => {
         if (warnings.length > 0) {
           const warningMessages = warnings.map(w => `${w.type}: ${w.text}`).join('\n');
@@ -639,7 +639,7 @@ export const test = base.extend<{
         }
       }
     };
-    
+
     // Set up console monitoring
     mcpPage.on('console', (msg) => {
       const logEntry: TestTypes.ConsoleLog = {
@@ -649,16 +649,16 @@ export const test = base.extend<{
         url: mcpPage.url(),
         location: msg.location()
       };
-      
+
       allLogs.push(logEntry);
-      
+
       if (msg.type() === 'error') {
         errors.push(logEntry);
       } else if (msg.type() === 'warn') {
         warnings.push(logEntry);
       }
     });
-    
+
     // Monitor page errors
     mcpPage.on('pageerror', (error) => {
       const errorLog: TestTypes.ConsoleLog = {
@@ -668,11 +668,11 @@ export const test = base.extend<{
         url: mcpPage.url(),
         stack: error.stack
       };
-      
+
       allLogs.push(errorLog);
       errors.push(errorLog);
     });
-    
+
     await use(monitor);
   },
 
@@ -685,7 +685,7 @@ export const test = base.extend<{
   },
 
   /**
-   * Upload page object fixture  
+   * Upload page object fixture
    */
   uploadPage: async ({ mcpPage }, use) => {
     const uploadPage = new UploadPageObject(mcpPage, DEFAULT_SELECTORS);
@@ -718,18 +718,18 @@ expect.extend({
    */
   async toHavePlotlyData(received: unknown, expectedStructure?: object) {
     const plotElement = received as any;
-    const pass = plotElement && 
-                  plotElement._fullData && 
+    const pass = plotElement &&
+                  plotElement._fullData &&
                   Array.isArray(plotElement._fullData) &&
                   plotElement._fullData.length > 0 &&
                   plotElement._fullLayout;
-    
+
     if (expectedStructure && pass) {
       // Additional structure validation could be added here
     }
-    
+
     return {
-      message: () => pass 
+      message: () => pass
         ? `Expected element not to have valid Plotly data structure`
         : `Expected element to have valid Plotly data structure`,
       pass
@@ -772,22 +772,22 @@ expect.extend({
       cpuUsage: 80,
       networkRequests: 50
     };
-    
+
     const finalThresholds = { ...defaultThresholds, ...thresholds };
     const failures: string[] = [];
-    
+
     if (metrics.loadTime > finalThresholds.loadTime) {
       failures.push(`Load time ${metrics.loadTime}ms exceeds threshold ${finalThresholds.loadTime}ms`);
     }
-    
+
     if (metrics.renderTime > finalThresholds.renderTime) {
       failures.push(`Render time ${metrics.renderTime}ms exceeds threshold ${finalThresholds.renderTime}ms`);
     }
-    
+
     if (metrics.memoryUsage > finalThresholds.memoryUsage) {
       failures.push(`Memory usage ${metrics.memoryUsage} bytes exceeds threshold ${finalThresholds.memoryUsage} bytes`);
     }
-    
+
     return {
       message: () => failures.length === 0
         ? `Expected performance metrics not to meet thresholds`
@@ -801,30 +801,30 @@ expect.extend({
    */
   async toBeValidMELDData(received: unknown) {
     const data = received as MELDData.DataPoint[];
-    
+
     if (!Array.isArray(data) || data.length === 0) {
       return {
         message: () => `Expected valid MELD data array, received ${typeof received}`,
         pass: false
       };
     }
-    
+
     const requiredFields: Array<keyof MELDData.DataPoint> = [
       'Date', 'Time', 'XPos', 'YPos', 'ZPos', 'ToolTemp'
     ];
-    
-    const missingFields = requiredFields.filter(field => 
+
+    const missingFields = requiredFields.filter(field =>
       data.some(point => point[field] === undefined || point[field] === null)
     );
-    
-    const hasInvalidNumbers = data.some(point => 
-      ['XPos', 'YPos', 'ZPos', 'ToolTemp'].some(field => 
+
+    const hasInvalidNumbers = data.some(point =>
+      ['XPos', 'YPos', 'ZPos', 'ToolTemp'].some(field =>
         isNaN(Number(point[field as keyof MELDData.DataPoint]))
       )
     );
-    
+
     const pass = missingFields.length === 0 && !hasInvalidNumbers;
-    
+
     return {
       message: () => pass
         ? `Expected invalid MELD data`

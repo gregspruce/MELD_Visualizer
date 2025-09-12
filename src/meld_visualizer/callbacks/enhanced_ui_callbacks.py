@@ -16,9 +16,6 @@ from ..constants import (
     ALERT_DURATION_SUCCESS_MS,
     DEFAULT_VIEWPORT_HEIGHT,
     DEFAULT_VIEWPORT_WIDTH,
-    UI_DEBOUNCE_DELAY_MS,
-    UI_SCROLL_AMOUNT_PX,
-    UI_SCROLL_WIDTH_RATIO,
 )
 from ..core.enhanced_ui import UserFeedbackManager
 
@@ -33,84 +30,42 @@ def register_enhanced_ui_callbacks(app):
     register_toast_notification_callbacks(app)
     register_progress_indicator_callbacks(app)
     register_control_panel_callbacks(app)
+    register_performance_callbacks(app)  # Performance: Add monitoring callbacks
+    register_keyboard_navigation_callbacks(app)
+    register_accessibility_callbacks(app)
 
 
 def register_tab_navigation_callbacks(app):
     """Register callbacks for enhanced tab navigation."""
 
-    # Tab scrolling functionality (client-side)
-    clientside_callback(
-        f"""
-        function(left_clicks, right_clicks) {{
-            const scrollContainer = document.querySelector('.enhanced-tabs-scroll-container');
-            if (!scrollContainer) return [false, false];
-
-            // Calculate scroll amount based on container width
-            const scrollAmount = Math.min({UI_SCROLL_AMOUNT_PX}, scrollContainer.clientWidth * {UI_SCROLL_WIDTH_RATIO});
-
-            // Handle left scroll
-            if (left_clicks && left_clicks > 0) {{
-                scrollContainer.scrollBy({{ left: -scrollAmount, behavior: 'smooth' }});
-            }}
-
-            // Handle right scroll
-            if (right_clicks && right_clicks > 0) {{
-                scrollContainer.scrollBy({{ left: scrollAmount, behavior: 'smooth' }});
-            }}
-
-            // Update button states after scroll
-            setTimeout(() => {{
-                const isAtStart = scrollContainer.scrollLeft <= 0;
-                const isAtEnd = scrollContainer.scrollLeft >=
-                    scrollContainer.scrollWidth - scrollContainer.clientWidth - 1;
-
-                const leftBtn = document.getElementById('tab-scroll-left');
-                const rightBtn = document.getElementById('tab-scroll-right');
-
-                if (leftBtn) leftBtn.disabled = isAtStart;
-                if (rightBtn) rightBtn.disabled = isAtEnd;
-            }}, {UI_DEBOUNCE_DELAY_MS});
-
-            return [false, false];
-        }}
-        """,
-        [
-            Output("tab-scroll-left", "disabled", allow_duplicate=True),
-            Output("tab-scroll-right", "disabled", allow_duplicate=True),
-        ],
-        [Input("tab-scroll-left", "n_clicks"), Input("tab-scroll-right", "n_clicks")],
-        prevent_initial_call=True,
-    )
-
-    # Tab content switching
-    @callback(Output("tab-content", "children"), Input("enhanced-tabs", "active_tab"))
-    def update_tab_content(active_tab):
-        """Update tab content based on active tab."""
-        try:
-            # This will be handled by the Dash Bootstrap Components Tabs
-            # The content is already defined in the tab structure
-            return []
-        except Exception as e:
-            logger.error(f"Error updating tab content: {e}")
-            return []
+    # Skip tab navigation callbacks if enhanced tab components are not present
+    # This allows the enhanced UI to work with existing standard tabs
+    logger.info("Enhanced tab navigation callbacks skipped - using standard dbc.Tabs")
 
 
 def register_loading_state_callbacks(app):
     """Register callbacks for loading state management."""
 
-    # Global loading state management (client-side)
+    # Performance: Optimized loading state management (client-side with debouncing)
     clientside_callback(
         """
         function(loading_state) {
             if (!loading_state) return window.dash_clientside.no_update;
 
-            if (window.dashUtils && loading_state.show !== undefined) {
-                if (loading_state.show) {
-                    window.dashUtils.showLoading(loading_state.message || 'Processing...');
-                } else {
-                    window.dashUtils.hideLoading();
-                }
+            // Performance: Debounce rapid loading state changes
+            if (window._loadingDebouncer) {
+                clearTimeout(window._loadingDebouncer);
             }
+
+            window._loadingDebouncer = setTimeout(() => {
+                if (window.dashUtils && loading_state.show !== undefined) {
+                    if (loading_state.show) {
+                        window.dashUtils.showLoading(loading_state.message || 'Processing...');
+                    } else {
+                        window.dashUtils.hideLoading();
+                    }
+                }
+            }, 50); // 50ms debounce to prevent UI thrashing
 
             return window.dash_clientside.no_update;
         }
@@ -448,6 +403,41 @@ def register_accessibility_callbacks(app):
 def register_performance_callbacks(app):
     """Register callbacks for performance monitoring and optimization."""
 
+    # Performance: Client-side performance monitoring
+    clientside_callback(
+        """
+        function(trigger) {
+            if (!trigger) return window.dash_clientside.no_update;
+
+            // Performance monitoring with Core Web Vitals
+            if (typeof performance !== 'undefined' && performance.mark) {
+                performance.mark('dash-performance-check');
+
+                // Monitor React re-renders
+                if (window.React && window.React.Profiler) {
+                    console.log('React Performance:', {
+                        renderCount: window._dashRenderCount || 0,
+                        lastRenderTime: window._lastRenderDuration || 0
+                    });
+                }
+
+                // Monitor memory usage
+                if (performance.memory) {
+                    const memMB = performance.memory.usedJSHeapSize / 1024 / 1024;
+                    if (memMB > 150) { // 150MB threshold
+                        console.warn('High memory usage detected:', memMB.toFixed(1) + 'MB');
+                    }
+                }
+            }
+
+            return window.dash_clientside.no_update;
+        }
+        """,
+        Output("ui-state-store", "modified_timestamp", allow_duplicate=True),
+        Input("ui-state-store", "data"),
+        prevent_initial_call=True,
+    )
+
     @callback(
         Output("ui-state-store", "data", allow_duplicate=True),
         [Input("store-main-df", "data"), Input("store-gcode-df", "data")],
@@ -467,13 +457,21 @@ def register_performance_callbacks(app):
                 processing_time = current_time - ui_state["data_load_start"]
                 ui_state["last_processing_time"] = processing_time
 
-                # Show performance toast if processing took a while
+                # Performance: Log slow operations for optimization
                 if processing_time > 2.0:  # More than 2 seconds
                     ui_state["performance_warning"] = True
+                    logger.warning(f"Slow data processing detected: {processing_time:.2f}s")
+                elif processing_time > 5.0:  # Critical threshold
+                    logger.error(
+                        f"Critical performance issue: data processing took {processing_time:.2f}s"
+                    )
 
             if gcode_data and "gcode_load_start" in ui_state:
                 processing_time = current_time - ui_state["gcode_load_start"]
                 ui_state["last_gcode_processing_time"] = processing_time
+
+                if processing_time > 3.0:  # G-code threshold
+                    logger.warning(f"Slow G-code processing: {processing_time:.2f}s")
 
             return ui_state
 

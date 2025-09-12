@@ -4,14 +4,14 @@
   "main_entry": "src/meld_visualizer/app.py",
   "current_version": "1.0.0",
   "last_major_fix": "2025-08-18 - Volume calculation correction (27% accuracy improvement)",
-  
+
   "critical_constants": {
     "FEEDSTOCK_DIMENSION_INCHES": 0.5,
     "FEEDSTOCK_DIMENSION_MM": 12.7,
     "FEEDSTOCK_AREA_MM2": 161.29,
     "FEEDSTOCK_GEOMETRY": "SQUARE_ROD"
   },
-  
+
   "architecture": {
     "pattern": "MVC-like",
     "view": "layout.py",
@@ -19,7 +19,7 @@
     "model": "data_processing.py",
     "config": "config.py"
   },
-  
+
   "tech_stack": {
     "framework": "Dash >= 2.14.0",
     "ui": "dash-bootstrap-components",
@@ -27,7 +27,7 @@
     "data": "pandas, numpy",
     "testing": "pytest, selenium"
   },
-  
+
   "quick_commands": {
     "run": "python app.py",
     "test_unit": "pytest -m 'not e2e'",
@@ -35,7 +35,7 @@
     "test_all": "pytest",
     "build": "pyinstaller VolumetricPlotter.spec"
   },
-  
+
   "recent_fixes": [
     {
       "date": "2025-08-18",
@@ -57,20 +57,20 @@
       "new": "gregspruce/MELD_Visualizer"
     }
   ],
-  
+
   "known_issues": [
     "Hot-reloading doesn't work for config.json changes",
     "Theme changes require app restart",
     "Legacy configuration compatibility"
   ],
-  
+
   "future_features": [
     "Enhanced G-code parsing",
     "Real-time data streaming",
     "WebSocket support",
     "Export functionality"
   ],
-  
+
   "file_structure": {
     "src/meld_visualizer/": "Main package directory",
     "src/meld_visualizer/callbacks/": "Modular callback handlers",
@@ -80,13 +80,13 @@
     "CSV/": "Sample data files",
     "config.json": "User configuration"
   },
-  
+
   "testing_markers": {
     "unit": "Unit tests only",
     "integration": "Integration tests",
     "e2e": "End-to-end browser tests"
   },
-  
+
   "agent_context": {
     "last_context_update": "2025-08-18",
     "context_version": "1.0",

@@ -5,11 +5,11 @@
 
 import { test, devices } from '@playwright/test';
 import { VisualTestUtils } from './visual-utils';
-import { 
-  BROWSER_CONFIGS, 
-  RESPONSIVE_VIEWPORTS, 
+import {
+  BROWSER_CONFIGS,
+  RESPONSIVE_VIEWPORTS,
   THEME_CONFIGS,
-  DEFAULT_VISUAL_CONFIG 
+  DEFAULT_VISUAL_CONFIG
 } from './visual-config';
 
 // Test tags for selective execution
@@ -31,31 +31,31 @@ export const TEST_TAGS = {
 export const VISUAL_TEST_SUITE_CONFIG = {
   // Base URL for all tests
   baseURL: 'http://localhost:8050',
-  
+
   // Global timeout settings
   timeout: 30000,
   actionTimeout: 10000,
   navigationTimeout: 15000,
-  
+
   // Retry configuration
   retries: 2,
-  
+
   // Screenshot settings
   screenshot: {
     mode: 'only-on-failure' as const,
     fullPage: true
   },
-  
+
   // Video settings
   video: {
     mode: 'retain-on-failure' as const,
     size: { width: 1280, height: 720 }
   },
-  
+
   // Test directory structure
   testDir: './visual',
   outputDir: './visual-results',
-  
+
   // Browser projects for cross-browser testing
   projects: [
     {
@@ -85,27 +85,27 @@ export const VISUAL_TEST_SUITE_CONFIG = {
       testMatch: /responsive.*\.(test|spec)\.ts/
     }
   ],
-  
+
   // Reporter configuration
   reporter: [
     ['html', { outputFolder: 'visual-report', open: 'never' }],
     ['json', { outputFile: 'visual-results.json' }],
     ['junit', { outputFile: 'visual-junit.xml' }]
   ],
-  
+
   // Global setup and teardown
   globalSetup: './visual-global-setup.ts',
   globalTeardown: './visual-global-teardown.ts',
-  
+
   // Worker configuration
   workers: process.env.CI ? 2 : undefined,
-  
+
   // Test file patterns
   testMatch: [
     '**/visual/**/*.test.ts',
     '**/visual/**/*.spec.ts'
   ],
-  
+
   // Ignore patterns
   testIgnore: [
     '**/node_modules/**',
@@ -128,7 +128,7 @@ export const VISUAL_TEST_CATEGORIES = {
     tags: [TEST_TAGS.VISUAL, TEST_TAGS.REGRESSION],
     priority: 'high'
   },
-  
+
   // Cross-browser compatibility
   CROSS_BROWSER: {
     description: 'Cross-browser visual consistency validation',
@@ -138,7 +138,7 @@ export const VISUAL_TEST_CATEGORIES = {
     tags: [TEST_TAGS.VISUAL, TEST_TAGS.CROSS_BROWSER],
     priority: 'high'
   },
-  
+
   // Responsive design validation
   RESPONSIVE: {
     description: 'Responsive design and viewport testing',
@@ -148,7 +148,7 @@ export const VISUAL_TEST_CATEGORIES = {
     tags: [TEST_TAGS.VISUAL, TEST_TAGS.RESPONSIVE],
     priority: 'medium'
   },
-  
+
   // Animation and interaction testing
   ANIMATION: {
     description: 'Animation, transitions, and interactive feedback',
@@ -158,7 +158,7 @@ export const VISUAL_TEST_CATEGORIES = {
     tags: [TEST_TAGS.VISUAL, TEST_TAGS.ANIMATION],
     priority: 'medium'
   },
-  
+
   // Accessibility visual validation
   ACCESSIBILITY: {
     description: 'Accessibility features and WCAG compliance',
@@ -168,7 +168,7 @@ export const VISUAL_TEST_CATEGORIES = {
     tags: [TEST_TAGS.VISUAL, TEST_TAGS.ACCESSIBILITY],
     priority: 'high'
   },
-  
+
   // CSS and layout validation
   CSS: {
     description: 'CSS properties, layouts, and performance validation',
@@ -234,13 +234,13 @@ export const ENVIRONMENT_CONFIGS = {
     threshold: 0.2, // More lenient for development
     timeout: 60000
   },
-  
+
   staging: {
     ...DEFAULT_VISUAL_CONFIG,
     threshold: 0.1, // Stricter for staging
     timeout: 45000
   },
-  
+
   production: {
     ...DEFAULT_VISUAL_CONFIG,
     threshold: 0.05, // Very strict for production
@@ -265,13 +265,13 @@ export const VisualTestHelpers = {
    */
   async setupTestEnvironment(page: any): Promise<VisualTestUtils> {
     const visualUtils = new VisualTestUtils(page);
-    
+
     // Wait for application to be ready
     await page.waitForLoadState('networkidle');
-    
+
     // Disable animations by default
     await visualUtils.disableAnimations();
-    
+
     return visualUtils;
   },
 
@@ -284,7 +284,7 @@ export const VisualTestHelpers = {
       // Remove any test elements
       const testElements = document.querySelectorAll('[data-testid]');
       testElements.forEach(el => el.remove());
-      
+
       // Reset any modified styles
       const modifiedStyles = document.querySelectorAll('style[data-test]');
       modifiedStyles.forEach(style => style.remove());
@@ -297,10 +297,10 @@ export const VisualTestHelpers = {
   async waitForStability(page: any): Promise<void> {
     // Wait for network requests to complete
     await page.waitForLoadState('networkidle');
-    
+
     // Wait for any pending animations
     await page.waitForTimeout(500);
-    
+
     // Wait for fonts to load
     await page.evaluate(() => {
       return document.fonts.ready;

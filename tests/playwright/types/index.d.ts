@@ -16,19 +16,19 @@ export type {
   MELDData.Dataset,
   MELDData.MELDPoint3D,
   MELDData.ValidationResult,
-  
+
   // Dash Components
   DashComponents.CallbackContext,
   DashComponents.UploadedFile,
   DashComponents.ThemeConfig,
   DashComponents.DataTableProps,
-  
+
   // Plotly
   PlotlyTypes.Scatter3DTrace,
   PlotlyTypes.PlotlyLayout,
   PlotlyTypes.PlotlyConfig,
   PlotlyTypes.MELDPlotConfig,
-  
+
   // Testing
   TestTypes.MELDTestConfig,
   TestTypes.TestDataFile,
@@ -65,27 +65,27 @@ declare global {
        * Custom matcher for Plotly graph validation
        */
       toHavePlotlyData(expectedStructure?: object): R;
-      
+
       /**
        * Custom matcher for viewport validation
        */
       toBeInViewport(): R;
-      
+
       /**
        * Custom matcher for performance validation
        */
       toMeetPerformanceThresholds(thresholds?: object): R;
-      
+
       /**
        * Custom matcher for MELD data validation
        */
       toBeValidMELDData(): R;
-      
+
       /**
        * Custom matcher for accessibility compliance
        */
       toBeAccessible(options?: object): R;
-      
+
       /**
        * Custom matcher for visual regression
        */
@@ -101,14 +101,14 @@ declare module '@playwright/test' {
     mcpUtils: import('./test-types').TestTypes.TestExecutionContext['fixtures'];
     mcpContext: BrowserContext;
     mcpPage: Page;
-    
+
     // MELD-specific fixtures
     testFiles: import('./test-types').TestTypes.TestFixtures;
     performanceMonitor: import('./test-types').TestTypes.PerformanceMetrics;
     visualTester: import('./test-types').TestTypes.VisualTestConfig;
     networkMocker: import('./test-types').TestTypes.NetworkMockConfig;
     consoleMonitor: import('./test-types').TestTypes.TestAssertions;
-    
+
     // Page objects
     homePage: HomePage;
     uploadPage: UploadPage;
@@ -122,7 +122,7 @@ export interface HomePage extends import('./test-types').BasePage {
   readonly header: Locator;
   readonly navigation: Locator;
   readonly themeToggle: Locator;
-  
+
   goto(): Promise<void>;
   switchTheme(theme: import('./dash-components').DashComponents.ThemeConfig['name']): Promise<void>;
   navigateToTab(tabId: string): Promise<void>;
@@ -134,7 +134,7 @@ export interface UploadPage extends import('./test-types').BasePage {
   readonly uploadButton: Locator;
   readonly progressBar: Locator;
   readonly statusMessage: Locator;
-  
+
   uploadFile(file: import('./test-types').TestTypes.TestDataFile): Promise<void>;
   waitForUploadComplete(): Promise<void>;
   getUploadStatus(): Promise<'success' | 'error' | 'pending'>;
@@ -146,7 +146,7 @@ export interface VisualizationPage extends import('./test-types').BasePage {
   readonly exportButton: Locator;
   readonly resetButton: Locator;
   readonly legend: Locator;
-  
+
   waitForGraphRender(): Promise<void>;
   getTraceCount(): Promise<number>;
   getDataPoints(): Promise<ReadonlyArray<import('./meld-data').MELDData.MELDPoint3D>>;
@@ -160,7 +160,7 @@ export interface SettingsPage extends import('./test-types').BasePage {
   readonly performanceOptions: Locator;
   readonly exportSettings: Locator;
   readonly resetSettings: Locator;
-  
+
   changeTheme(theme: import('./dash-components').DashComponents.ThemeConfig['name']): Promise<void>;
   updatePerformanceSettings(settings: object): Promise<void>;
   resetToDefaults(): Promise<void>;
@@ -176,7 +176,7 @@ export namespace TypeHelpers {
     with<K extends keyof T>(key: K, value: T[K]): TestDataBuilder<T>;
     build(): T;
   }
-  
+
   /**
    * Create a mock response builder
    */
@@ -188,7 +188,7 @@ export namespace TypeHelpers {
     withStatus(code: number): MockBuilder;
     build(): import('./test-types').TestTypes.NetworkMock;
   }
-  
+
   /**
    * Create a performance assertion builder
    */
@@ -198,7 +198,7 @@ export namespace TypeHelpers {
     memoryUsage(threshold: number): PerformanceAssertionBuilder;
     build(): import('./test-types').TestTypes.PerformanceThresholds;
   }
-  
+
   /**
    * Create a visual test configuration builder
    */
@@ -222,7 +222,7 @@ export const TEST_CONSTANTS = {
     FILE_UPLOAD: 30_000,
     DASH_CALLBACK: 10_000,
   },
-  
+
   // Viewport sizes
   VIEWPORTS: {
     DESKTOP: { width: 1920, height: 1080 },
@@ -231,7 +231,7 @@ export const TEST_CONSTANTS = {
     MOBILE: { width: 375, height: 667 },
     HIGH_DPI: { width: 2560, height: 1440 },
   },
-  
+
   // Performance thresholds
   PERFORMANCE: {
     LOAD_TIME: 5_000,
@@ -240,21 +240,21 @@ export const TEST_CONSTANTS = {
     MEMORY_USAGE: 100_000_000, // 100MB
     CPU_USAGE: 80, // 80%
   },
-  
+
   // File size limits
   FILE_SIZES: {
     MIN: 1024, // 1KB
     MAX: 10_000_000, // 10MB
     LARGE: 1_000_000, // 1MB
   },
-  
+
   // Visual regression thresholds
   VISUAL: {
     THRESHOLD: 0.2,
     PIXEL_DIFF: 100,
     RATIO_DIFF: 0.01,
   },
-  
+
   // Test data generation
   DATA_GENERATION: {
     DEFAULT_COUNT: 1000,
@@ -263,7 +263,7 @@ export const TEST_CONSTANTS = {
     MIN_VELOCITY: 0,
     MAX_VELOCITY: 100,
   },
-  
+
   // Common selectors
   SELECTORS: {
     APP_CONTAINER: '[data-testid="app-container"], .dash-app-content, #app',
@@ -272,17 +272,17 @@ export const TEST_CONSTANTS = {
     ERROR_MESSAGE: '[data-testid="error"], .error',
     SUCCESS_MESSAGE: '[data-testid="success"], .success',
   },
-  
+
   // Network patterns
   NETWORK: {
     DASH_CALLBACK: '**/_dash-update-component',
     FILE_UPLOAD: '**/upload*',
     STATIC_ASSETS: '**/*.{css,js,png,jpg,svg,woff,woff2}',
   },
-  
+
   // Theme names
   THEMES: ['light', 'dark', 'plotly', 'plotly_dark'] as const,
-  
+
   // File extensions
   EXTENSIONS: {
     MELD_DATA: ['.csv', '.tsv'],
@@ -298,10 +298,10 @@ export interface ConfigValidator {
     valid: boolean;
     errors: ReadonlyArray<string>;
   };
-  
+
   validateMELDData(data: unknown): data is import('./meld-data').MELDData.DataPoint;
-  
+
   validatePlotlyConfig(config: unknown): config is import('./plotly-types').PlotlyTypes.PlotlyConfig;
-  
+
   validatePageSelectors(selectors: unknown): selectors is import('./test-types').TestTypes.PageSelectors;
 }

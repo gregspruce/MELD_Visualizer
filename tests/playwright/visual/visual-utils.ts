@@ -30,10 +30,10 @@ export class VisualTestUtils {
    */
   async waitForPlotlyRender(selector: string = COMPONENT_SELECTORS.plotlyGraph): Promise<void> {
     await this.page.waitForSelector(selector, { state: 'visible' });
-    
+
     // Wait for Plotly to be ready
     await this.page.waitForFunction(() => {
-      return typeof window.Plotly !== 'undefined' && 
+      return typeof window.Plotly !== 'undefined' &&
              document.querySelectorAll('.js-plotly-plot').length > 0;
     });
 
@@ -54,10 +54,10 @@ export class VisualTestUtils {
    */
   async setTheme(themeName: keyof typeof THEME_CONFIGS): Promise<void> {
     const themeConfig = THEME_CONFIGS[themeName];
-    
+
     // Apply color scheme preference
     await this.page.emulateMedia({ colorScheme: themeConfig.colorScheme });
-    
+
     // Apply CSS variables if specified
     if (themeConfig.cssVariables) {
       await this.page.addStyleTag({
@@ -93,11 +93,11 @@ export class VisualTestUtils {
   async setViewport(viewportName: keyof typeof RESPONSIVE_VIEWPORTS): Promise<void> {
     const viewport = RESPONSIVE_VIEWPORTS[viewportName];
     await this.page.setViewportSize(viewport);
-    
+
     // Wait for responsive layout adjustments
     await this.page.waitForTimeout(200);
     await this.waitForAnimationsToComplete();
-    
+
     // Wait for any responsive Plotly graph resizing
     try {
       await this.page.waitForFunction(() => {
@@ -124,7 +124,7 @@ export class VisualTestUtils {
           transition-duration: 0s !important;
           transition-delay: 0s !important;
         }
-        
+
         .plotly .js-plotly-plot .plotly-notifier {
           display: none !important;
         }
@@ -149,18 +149,18 @@ export class VisualTestUtils {
     config: Partial<VisualTestConfig> = {}
   ): Promise<void> {
     const finalConfig = { ...DEFAULT_VISUAL_CONFIG, ...config };
-    
+
     // Wait for component to be visible
     await this.page.waitForSelector(selector, { state: 'visible' });
-    
+
     // Wait for animations to complete
     await this.waitForAnimationsToComplete();
-    
+
     // Special handling for Plotly graphs
     if (selector.includes('.js-plotly-plot') || selector.includes('plot')) {
       await this.waitForPlotlyRender(selector);
     }
-    
+
     const locator = this.page.locator(selector);
     await expect(locator).toHaveScreenshot(`${name}.png`, {
       threshold: finalConfig.threshold,
@@ -181,18 +181,18 @@ export class VisualTestUtils {
     config: Partial<VisualTestConfig> = {}
   ): Promise<void> {
     const finalConfig = { ...DEFAULT_VISUAL_CONFIG, ...config };
-    
+
     // Wait for page to be fully loaded
     await this.page.waitForLoadState('networkidle');
     await this.waitForAnimationsToComplete();
-    
+
     // Wait for any Plotly graphs to render
     try {
       await this.waitForPlotlyRender();
     } catch {
       // No Plotly graphs present
     }
-    
+
     await expect(this.page).toHaveScreenshot(`${name}.png`, {
       fullPage: true,
       threshold: finalConfig.threshold,
@@ -273,15 +273,15 @@ export class VisualTestUtils {
     config: Partial<VisualTestConfig> = {}
   ): Promise<void> {
     const element = this.page.locator(selector);
-    
+
     // Normal state
     await this.screenshotComponent(selector, `${baseName}-normal`, config);
-    
+
     // Hover state
     await element.hover();
     await this.page.waitForTimeout(ANIMATION_DURATIONS.hoverEffect);
     await this.screenshotComponent(selector, `${baseName}-hover`, config);
-    
+
     // Focus state (if focusable)
     try {
       await element.focus();
@@ -301,15 +301,15 @@ export class VisualTestUtils {
   ): Promise<void> {
     // Test focus indicators
     const element = this.page.locator(selector);
-    
+
     try {
       await element.focus();
       await this.screenshotComponent(selector, `${baseName}-focus-indicator`);
-      
+
       // Test high contrast mode
       await this.page.emulateMedia({ forcedColors: 'active' });
       await this.screenshotComponent(selector, `${baseName}-high-contrast`);
-      
+
       // Reset forced colors
       await this.page.emulateMedia({ forcedColors: 'none' });
     } catch {
@@ -340,7 +340,7 @@ export class VisualTestUtils {
       '[data-testid="file-size"]',
       '[data-testid="processing-time"]'
     ];
-    
+
     return [...defaultMasks, ...additionalSelectors].map(selector => ({ selector }));
   }
 
@@ -350,20 +350,20 @@ export class VisualTestUtils {
   async waitForFileUploadComplete(): Promise<void> {
     // Wait for upload progress to disappear
     try {
-      await this.page.waitForSelector(COMPONENT_SELECTORS.fileUploadProgress, { 
-        state: 'hidden', 
-        timeout: 10000 
+      await this.page.waitForSelector(COMPONENT_SELECTORS.fileUploadProgress, {
+        state: 'hidden',
+        timeout: 10000
       });
     } catch {
       // Progress indicator might not be present
     }
-    
+
     // Wait for success or error state
     await this.page.waitForSelector(
       `${COMPONENT_SELECTORS.fileUploadSuccess}, ${COMPONENT_SELECTORS.fileUploadError}`,
       { timeout: 10000 }
     );
-    
+
     // Additional wait for any subsequent processing
     await this.page.waitForTimeout(500);
   }
@@ -388,7 +388,7 @@ export class VisualTestUtils {
         justify-content: center;
         z-index: 9999;
       `;
-      
+
       const spinner = document.createElement('div');
       spinner.setAttribute('data-testid', 'loading-spinner');
       spinner.style.cssText = `
@@ -399,7 +399,7 @@ export class VisualTestUtils {
         border-radius: 50%;
         animation: spin 1s linear infinite;
       `;
-      
+
       const style = document.createElement('style');
       style.textContent = `
         @keyframes spin {
@@ -407,11 +407,11 @@ export class VisualTestUtils {
           100% { transform: rotate(360deg); }
         }
       `;
-      
+
       document.head.appendChild(style);
       overlay.appendChild(spinner);
       document.body.appendChild(overlay);
-      
+
       // Remove after duration
       setTimeout(() => {
         if (overlay.parentNode) {
@@ -419,7 +419,7 @@ export class VisualTestUtils {
         }
       }, duration);
     }, duration);
-    
+
     await this.page.waitForTimeout(duration + 100);
   }
 }
@@ -429,7 +429,7 @@ export class VisualTestUtils {
  */
 export class BaselineManager {
   private baselinePath: string;
-  
+
   constructor(baselinePath: string = path.join(__dirname, 'baselines')) {
     this.baselinePath = baselinePath;
     this.ensureBaselineDirectory();
@@ -447,7 +447,7 @@ export class BaselineManager {
   }
 
   async compareWithBaseline(
-    currentScreenshot: string, 
+    currentScreenshot: string,
     baselineName: string
   ): Promise<{ match: boolean; diffPixels: number }> {
     // Implementation for programmatic baseline comparison

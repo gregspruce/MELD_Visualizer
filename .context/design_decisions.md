@@ -108,7 +108,7 @@ class InputValidator:
     def sanitize_filename(filename: str) -> str:
         # Remove path traversal attempts
         return os.path.basename(filename)
-    
+
     @staticmethod
     def validate_upload_size(contents: str, max_size_mb: int = 100):
         # Check file size before processing

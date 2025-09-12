@@ -1,8 +1,8 @@
 # MELD Visualizer - Comprehensive Onboarding Documentation
 
-**Generated:** August 19, 2025  
-**Claude Code Onboarding Session ID:** onboard-2025-08-19  
-**Repository:** https://github.com/gregspruce/MELD_Visualizer  
+**Generated:** August 19, 2025
+**Claude Code Onboarding Session ID:** onboard-2025-08-19
+**Repository:** https://github.com/gregspruce/MELD_Visualizer
 
 ## Executive Summary
 
@@ -34,7 +34,7 @@ MELD_Visualizer/
 │   ├── config.py                 # Configuration and theme management
 │   ├── core/                     # Core functionality
 │   │   ├── layout.py            # UI components (View layer)
-│   │   ├── data_processing.py   # Data operations (Model layer) 
+│   │   ├── data_processing.py   # Data operations (Model layer)
 │   │   ├── volume_calculations.py # MELD volume math
 │   │   └── volume_mesh.py       # 3D mesh generation
 │   ├── callbacks/               # Modular controller system
@@ -90,7 +90,7 @@ MELD_Visualizer/
   - Unified callback registration into single flow
   - Enhanced hot-reload integration without duplicates
   - Added comprehensive error handling and logging
-- **Results**: 
+- **Results**:
   - ✅ Excellent performance: 0.01s startup, <4ms responses
   - ✅ All functionality preserved (filters, themes, hot-reload)
   - ✅ Clean, maintainable callback architecture
@@ -246,7 +246,7 @@ DEBUG=1 meld-visualizer
 pytest -m "unit" -v
 
 # Integration tests (component interactions)
-pytest -m "integration" -v  
+pytest -m "integration" -v
 
 # E2E tests (full browser automation)
 pytest -m "e2e" -v
@@ -257,7 +257,7 @@ pytest --cov=src/meld_visualizer --cov-report=html
 
 ### Test Structure
 - **Unit Tests**: `tests/unit/` - Function-level testing
-- **Integration Tests**: `tests/integration/` - Component interactions  
+- **Integration Tests**: `tests/integration/` - Component interactions
 - **E2E Tests**: `tests/e2e/` - Selenium browser automation
 - **Configuration**: `pytest.ini`, `conftest.py`
 
@@ -268,7 +268,7 @@ pytest --cov=src/meld_visualizer --cov-report=html
 # Format code
 black src/ tests/
 
-# Lint code  
+# Lint code
 flake8 src/ tests/
 
 # Type checking
@@ -309,7 +309,7 @@ TEST_SUITE=e2e bash scripts/run_tests.sh
 5. **Processing**: Data cleanup, column mapping, time handling
 6. **Visualization**: Interactive 3D plots with customizable parameters
 
-### G-code Processing  
+### G-code Processing
 1. **Upload**: Dedicated G-code upload area
 2. **Parsing**: G-code command interpretation (G0, G1, M34, M35)
 3. **Simulation**: Toolpath generation with feedstock extrusion
@@ -333,7 +333,7 @@ TEST_SUITE=e2e bash scripts/run_tests.sh
 
 ### Benchmarks (Typical Usage)
 - **CSV Parsing**: <50ms for 100 rows, <2s for 10,000 rows
-- **Mesh Generation**: <500ms for 100 points, <5s for 1,000 points  
+- **Mesh Generation**: <500ms for 100 points, <5s for 1,000 points
 - **Cache Hit Rate**: >80% for standard workflows
 - **Memory Usage**: <500MB for typical manufacturing datasets
 
@@ -457,7 +457,7 @@ DEBUG=1 meld-visualizer
 - **Components**: `docs/components/components.md` - Technical components
 - **API Docs**: `docs/api/openapi.yaml` - API specifications
 
-### Development Resources  
+### Development Resources
 - **Development Guide**: `docs/agents.md` - Detailed development instructions
 - **Claude Instructions**: `docs/CLAUDE.md` - AI assistant guidance
 - **Security Audit**: `docs/SECURITY_AUDIT.md` - Security analysis
@@ -473,7 +473,7 @@ DEBUG=1 meld-visualizer
 
 ### Development Environment ✅
 - [x] Project structure explored and documented
-- [x] Installation methods and requirements understood  
+- [x] Installation methods and requirements understood
 - [x] Testing framework and categories identified
 - [x] Common development workflows documented
 
@@ -491,8 +491,8 @@ DEBUG=1 meld-visualizer
 
 ---
 
-**Onboarding Status**: ✅ COMPLETE  
-**Documentation**: Comprehensive and ready for development work  
+**Onboarding Status**: ✅ COMPLETE
+**Documentation**: Comprehensive and ready for development work
 **Next Steps**: Ready to begin feature development, bug fixes, or enhancement tasks
 
 *This onboarding documentation serves as the complete reference for any future Claude Code sessions working with the MELD Visualizer codebase.*

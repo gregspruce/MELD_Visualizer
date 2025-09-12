@@ -59,7 +59,7 @@
 - **Unit Tests**: Full coverage of data processing functions
 - **Integration Tests**: Complete workflow testing
 - **E2E Tests**: Browser automation for user scenarios
-- **Test Suite**: 
+- **Test Suite**:
   - Run with `pytest` (all tests)
   - `pytest -m "not e2e"` (unit tests only)
   - `pytest -m "e2e"` (E2E tests only)

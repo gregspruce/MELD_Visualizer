@@ -64,7 +64,7 @@ module.exports = defineConfig({
   projects: [
     {
       name: 'chromium-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         launchOptions: {
           args: [
@@ -78,7 +78,7 @@ module.exports = defineConfig({
     },
     {
       name: 'firefox-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
         launchOptions: {
           firefoxUserPrefs: {
@@ -90,7 +90,7 @@ module.exports = defineConfig({
     },
     {
       name: 'webkit-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
         launchOptions: {
           args: ['--disable-web-security']
@@ -100,7 +100,7 @@ module.exports = defineConfig({
     /* Mobile testing for responsive design */
     {
       name: 'mobile-chrome',
-      use: { 
+      use: {
         ...devices['Pixel 5'],
         isMobile: true,
         hasTouch: true
@@ -108,7 +108,7 @@ module.exports = defineConfig({
     },
     {
       name: 'mobile-safari',
-      use: { 
+      use: {
         ...devices['iPhone 12'],
         isMobile: true,
         hasTouch: true
@@ -139,7 +139,7 @@ module.exports = defineConfig({
       NODE_ENV: 'test',
     },
   },
-  
+
   /* Output directories */
   outputDir: '../reports/test-results',
 });

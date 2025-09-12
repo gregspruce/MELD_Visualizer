@@ -1,6 +1,6 @@
 # Pull Request: Fix Volume Plot Bead Overlap Calibration
 
-**Branch**: `fix/bead-overlap-calibration`  
+**Branch**: `fix/bead-overlap-calibration`
 **Target**: `main`
 
 ## Summary

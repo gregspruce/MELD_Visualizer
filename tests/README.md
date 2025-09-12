@@ -58,7 +58,7 @@ tests/
    ```bash
    # Install test dependencies
    pip install -e ".[test,playwright]"
-   
+
    # Or install from requirements
    pip install -r requirements-dev.txt
    ```
@@ -74,7 +74,7 @@ tests/
    ```bash
    # Test Python setup
    python -m pytest tests/python/unit/ --collect-only
-   
+
    # Test Playwright setup
    npx playwright test --list
    ```
@@ -266,7 +266,7 @@ def test_local_only_feature():
    # tests/python/unit/test_new_feature.py
    import pytest
    from meld_visualizer.new_feature import NewFeature
-   
+
    class TestNewFeature:
        def test_basic_functionality(self):
            feature = NewFeature()
@@ -278,7 +278,7 @@ def test_local_only_feature():
    ```javascript
    // tests/playwright/e2e/test_new_workflow.spec.js
    import { test, expect } from '@playwright/test';
-   
+
    test('new workflow test', async ({ page }) => {
      await page.goto('http://localhost:8050');
      // Add test steps
@@ -289,7 +289,7 @@ def test_local_only_feature():
    ```python
    # tests/playwright/e2e/test_with_page_objects.py
    from fixtures.page_objects import MeldVisualizerPage
-   
+
    async def test_file_upload(page):
        meld_page = MeldVisualizerPage(page)
        await meld_page.navigate()
@@ -309,7 +309,7 @@ def test_local_only_feature():
    # Use Faker for dynamic test data
    from faker import Faker
    fake = Faker()
-   
+
    test_data = {
        'date': fake.date(),
        'temperature': fake.pyfloat(min_value=100, max_value=200),
@@ -331,10 +331,10 @@ def test_local_only_feature():
    ```bash
    # Run with debugger
    python -m pytest tests/python/unit/test_file.py::test_function --pdb
-   
+
    # Verbose output
    python -m pytest tests/python/unit/ -v -s
-   
+
    # Show local variables on failure
    python -m pytest tests/python/unit/ -l
    ```
@@ -343,10 +343,10 @@ def test_local_only_feature():
    ```bash
    # Debug mode (opens browser debugger)
    npx playwright test --debug
-   
+
    # Headed mode (visible browser)
    npx playwright test --headed
-   
+
    # Trace viewer
    npx playwright test --trace on
    ```
@@ -424,7 +424,7 @@ safety check
    ```bash
    # Check if port 8050 is available
    netstat -an | grep 8050
-   
+
    # Start application manually
    python -m meld_visualizer
    ```
@@ -433,7 +433,7 @@ safety check
    ```bash
    # Reinstall browsers
    npx playwright install --force
-   
+
    # Install system dependencies
    npx playwright install-deps
    ```
@@ -442,7 +442,7 @@ safety check
    ```bash
    # Install in development mode
    pip install -e .
-   
+
    # Check Python path
    python -c "import sys; print(sys.path)"
    ```
@@ -451,7 +451,7 @@ safety check
    ```bash
    # Verify test data exists
    ls tests/playwright/fixtures/test_data/
-   
+
    # Regenerate if needed
    python tests/generate_test_data.py
    ```

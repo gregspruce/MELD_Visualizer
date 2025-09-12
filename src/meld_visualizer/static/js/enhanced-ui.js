@@ -7,6 +7,9 @@ class EnhancedUIManager {
     constructor() {
         this.toasts = new Map();
         this.scrollPositions = new Map();
+        this.eventControllers = new Map(); // Performance: Track AbortControllers for cleanup
+        this.rafId = null; // Performance: RequestAnimationFrame ID for batching
+        this.pendingUpdates = new Set(); // Performance: Batch DOM updates
         this.init();
     }
 
@@ -34,37 +37,65 @@ class EnhancedUIManager {
             return Math.min(200, scrollContainer.clientWidth * 0.3);
         };
 
-        leftButton.addEventListener('click', () => {
+        // Performance: Use AbortController for proper cleanup
+        const scrollController = new AbortController();
+        this.eventControllers.set('tab-scroll', scrollController);
+
+        const leftClickHandler = () => {
             const scrollAmount = getScrollAmount();
             scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-        });
-
-        rightButton.addEventListener('click', () => {
-            const scrollAmount = getScrollAmount();
-            scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        });
-
-        // Update button states based on scroll position
-        const updateScrollButtons = () => {
-            const isAtStart = scrollContainer.scrollLeft <= 0;
-            const isAtEnd = scrollContainer.scrollLeft >= 
-                scrollContainer.scrollWidth - scrollContainer.clientWidth - 1;
-
-            leftButton.disabled = isAtStart;
-            rightButton.disabled = isAtEnd;
-
-            leftButton.style.opacity = isAtStart ? '0.3' : '1';
-            rightButton.style.opacity = isAtEnd ? '0.3' : '1';
         };
 
-        scrollContainer.addEventListener('scroll', updateScrollButtons);
-        
-        // Initial update
-        setTimeout(updateScrollButtons, 100);
-        
-        // Update on resize
-        window.addEventListener('resize', () => {
-            setTimeout(updateScrollButtons, 100);
+        const rightClickHandler = () => {
+            const scrollAmount = getScrollAmount();
+            scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        };
+
+        leftButton.addEventListener('click', leftClickHandler, { signal: scrollController.signal });
+        rightButton.addEventListener('click', rightClickHandler, { signal: scrollController.signal });
+
+        // Performance: Throttle scroll updates using RAF
+        let updateScheduled = false;
+        const updateScrollButtons = () => {
+            if (updateScheduled) return;
+            updateScheduled = true;
+
+            requestAnimationFrame(() => {
+                const isAtStart = scrollContainer.scrollLeft <= 0;
+                const isAtEnd = scrollContainer.scrollLeft >=
+                    scrollContainer.scrollWidth - scrollContainer.clientWidth - 1;
+
+                leftButton.disabled = isAtStart;
+                rightButton.disabled = isAtEnd;
+
+                leftButton.style.opacity = isAtStart ? '0.3' : '1';
+                rightButton.style.opacity = isAtEnd ? '0.3' : '1';
+
+                updateScheduled = false;
+            });
+        };
+
+        scrollContainer.addEventListener('scroll', updateScrollButtons, {
+            signal: scrollController.signal,
+            passive: true  // Performance: Passive scroll listener
+        });
+
+        // Performance: Use RAF instead of setTimeout
+        requestAnimationFrame(updateScrollButtons);
+
+        // Performance: Throttled resize handler
+        const resizeController = new AbortController();
+        this.eventControllers.set('tab-resize', resizeController);
+
+        let resizeTimeoutId;
+        const resizeHandler = () => {
+            clearTimeout(resizeTimeoutId);
+            resizeTimeoutId = setTimeout(updateScrollButtons, 100);
+        };
+
+        window.addEventListener('resize', resizeHandler, {
+            signal: resizeController.signal,
+            passive: true
         });
     }
 
@@ -101,7 +132,7 @@ class EnhancedUIManager {
 
         const toast = this.createToastElement(id, type, title, message, icon, duration);
         const container = document.getElementById('toast-container');
-        
+
         if (!container) return;
 
         container.appendChild(toast);
@@ -155,7 +186,7 @@ class EnhancedUIManager {
 
         const toast = toastData.element;
         toast.classList.remove('show');
-        
+
         setTimeout(() => {
             if (toast.parentNode) {
                 toast.parentNode.removeChild(toast);
@@ -181,34 +212,66 @@ class EnhancedUIManager {
     }
 
     /**
-     * Update progress indicator
+     * Update progress indicator (Performance optimized with RAF batching)
      * @param {string} progressId - Progress indicator ID
      * @param {number} value - Progress value
      * @param {number} maxValue - Maximum value
      */
     updateProgress(progressId, value, maxValue = 100) {
-        const progressBar = document.getElementById(`${progressId}-bar`);
-        const progressText = progressBar?.querySelector('.progress-text');
+        // Performance: Batch progress updates using RAF
+        this.pendingUpdates.add({
+            type: 'progress',
+            id: progressId,
+            value,
+            maxValue,
+            timestamp: performance.now()
+        });
 
-        if (!progressBar || !progressText) return;
-
-        const percentage = Math.min(100, Math.max(0, (value / maxValue) * 100));
-        
-        progressBar.style.width = `${percentage}%`;
-        progressText.textContent = `${Math.round(percentage)}%`;
-
-        // Add completion styling
-        if (percentage >= 100) {
-            progressBar.classList.add('completed');
-            setTimeout(() => {
-                this.showToast({
-                    type: 'success',
-                    title: 'Task Complete',
-                    message: 'Operation completed successfully!',
-                    duration: 3000
-                });
-            }, 500);
+        if (!this.rafId) {
+            this.rafId = requestAnimationFrame(() => {
+                this.flushPendingUpdates();
+                this.rafId = null;
+            });
         }
+    }
+
+    /**
+     * Performance: Flush all pending DOM updates in a single RAF
+     */
+    flushPendingUpdates() {
+        const updates = Array.from(this.pendingUpdates);
+        this.pendingUpdates.clear();
+
+        // Group updates by type for efficiency
+        const progressUpdates = updates.filter(u => u.type === 'progress');
+
+        // Process progress updates
+        progressUpdates.forEach(update => {
+            const progressBar = document.getElementById(`${update.id}-bar`);
+            const progressText = progressBar?.querySelector('.progress-text');
+
+            if (!progressBar || !progressText) return;
+
+            const percentage = Math.min(100, Math.max(0, (update.value / update.maxValue) * 100));
+
+            // Batch DOM writes
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${Math.round(percentage)}%`;
+
+            // Add completion styling
+            if (percentage >= 100 && !progressBar.classList.contains('completed')) {
+                progressBar.classList.add('completed');
+                // Performance: Defer non-critical toast
+                setTimeout(() => {
+                    this.showToast({
+                        type: 'success',
+                        title: 'Task Complete',
+                        message: 'Operation completed successfully!',
+                        duration: 3000
+                    });
+                }, 500);
+            }
+        });
     }
 
     setupProgressUpdates() {
@@ -233,7 +296,7 @@ class EnhancedUIManager {
             if (!icon) return;
 
             header.classList.toggle('collapsed');
-            
+
             // Let Bootstrap handle the collapse, just update the icon
             const targetId = header.getAttribute('data-bs-target');
             if (targetId) {
@@ -287,7 +350,7 @@ class EnhancedUIManager {
             if (event.ctrlKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
                 this.handleTabKeyboardNavigation(event);
             }
-            
+
             // Escape to close modals/toasts
             if (event.key === 'Escape') {
                 this.handleEscapeKey();
@@ -298,7 +361,7 @@ class EnhancedUIManager {
     handleTabKeyboardNavigation(event) {
         const tabs = document.querySelectorAll('.enhanced-tabs .nav-link');
         const activeTab = document.querySelector('.enhanced-tabs .nav-link.active');
-        
+
         if (!tabs.length || !activeTab) return;
 
         const currentIndex = Array.from(tabs).indexOf(activeTab);
@@ -337,8 +400,9 @@ class EnhancedUIManager {
      */
     showLoading(message = 'Processing...') {
         let overlay = document.getElementById('loading-overlay');
-        
+
         if (!overlay) {
+            // Create new loading overlay with full structure
             overlay = document.createElement('div');
             overlay.id = 'loading-overlay';
             overlay.className = 'loading-overlay';
@@ -350,7 +414,19 @@ class EnhancedUIManager {
             `;
             document.body.appendChild(overlay);
         } else {
-            overlay.querySelector('.loading-message').textContent = message;
+            // Defensive programming: check if overlay has proper structure
+            const messageElement = overlay.querySelector('.loading-message');
+            if (messageElement) {
+                messageElement.textContent = message;
+            } else {
+                // If overlay exists but is empty/malformed, recreate the structure
+                overlay.innerHTML = `
+                    <div class="loading-content">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-message">${message}</p>
+                    </div>
+                `;
+            }
         }
 
         overlay.classList.add('show');
@@ -389,11 +465,55 @@ class EnhancedUIManager {
         const event = new CustomEvent(eventName, { detail });
         window.dispatchEvent(event);
     }
+
+    /**
+     * Performance: Cleanup method for proper memory management
+     */
+    cleanup() {
+        // Cancel any pending RAF
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
+
+        // Abort all event controllers
+        this.eventControllers.forEach(controller => {
+            controller.abort();
+        });
+        this.eventControllers.clear();
+
+        // Clear pending updates
+        this.pendingUpdates.clear();
+
+        // Remove all toasts
+        this.toasts.forEach((_, id) => this.removeToast(id));
+        this.toasts.clear();
+
+        console.log('EnhancedUIManager cleaned up successfully');
+    }
+}
+
+// Utility function to safely define custom elements
+function safeCustomElementDefine(name, constructor, options) {
+    if (!customElements.get(name)) {
+        try {
+            customElements.define(name, constructor, options);
+        } catch (error) {
+            console.warn(`Custom element '${name}' could not be defined:`, error);
+        }
+    }
 }
 
 // Initialize Enhanced UI Manager when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.enhancedUI = new EnhancedUIManager();
+});
+
+// Performance: Cleanup on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+    if (window.enhancedUI && typeof window.enhancedUI.cleanup === 'function') {
+        window.enhancedUI.cleanup();
+    }
 });
 
 // Expose utility functions for Dash callbacks
@@ -408,7 +528,7 @@ window.dashUtils = {
 // Clientside callbacks for Dash integration
 if (window.dash_clientside) {
     window.dash_clientside.namespace = window.dash_clientside.namespace || {};
-    
+
     // Toast notification callback
     window.dash_clientside.enhanced_ui = {
         show_toast: function(trigger, config) {
@@ -416,19 +536,19 @@ if (window.dash_clientside) {
             window.dashUtils.showToast(config);
             return window.dash_clientside.no_update;
         },
-        
+
         show_loading: function(trigger, message) {
             if (!trigger) return window.dash_clientside.no_update;
             window.dashUtils.showLoading(message || 'Processing...');
             return window.dash_clientside.no_update;
         },
-        
+
         hide_loading: function(trigger) {
             if (!trigger) return window.dash_clientside.no_update;
             window.dashUtils.hideLoading();
             return window.dash_clientside.no_update;
         },
-        
+
         update_progress: function(value, max_value, progress_id) {
             if (value === undefined || !progress_id) return window.dash_clientside.no_update;
             window.dashUtils.updateProgress(progress_id, value, max_value || 100);

@@ -27,41 +27,41 @@ jobs:
     name: Extended Performance Testing
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: 'pip'
-    
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install memory-profiler psutil
-    
+
     - name: Install Playwright
       working-directory: tests/playwright
       run: |
         npm ci
         npx playwright install --with-deps chromium
-    
+
     - name: Generate Large Test Dataset
       run: |
         python -c "
         import pandas as pd
         import numpy as np
         from datetime import datetime, timedelta
-        
+
         # Generate large dataset for performance testing
         rows = 50000
         start_date = datetime.now() - timedelta(days=7)
-        
+
         data = {
             'Date': [(start_date + timedelta(seconds=i)).strftime('%Y-%m-%d') for i in range(rows)],
             'Time': [(start_date + timedelta(seconds=i)).strftime('%H:%M:%S.00') for i in range(rows)],
@@ -74,12 +74,12 @@ jobs:
             'ToolTemp': np.random.normal(150, 25, rows),
             'Gcode': np.random.randint(30, 60, rows)
         }
-        
+
         df = pd.DataFrame(data)
         df.to_csv('tests/playwright/fixtures/test_data/large_performance_dataset.csv', index=False)
         print(f'Generated dataset with {len(df)} rows')
         "
-    
+
     - name: Start Application with Profiling
       run: |
         # Start with memory profiling
@@ -87,7 +87,7 @@ jobs:
         echo "MELD_PID=$!" >> $GITHUB_ENV
         sleep 45  # Extra time for large dataset handling
         curl -f http://localhost:8050 || exit 1
-    
+
     - name: Run Extended Performance Tests
       working-directory: tests/playwright
       run: |
@@ -101,23 +101,23 @@ jobs:
           --output-dir=../reports/nightly-performance
       env:
         PERFORMANCE_TEST_DURATION: ${{ github.event.inputs.performance_duration || '30' }}
-    
+
     - name: Memory Usage Analysis
       run: |
         # Stop memory profiling and generate report
         mprof stop
         mprof plot --output tests/reports/memory_profile.png
-        
+
         # Generate memory usage report
         python -c "
         import json
         import psutil
         import os
-        
+
         # Get current process memory usage
         process = psutil.Process()
         memory_info = process.memory_info()
-        
+
         report = {
             'memory_usage_mb': memory_info.rss / 1024 / 1024,
             'virtual_memory_mb': memory_info.vms / 1024 / 1024,
@@ -125,22 +125,22 @@ jobs:
             'system_memory_total': psutil.virtual_memory().total / 1024 / 1024,
             'system_memory_available': psutil.virtual_memory().available / 1024 / 1024
         }
-        
+
         with open('tests/reports/memory_analysis.json', 'w') as f:
             json.dump(report, f, indent=2)
-        
+
         print('Memory Analysis:')
         print(f'RSS Memory: {report[\"memory_usage_mb\"]:.1f} MB')
         print(f'Virtual Memory: {report[\"virtual_memory_mb\"]:.1f} MB')
         "
-    
+
     - name: Stop Application
       if: always()
       run: |
         if [ ! -z "$MELD_PID" ]; then
           kill $MELD_PID || true
         fi
-    
+
     - name: Upload Performance Results
       uses: actions/upload-artifact@v3
       if: always()
@@ -157,35 +157,35 @@ jobs:
     name: Visual Regression Tests
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.include_visual_regression != 'false' }}
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: 'pip'
-    
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
+
     - name: Install Playwright
       working-directory: tests/playwright
       run: |
         npm ci
         npx playwright install --with-deps
-    
+
     - name: Start Application
       run: |
         python -m meld_visualizer &
         echo "MELD_PID=$!" >> $GITHUB_ENV
         sleep 30
         curl -f http://localhost:8050 || exit 1
-    
+
     - name: Run Visual Tests
       working-directory: tests/playwright
       run: |
@@ -193,14 +193,14 @@ jobs:
           --config=config/playwright.config.js \
           --update-snapshots=false \
           --reporter=json
-    
+
     - name: Stop Application
       if: always()
       run: |
         if [ ! -z "$MELD_PID" ]; then
           kill $MELD_PID || true
         fi
-    
+
     - name: Upload Visual Test Results
       uses: actions/upload-artifact@v3
       if: always()
@@ -224,32 +224,32 @@ jobs:
             python-version: '3.9'
           - os: windows-latest
             python-version: '3.9'
-    
+
     runs-on: ${{ matrix.os }}
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
-    
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-    
+
     - name: Run Python Unit Tests
       run: |
         python -m pytest tests/python/unit/ \
           -v \
           --tb=short \
           --junitxml=tests/reports/cross_platform_results_${{ matrix.os }}_py${{ matrix.python-version }}.xml
-    
+
     - name: Upload Cross-Platform Results
       uses: actions/upload-artifact@v3
       if: always()
@@ -261,40 +261,40 @@ jobs:
   security-audit:
     name: Dependency Security Audit
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    
+
     - name: Install Audit Tools
       run: |
         python -m pip install --upgrade pip
         pip install safety bandit semgrep
         npm install -g audit-ci
-    
+
     - name: Python Dependency Audit
       run: |
         # Check for known vulnerabilities
         safety check --json --output tests/reports/safety_audit.json || true
         safety check
-        
+
         # Static security analysis
         bandit -r src/ -f json -o tests/reports/bandit_audit.json
-        
+
         # Semgrep security scan
         semgrep --config=auto src/ --json --output tests/reports/semgrep_audit.json || true
-    
+
     - name: Node.js Dependency Audit
       working-directory: tests/playwright
       run: |
         npm audit --audit-level=moderate --json > ../reports/npm_audit.json || true
         npm audit
-    
+
     - name: Upload Security Audit Results
       uses: actions/upload-artifact@v3
       if: always()
@@ -312,75 +312,75 @@ jobs:
     runs-on: ubuntu-latest
     needs: [extended-performance-tests, visual-regression-tests, cross-platform-tests, security-audit]
     if: always()
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Download All Artifacts
       uses: actions/download-artifact@v3
       with:
         path: nightly-artifacts
-    
+
     - name: Generate Comprehensive Report
       run: |
         mkdir -p nightly-report
-        
+
         # Create comprehensive nightly report
         cat > nightly-report/nightly-summary.md << 'EOF'
         # MELD Visualizer Nightly Test Report
-        
+
         **Date:** $(date)
         **Commit:** ${{ github.sha }}
         **Branch:** ${{ github.ref_name }}
-        
+
         ## Test Results Overview
-        
+
         ### Extended Performance Tests
         - **Memory Usage**: Check memory_analysis.json for details
         - **Load Testing**: Results in nightly-performance-results
         - **Large Dataset Handling**: Tested with 50,000 row dataset
-        
+
         ### Visual Regression Tests
         - **Screenshot Comparison**: Available in visual-regression-results
         - **UI Consistency**: Cross-browser visual validation
-        
+
         ### Cross-Platform Compatibility
         - **Operating Systems**: Ubuntu, Windows, macOS
         - **Python Versions**: 3.9, 3.10, 3.11, 3.12
         - **Results**: Individual platform results in artifacts
-        
+
         ### Security Audit
         - **Dependency Vulnerabilities**: Check safety_audit.json
         - **Code Security**: Bandit and Semgrep analysis
         - **Node.js Dependencies**: NPM audit results
-        
+
         ## Performance Metrics
-        
+
         *Performance data will be populated from artifacts*
-        
+
         ## Recommendations
-        
+
         - Monitor memory usage trends over time
         - Address any security vulnerabilities found
         - Update dependencies with known issues
-        
+
         ## Artifact Links
-        
+
         All detailed results are available in the workflow artifacts.
         EOF
-        
+
         # List all available artifacts
         echo "## Available Artifacts" >> nightly-report/nightly-summary.md
         find nightly-artifacts -name "*.json" -o -name "*.xml" | sort >> nightly-report/nightly-summary.md
-    
+
     - name: Upload Nightly Report
       uses: actions/upload-artifact@v3
       with:
         name: nightly-comprehensive-report
         path: nightly-report/
         retention-days: 30
-    
+
     - name: Create Issue on Failures
       if: failure()
       uses: actions/github-script@v6
@@ -389,23 +389,23 @@ jobs:
           const title = `🌙 Nightly Test Failure - ${new Date().toISOString().split('T')[0]}`;
           const body = `
           ## Nightly Test Suite Failed
-          
+
           **Workflow Run:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           **Commit:** ${{ github.sha }}
           **Date:** ${new Date().toISOString()}
-          
+
           ### Failed Jobs
           Check the workflow run for detailed information about which jobs failed.
-          
+
           ### Action Required
           - [ ] Review failed test results
           - [ ] Address any performance regressions
           - [ ] Fix security vulnerabilities if found
           - [ ] Update failing tests if needed
-          
+
           This issue was automatically created by the nightly test workflow.
           `;
-          
+
           github.rest.issues.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
@@ -420,7 +420,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [nightly-report]
     if: always()
-    
+
     steps:
     - name: Delete Old Workflow Runs
       uses: actions/github-script@v6
@@ -432,10 +432,10 @@ jobs:
             workflow_id: 'nightly-tests.yml',
             per_page: 100
           });
-          
+
           // Keep last 10 nightly test runs
           const runsToDelete = runs.workflow_runs.slice(10);
-          
+
           for (const run of runsToDelete) {
             try {
               await github.rest.actions.deleteWorkflowRun({

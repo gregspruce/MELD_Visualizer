@@ -6,7 +6,7 @@
 **MELD Visualizer**: 3D visualization platform for Manufacturing using Extreme Layer Deposition
 - **Technology Stack**: Dash/Plotly web application with Python backend
 - **Purpose**: Visualize and analyze MELD manufacturing process data
-- **Key Features**: 
+- **Key Features**:
   - 3D plots with interactive controls
   - Volume calculations with calibrated parameters
   - G-code visualization and processing
@@ -41,7 +41,7 @@
 - **Circular Dependency Prevention**: Removed range-slider from Output in filter_callbacks
 
 ### Configuration Management
-- **Hot-reload System**: 
+- **Hot-reload System**:
   - Themes: Instant reload via Settings tab
   - Config: Requires restart for manual config.json edits
 - **Theme Support**: PLOTLY_TEMPLATE from config applied to all plots

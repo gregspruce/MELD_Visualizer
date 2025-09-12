@@ -26,7 +26,7 @@
 ## Callback Registration Order
 ```python
 1. data_callbacks
-2. config_callbacks  
+2. config_callbacks
 3. filter_callbacks
 4. graph_callbacks
 5. visualization_callbacks

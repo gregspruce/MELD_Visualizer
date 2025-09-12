@@ -25,8 +25,8 @@ const getEnvBoolean = (key: string, defaultValue: boolean): boolean => {
 };
 
 const getEnvString = <T extends string>(
-  key: string, 
-  defaultValue: T, 
+  key: string,
+  defaultValue: T,
   allowedValues?: ReadonlyArray<T>
 ): T => {
   const value = process.env[key] as T;
@@ -92,33 +92,33 @@ const baseTestConfig: TestTypes.MELDTestConfig = {
  */
 const playwrightConfig: PlaywrightTestConfig = defineConfig({
   testDir: '../',
-  
+
   // Execution settings
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  
+
   // Reporting configuration
   reporter: [
-    ['html', { 
+    ['html', {
       outputFolder: resolve(baseTestConfig.files.reportDir, 'playwright-report'),
       open: 'never'
     }],
-    ['json', { 
+    ['json', {
       outputFile: resolve(baseTestConfig.files.reportDir, 'test-results.json')
     }],
-    ['junit', { 
+    ['junit', {
       outputFile: resolve(baseTestConfig.files.reportDir, 'junit-results.xml')
     }],
     ['line'],
   ],
-  
+
   // Global test configuration
   use: {
     // Base URL
     baseURL: baseTestConfig.baseURL,
-    
+
     // Tracing and debugging
     trace: getEnvString('TRACE_MODE', 'on-first-retry', [
       'on-first-retry', 'on-all-retries', 'off', 'on', 'retain-on-failure'
@@ -127,21 +127,21 @@ const playwrightConfig: PlaywrightTestConfig = defineConfig({
     video: getEnvString('VIDEO_MODE', 'retain-on-failure', [
       'off', 'on', 'retain-on-failure', 'on-first-retry'
     ]),
-    
+
     // Timeouts
     actionTimeout: baseTestConfig.timeout.action,
     navigationTimeout: baseTestConfig.timeout.navigation,
-    
+
     // Browser context settings
     viewport: baseTestConfig.viewport,
     userAgent: 'MELD-Visualizer-Test-Agent/1.0',
     locale: 'en-US',
     timezoneId: 'America/New_York',
-    
+
     // Permissions and security
     permissions: ['clipboard-read', 'clipboard-write'],
     ignoreHTTPSErrors: true,
-    
+
     // HTTP headers for identification
     extraHTTPHeaders: {
       'X-Test-Framework': 'Playwright-MCP-TypeScript',
@@ -155,7 +155,7 @@ const playwrightConfig: PlaywrightTestConfig = defineConfig({
     // Desktop browsers
     {
       name: 'chromium-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         launchOptions: {
           args: [
@@ -172,7 +172,7 @@ const playwrightConfig: PlaywrightTestConfig = defineConfig({
     },
     {
       name: 'firefox-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
         launchOptions: {
           firefoxUserPrefs: {
@@ -186,7 +186,7 @@ const playwrightConfig: PlaywrightTestConfig = defineConfig({
     },
     {
       name: 'webkit-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
         launchOptions: {
           args: [
@@ -200,7 +200,7 @@ const playwrightConfig: PlaywrightTestConfig = defineConfig({
     // Mobile testing for responsive design
     {
       name: 'mobile-chrome',
-      use: { 
+      use: {
         ...devices['Pixel 5'],
         isMobile: true,
         hasTouch: true,
@@ -208,7 +208,7 @@ const playwrightConfig: PlaywrightTestConfig = defineConfig({
     },
     {
       name: 'mobile-safari',
-      use: { 
+      use: {
         ...devices['iPhone 12'],
         isMobile: true,
         hasTouch: true,
@@ -253,22 +253,22 @@ const playwrightConfig: PlaywrightTestConfig = defineConfig({
     },
     ignoreHTTPSErrors: true,
   },
-  
+
   // Output configuration
   outputDir: resolve(baseTestConfig.files.reportDir, 'test-results'),
-  
+
   // Expect configuration
   expect: {
     // Visual comparisons
     threshold: baseTestConfig.screenshots.threshold,
-    
+
     // Animation handling
     toHaveScreenshot: {
       threshold: baseTestConfig.screenshots.threshold,
       animations: baseTestConfig.screenshots.animations,
       caret: baseTestConfig.screenshots.caret,
     },
-    
+
     toMatchSnapshot: {
       threshold: baseTestConfig.screenshots.threshold,
       animations: baseTestConfig.screenshots.animations,
@@ -294,22 +294,22 @@ export function validateConfig(config: TestTypes.MELDTestConfig): boolean {
   try {
     // Validate URLs
     new URL(config.baseURL);
-    
+
     // Validate timeouts are positive
     Object.values(config.timeout).forEach(timeout => {
       if (timeout <= 0) throw new Error(`Invalid timeout: ${timeout}`);
     });
-    
+
     // Validate viewport dimensions
     if (config.viewport.width <= 0 || config.viewport.height <= 0) {
       throw new Error('Invalid viewport dimensions');
     }
-    
+
     // Validate thresholds
     Object.values(config.performance).forEach(threshold => {
       if (threshold <= 0) throw new Error(`Invalid performance threshold: ${threshold}`);
     });
-    
+
     return true;
   } catch (error) {
     console.error('Configuration validation failed:', error);

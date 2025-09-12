@@ -25,7 +25,7 @@ export class DashComponentLifecycleTester {
     } = {}
   ): Promise<ComponentLifecycleResult> {
     const { props = {}, stressTest = false, memoryProfiling = false, renderOptimization = false } = lifecycleOptions;
-    
+
     const results: ComponentLifecycleResult = {
       mount: { success: false, time: 0, memoryBefore: 0, memoryAfter: 0 },
       updates: [],
@@ -49,7 +49,7 @@ export class DashComponentLifecycleTester {
 
     // Test mounting
     results.mount = await this.testMount(componentId, props);
-    
+
     // Test updates and re-renders
     if (stressTest) {
       results.updates = await this.stressTestUpdates(componentId, 20);
@@ -83,7 +83,7 @@ export class DashComponentLifecycleTester {
    * Test component mounting with detailed analysis
    */
   async testMount(
-    componentId: string, 
+    componentId: string,
     initialProps: Record<string, unknown> = {}
   ): Promise<MountTestResult> {
     const startTime = performance.now();
@@ -123,15 +123,15 @@ export class DashComponentLifecycleTester {
     // Wait for component to mount
     try {
       await this.page.waitForSelector(`#${componentId}`, { timeout: 10000 });
-      
+
       // Wait for React to finish mounting
       await this.page.waitForFunction((id) => {
         const element = document.getElementById(id);
         if (!element) return false;
 
         // Check if React has attached
-        const reactKey = Object.keys(element).find(key => 
-          key.startsWith('__reactInternalInstance') || 
+        const reactKey = Object.keys(element).find(key =>
+          key.startsWith('__reactInternalInstance') ||
           key.startsWith('__reactFiber')
         );
 
@@ -155,26 +155,26 @@ export class DashComponentLifecycleTester {
     const mountAnalysis = await this.page.evaluate((id) => {
       const monitoring = (window as any).__mountMonitoring;
       const element = document.getElementById(id);
-      
+
       if (!element || !monitoring) {
         return { hasEffects: false, hasCallbacks: false, reactAttached: false };
       }
 
       // Check React fiber
-      const reactKey = Object.keys(element).find(key => 
-        key.startsWith('__reactInternalInstance') || 
+      const reactKey = Object.keys(element).find(key =>
+        key.startsWith('__reactInternalInstance') ||
         key.startsWith('__reactFiber')
       );
       const reactNode = reactKey ? (element as any)[reactKey] : null;
 
       // Check for effects
-      const hasEffects = reactNode?.updateQueue || 
-                        reactNode?.effectTag || 
+      const hasEffects = reactNode?.updateQueue ||
+                        reactNode?.effectTag ||
                         reactNode?.flags;
 
       // Check for Dash callbacks
       const dash = (window as any).dash_clientside;
-      const hasCallbacks = dash && dash.callback_map && 
+      const hasCallbacks = dash && dash.callback_map &&
                           Object.keys(dash.callback_map).some(key => key.includes(id));
 
       // Cleanup observer
@@ -206,7 +206,7 @@ export class DashComponentLifecycleTester {
    */
   async testStandardUpdates(componentId: string): Promise<UpdateTestResult[]> {
     const updates: UpdateTestResult[] = [];
-    
+
     // Test different types of updates
     const updateScenarios = [
       { type: 'prop-update', trigger: () => this.triggerPropUpdate(componentId, { testProp: 'updated-value' }) },
@@ -218,7 +218,7 @@ export class DashComponentLifecycleTester {
     for (const scenario of updateScenarios) {
       const result = await this.testSingleUpdate(componentId, scenario.type, scenario.trigger);
       updates.push(result);
-      
+
       // Wait between updates
       await this.page.waitForTimeout(100);
     }
@@ -248,15 +248,15 @@ export class DashComponentLifecycleTester {
       // Monitor renders
       const element = document.getElementById(id);
       if (element) {
-        const reactKey = Object.keys(element).find(key => 
-          key.startsWith('__reactInternalInstance') || 
+        const reactKey = Object.keys(element).find(key =>
+          key.startsWith('__reactInternalInstance') ||
           key.startsWith('__reactFiber')
         );
-        
+
         if (reactKey) {
           const reactNode = (element as any)[reactKey];
           const monitoring = (window as any).__updateMonitoring;
-          
+
           // Hook into render (simplified)
           const originalForceUpdate = reactNode.stateNode?.forceUpdate;
           if (originalForceUpdate && !monitoring.hooked) {
@@ -274,13 +274,13 @@ export class DashComponentLifecycleTester {
     }, componentId);
 
     const startTime = performance.now();
-    
+
     try {
       await updateTrigger();
-      
+
       // Wait for update to complete
       await this.page.waitForTimeout(500);
-      
+
       const updateResults = await this.page.evaluate((id) => {
         const monitoring = (window as any).__updateMonitoring;
         return {
@@ -295,8 +295,8 @@ export class DashComponentLifecycleTester {
         success: true,
         time: performance.now() - startTime,
         renderCount: updateResults.renderCount,
-        averageRenderTime: updateResults.renderTimes.length > 0 
-          ? updateResults.renderTimes.reduce((a: number, b: number) => a + b) / updateResults.renderTimes.length 
+        averageRenderTime: updateResults.renderTimes.length > 0
+          ? updateResults.renderTimes.reduce((a: number, b: number) => a + b) / updateResults.renderTimes.length
           : 0
       };
     } catch (error) {
@@ -328,7 +328,7 @@ export class DashComponentLifecycleTester {
     }, componentId);
 
     const optimization = (window as any).__renderOptimization;
-    
+
     // Trigger various interactions that should NOT cause re-renders
     const nonRenderTriggers = [
       () => this.page.hover(`#${componentId}`),
@@ -338,17 +338,17 @@ export class DashComponentLifecycleTester {
     ];
 
     for (const trigger of nonRenderTriggers) {
-      const rendersBefore = await this.page.evaluate(() => 
+      const rendersBefore = await this.page.evaluate(() =>
         (window as any).__renderOptimization?.totalRenders || 0
       );
-      
+
       await trigger();
       await this.page.waitForTimeout(100);
-      
-      const rendersAfter = await this.page.evaluate(() => 
+
+      const rendersAfter = await this.page.evaluate(() =>
         (window as any).__renderOptimization?.totalRenders || 0
       );
-      
+
       if (rendersAfter > rendersBefore) {
         await this.page.evaluate((reason) => {
           (window as any).__renderOptimization.unnecessaryRenders++;
@@ -367,7 +367,7 @@ export class DashComponentLifecycleTester {
         totalRenders: opt?.totalRenders || 0,
         unnecessaryRenders: opt?.unnecessaryRenders || 0,
         renderReasons: opt?.renderReasons || [],
-        efficiency: opt?.totalRenders > 0 
+        efficiency: opt?.totalRenders > 0
           ? 1 - (opt.unnecessaryRenders / opt.totalRenders)
           : 1
       };
@@ -402,17 +402,17 @@ export class DashComponentLifecycleTester {
       const element = document.getElementById(id);
       if (element) {
         const monitoring = (window as any).__unmountMonitoring;
-        
+
         // Count event listeners (approximation)
         monitoring.listenersCount = Object.keys(element)
           .filter(key => key.startsWith('on')).length;
-        
+
         // Check for cleanup patterns
-        const reactKey = Object.keys(element).find(key => 
-          key.startsWith('__reactInternalInstance') || 
+        const reactKey = Object.keys(element).find(key =>
+          key.startsWith('__reactInternalInstance') ||
           key.startsWith('__reactFiber')
         );
-        
+
         if (reactKey) {
           const reactNode = (element as any)[reactKey];
           monitoring.hasCleanupEffects = !!reactNode?.effectTag;
@@ -425,13 +425,13 @@ export class DashComponentLifecycleTester {
       // For MELD Visualizer, navigate to different tab
       await this.page.locator('[data-testid="tab-settings"]').click();
       await this.page.waitForSelector('[data-testid="tab-content-settings"]', { timeout: 5000 });
-      
+
       // Wait for unmount to complete
       await this.page.waitForTimeout(1000);
-      
+
       // Check if component was removed
       const componentExists = await this.page.locator(`#${componentId}`).count() > 0;
-      
+
       const unmountResults = await this.page.evaluate(() => {
         const monitoring = (window as any).__unmountMonitoring;
         return {
@@ -467,7 +467,7 @@ export class DashComponentLifecycleTester {
    */
   async stressTestUpdates(componentId: string, updateCount: number): Promise<UpdateTestResult[]> {
     const updates: UpdateTestResult[] = [];
-    
+
     for (let i = 0; i < updateCount; i++) {
       const updateType = `stress-test-${i}`;
       const result = await this.testSingleUpdate(
@@ -475,15 +475,15 @@ export class DashComponentLifecycleTester {
         updateType,
         async () => {
           // Rapid random updates
-          await this.triggerPropUpdate(componentId, { 
+          await this.triggerPropUpdate(componentId, {
             stressTest: Math.random(),
-            iteration: i 
+            iteration: i
           });
         }
       );
-      
+
       updates.push(result);
-      
+
       // Minimal wait between stress updates
       await this.page.waitForTimeout(10);
     }
@@ -499,7 +499,7 @@ export class DashComponentLifecycleTester {
         Object.entries(newProps).forEach(([key, value]) => {
           (element as any)[key] = value;
         });
-        
+
         // Trigger React update
         const event = new CustomEvent('dash-update', {
           detail: { componentId: id, props: newProps }
@@ -550,22 +550,22 @@ export class DashComponentLifecycleTester {
             peakMemory: 0,
             gcCount: 0
           };
-          
+
           // Monitor memory usage
           const measureMemory = () => {
             if ((window as any).__memoryProfiling.active) {
               const memory = (performance as any).memory?.usedJSHeapSize || 0;
               const profiling = (window as any).__memoryProfiling;
-              
+
               profiling.measurements.push({
                 timestamp: Date.now(),
                 memory
               });
-              
+
               if (memory > profiling.peakMemory) {
                 profiling.peakMemory = memory;
               }
-              
+
               // Detect GC (memory drop)
               if (profiling.measurements.length > 1) {
                 const prev = profiling.measurements[profiling.measurements.length - 2];
@@ -573,21 +573,21 @@ export class DashComponentLifecycleTester {
                   profiling.gcCount++;
                 }
               }
-              
+
               setTimeout(measureMemory, 100);
             }
           };
-          
+
           measureMemory();
         });
       },
-      
+
       stop: async () => {
         await this.page.evaluate(() => {
           (window as any).__memoryProfiling.active = false;
         });
       },
-      
+
       getResults: async () => {
         return await this.page.evaluate(() => {
           const profiling = (window as any).__memoryProfiling;
@@ -636,7 +636,7 @@ export class DashPerformanceBenchmarker {
 
     // Calculate overall metrics
     const validScenarios = results.scenarios.filter(s => s.success);
-    
+
     if (validScenarios.length > 0) {
       results.overall.averageLoadTime = validScenarios.reduce((sum, s) => sum + s.loadTime, 0) / validScenarios.length;
       results.overall.averageInteractionTime = validScenarios.reduce((sum, s) => sum + s.interactionTime, 0) / validScenarios.length;
@@ -652,7 +652,7 @@ export class DashPerformanceBenchmarker {
    */
   async runBenchmarkScenario(scenario: BenchmarkScenario): Promise<ScenarioResult> {
     const startTime = performance.now();
-    
+
     try {
       // Set up performance monitoring
       await this.page.evaluate(() => {
@@ -667,12 +667,12 @@ export class DashPerformanceBenchmarker {
 
       // Execute scenario actions
       const executionResult = await this.executeScenarioActions(scenario);
-      
+
       // Collect performance data
       const performanceData = await this.collectPerformanceData();
-      
+
       const totalTime = performance.now() - startTime;
-      
+
       return {
         name: scenario.name,
         success: executionResult.success,
@@ -705,7 +705,7 @@ export class DashPerformanceBenchmarker {
     try {
       for (const action of scenario.actions) {
         const actionStart = performance.now();
-        
+
         await this.page.evaluate((actionType, startTime) => {
           const benchmark = (window as any).__performanceBenchmark;
           benchmark.interactions.push({
@@ -736,7 +736,7 @@ export class DashPerformanceBenchmarker {
         }
 
         const actionEnd = performance.now();
-        
+
         await this.page.evaluate((actionType, endTime, duration) => {
           const benchmark = (window as any).__performanceBenchmark;
           const interaction = benchmark.interactions.find((i: any) => i.type === actionType);
@@ -763,7 +763,7 @@ export class DashPerformanceBenchmarker {
     return await this.page.evaluate(() => {
       const benchmark = (window as any).__performanceBenchmark;
       const performanceEntries = performance.getEntries();
-      
+
       // Calculate load time
       const loadTime = performanceEntries
         .filter(entry => entry.entryType === 'navigation')

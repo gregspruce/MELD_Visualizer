@@ -4,10 +4,10 @@
  */
 
 import { Page, Locator, expect } from '@playwright/test';
-import type { 
-  TestTypes, 
-  MELDData, 
-  DashComponents, 
+import type {
+  TestTypes,
+  MELDData,
+  DashComponents,
   PlotlyTypes,
   BasePage,
   HomePage,
@@ -39,7 +39,7 @@ export abstract class BasePageObject implements BasePage {
    * Take screenshot of current state
    */
   async screenshot(name: string): Promise<Buffer> {
-    return await this.page.screenshot({ 
+    return await this.page.screenshot({
       fullPage: true,
       path: `screenshots/${name}.png`
     });
@@ -102,7 +102,7 @@ export abstract class BasePageObject implements BasePage {
    */
   async safeClick(selector: string, options?: { timeout?: number; retries?: number }): Promise<void> {
     const { timeout = 10000, retries = 3 } = options || {};
-    
+
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         const element = this.page.locator(selector);
@@ -148,7 +148,7 @@ export class HomePageObject extends BasePageObject implements HomePage {
   async waitForLoad(): Promise<void> {
     // Wait for main app container
     await this.waitForElement(this.selectors.app.container, 30000);
-    
+
     // Wait for Dash to be ready
     await this.page.waitForFunction(() => {
       return window.dash_clientside && window.Plotly;
@@ -166,10 +166,10 @@ export class HomePageObject extends BasePageObject implements HomePage {
    */
   async switchTheme(theme: DashComponents.ThemeConfig['name']): Promise<void> {
     await this.safeClick(this.selectors.controls.themeToggle);
-    
+
     // Wait for theme to be applied
     await this.page.waitForTimeout(1000);
-    
+
     // Verify theme was applied
     const appliedTheme = await this.page.evaluate(() => {
       const body = document.body;
@@ -192,10 +192,10 @@ export class HomePageObject extends BasePageObject implements HomePage {
   async navigateToTab(tabId: string): Promise<void> {
     const tabSelector = this.selectors.tabs.tab(tabId);
     await this.safeClick(tabSelector);
-    
+
     // Wait for tab content to be active
     await this.page.locator(this.selectors.tabs.active).waitFor({ state: 'visible' });
-    
+
     // Verify correct tab is active
     const activeTab = await this.page.locator(`${tabSelector}.active, ${tabSelector}[aria-selected="true"]`).count();
     if (activeTab === 0) {
@@ -209,8 +209,8 @@ export class HomePageObject extends BasePageObject implements HomePage {
   async getCurrentTheme(): Promise<'light' | 'dark'> {
     return await this.page.evaluate(() => {
       const body = document.body;
-      return body.classList.contains('dark-theme') || body.getAttribute('data-theme') === 'dark' 
-        ? 'dark' 
+      return body.classList.contains('dark-theme') || body.getAttribute('data-theme') === 'dark'
+        ? 'dark'
         : 'light';
     });
   }
@@ -221,7 +221,7 @@ export class HomePageObject extends BasePageObject implements HomePage {
   async isNavigationResponsive(): Promise<boolean> {
     const viewport = this.page.viewportSize();
     if (!viewport) return false;
-    
+
     return viewport.width < 768;
   }
 }
@@ -263,7 +263,7 @@ export class UploadPageObject extends BasePageObject implements UploadPage {
 
     // Set up file chooser handler
     const fileChooserPromise = this.page.waitForEvent('filechooser');
-    
+
     // Trigger file input
     if (await this.elementExists(this.selectors.upload.fileInput)) {
       await this.fileInput.click();
@@ -278,7 +278,7 @@ export class UploadPageObject extends BasePageObject implements UploadPage {
 
     // Wait for upload to start
     await this.waitForUploadStart();
-    
+
     // Wait for upload to complete
     await this.waitForUploadComplete();
   }
@@ -290,7 +290,7 @@ export class UploadPageObject extends BasePageObject implements UploadPage {
     try {
       // Wait for either success or error message
       await this.statusMessage.waitFor({ state: 'visible', timeout: 30000 });
-      
+
       // Check final status
       const status = await this.getUploadStatus();
       if (status === 'error') {
@@ -396,13 +396,13 @@ export class VisualizationPageObject extends BasePageObject implements Visualiza
   async waitForGraphRender(): Promise<void> {
     // Wait for graph container
     await this.plotlyGraph.waitFor({ state: 'visible', timeout: 30000 });
-    
+
     // Wait for Plotly to initialize and render
     await this.page.waitForFunction((selector) => {
       const element = document.querySelector(selector) as any;
-      return element && 
-             element._fullLayout && 
-             element._fullData && 
+      return element &&
+             element._fullLayout &&
+             element._fullData &&
              Array.isArray(element._fullData) &&
              element._fullData.length > 0;
     }, this.selectors.graph.plotly, { timeout: 15000 });
@@ -459,23 +459,23 @@ export class VisualizationPageObject extends BasePageObject implements Visualiza
   async exportData(format: 'csv' | 'json'): Promise<string> {
     // Set up download handler
     const downloadPromise = this.page.waitForEvent('download', { timeout: 10000 });
-    
+
     // Click export button
     await this.safeClick(this.selectors.controls.exportButton);
-    
+
     // Handle format selection if needed
     const formatSelector = `[data-format="${format}"], .export-${format}`;
     if (await this.elementExists(formatSelector)) {
       await this.safeClick(formatSelector);
     }
-    
+
     // Wait for download
     const download = await downloadPromise;
-    
+
     // Save and return file path
     const filePath = `downloads/${download.suggestedFilename()}`;
     await download.saveAs(filePath);
-    
+
     return filePath;
   }
 
@@ -484,19 +484,19 @@ export class VisualizationPageObject extends BasePageObject implements Visualiza
    */
   async resetView(): Promise<void> {
     await this.safeClick(this.selectors.controls.resetButton);
-    
+
     // Wait for reset to complete
     await this.page.waitForTimeout(1000);
-    
+
     // Verify reset by checking camera position
     const isReset = await this.page.evaluate((selector) => {
       const element = document.querySelector(selector) as any;
       if (!element || !element._fullLayout || !element._fullLayout.scene) {
         return false;
       }
-      
+
       const camera = element._fullLayout.scene.camera;
-      return camera && camera.eye && 
+      return camera && camera.eye &&
              Math.abs(camera.eye.x - 1.25) < 0.1 &&
              Math.abs(camera.eye.y - 1.25) < 0.1 &&
              Math.abs(camera.eye.z - 1.25) < 0.1;
@@ -512,7 +512,7 @@ export class VisualizationPageObject extends BasePageObject implements Visualiza
    */
   async toggleTrace(traceName: string): Promise<void> {
     const traceSelector = `.legend .traces .trace[data-trace-name="${traceName}"], .js-legend .traces .trace:has-text("${traceName}")`;
-    
+
     if (await this.elementExists(traceSelector)) {
       await this.safeClick(traceSelector);
       // Wait for trace toggle to complete
@@ -528,8 +528,8 @@ export class VisualizationPageObject extends BasePageObject implements Visualiza
   async getCameraPosition(): Promise<PlotlyTypes.Camera3D | null> {
     return await this.page.evaluate((selector) => {
       const element = document.querySelector(selector) as any;
-      return element && element._fullLayout && element._fullLayout.scene 
-        ? element._fullLayout.scene.camera 
+      return element && element._fullLayout && element._fullLayout.scene
+        ? element._fullLayout.scene.camera
         : null;
     }, this.selectors.graph.plotly);
   }
@@ -586,7 +586,7 @@ export class SettingsPageObject extends BasePageObject implements SettingsPage {
         return document.body.classList.contains('dark-theme') ? 'dark' : 'light';
       });
 
-      if ((theme.includes('dark') && currentTheme === 'light') || 
+      if ((theme.includes('dark') && currentTheme === 'light') ||
           (theme.includes('light') && currentTheme === 'dark')) {
         await this.safeClick(this.selectors.controls.themeToggle);
       }
@@ -638,10 +638,10 @@ export class SettingsPageObject extends BasePageObject implements SettingsPage {
   async resetToDefaults(): Promise<void> {
     const confirmDialog = this.page.waitForEvent('dialog');
     await this.safeClick('.reset-settings');
-    
+
     const dialog = await confirmDialog;
     await dialog.accept();
-    
+
     // Wait for reset to complete
     await this.page.waitForTimeout(2000);
   }
@@ -652,11 +652,11 @@ export class SettingsPageObject extends BasePageObject implements SettingsPage {
   async exportConfiguration(): Promise<string> {
     const downloadPromise = this.page.waitForEvent('download');
     await this.safeClick('.export-settings');
-    
+
     const download = await downloadPromise;
     const filePath = `downloads/config-${Date.now()}.json`;
     await download.saveAs(filePath);
-    
+
     return filePath;
   }
 
@@ -667,21 +667,21 @@ export class SettingsPageObject extends BasePageObject implements SettingsPage {
     return await this.page.evaluate(() => {
       // This would depend on how settings are stored in the app
       const settings: Record<string, unknown> = {};
-      
+
       // Theme
       settings.theme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
-      
+
       // Performance settings (if available)
       const animationsToggle = document.querySelector('.animations-toggle input') as HTMLInputElement;
       if (animationsToggle) {
         settings.enableAnimations = animationsToggle.checked;
       }
-      
+
       const maxPointsInput = document.querySelector('.max-points input') as HTMLInputElement;
       if (maxPointsInput) {
         settings.maxDataPoints = parseInt(maxPointsInput.value);
       }
-      
+
       return settings;
     });
   }

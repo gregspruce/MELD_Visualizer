@@ -271,7 +271,7 @@ await baselineManager.updateBaselines('test-name');
 
 // Compare with baseline
 const result = await baselineManager.compareWithBaseline(
-  'current-screenshot', 
+  'current-screenshot',
   'baseline-name'
 );
 ```
@@ -409,23 +409,23 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         run: |
           cd tests/playwright
           npm install
           npx playwright install
-      
+
       - name: Start application
         run: |
           python -m src.meld_visualizer &
           sleep 10
-      
+
       - name: Run visual tests
         run: |
           cd tests/playwright
           npm run test:visual
-      
+
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: failure()

@@ -204,12 +204,12 @@ export namespace TestTypes {
    */
   export interface TestAssertions {
     readonly page: Page;
-    
+
     /**
      * Assert that MELD data is properly loaded
      */
     readonly assertMELDDataLoaded: (expectedCount?: number) => Promise<void>;
-    
+
     /**
      * Assert that Plotly graph is rendered correctly
      */
@@ -217,29 +217,29 @@ export namespace TestTypes {
       selector: string,
       expectedTraces?: number
     ) => Promise<void>;
-    
+
     /**
      * Assert that file upload completed successfully
      */
     readonly assertFileUploadSuccess: (filename: string) => Promise<void>;
-    
+
     /**
      * Assert that theme is applied correctly
      */
     readonly assertThemeApplied: (theme: DashComponents.ThemeConfig['name']) => Promise<void>;
-    
+
     /**
      * Assert performance metrics meet thresholds
      */
     readonly assertPerformanceMetrics: (
       thresholds: PerformanceThresholds
     ) => Promise<TestPerformanceResult>;
-    
+
     /**
      * Assert no console errors
      */
     readonly assertNoConsoleErrors: () => Promise<void>;
-    
+
     /**
      * Assert network requests are successful
      */
@@ -554,7 +554,7 @@ export abstract class BasePage {
    * Take screenshot of current state
    */
   async screenshot(name: string): Promise<Buffer> {
-    return await this.page.screenshot({ 
+    return await this.page.screenshot({
       fullPage: true,
       path: `screenshots/${name}.png`
     });

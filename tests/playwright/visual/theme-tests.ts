@@ -5,13 +5,13 @@
 
 import { test, expect } from '@playwright/test';
 import { VisualTestUtils } from './visual-utils';
-import { 
-  THEME_CONFIGS, 
+import {
+  THEME_CONFIGS,
   RESPONSIVE_VIEWPORTS,
   COMPONENT_SELECTORS,
   DEFAULT_VISUAL_CONFIG,
   ANIMATION_DURATIONS,
-  ACCESSIBILITY_CONFIG 
+  ACCESSIBILITY_CONFIG
 } from './visual-config';
 
 // Theme-specific configuration
@@ -23,13 +23,13 @@ const THEME_CONFIG = {
 
 test.describe('Theme Visual Validation Tests', () => {
   let visualUtils: VisualTestUtils;
-  
+
   test.beforeEach(async ({ page }) => {
     visualUtils = new VisualTestUtils(page);
-    
+
     // Navigate to the application
     await page.goto('http://localhost:8050', { waitUntil: 'networkidle' });
-    
+
     // Wait for initial page load
     await page.waitForLoadState('domcontentloaded');
     await visualUtils.waitForAnimationsToComplete();
@@ -38,7 +38,7 @@ test.describe('Theme Visual Validation Tests', () => {
   // Test each theme configuration
   for (const [themeName, themeConfig] of Object.entries(THEME_CONFIGS)) {
     test.describe(`Theme: ${themeName}`, () => {
-      
+
       test.beforeEach(async ({ page }) => {
         await visualUtils.setTheme(themeName as keyof typeof THEME_CONFIGS);
       });
@@ -84,7 +84,7 @@ test.describe('Theme Visual Validation Tests', () => {
 
       test(`${themeName} - Plotly Graph Theme Integration @visual @theme`, async ({ page }) => {
         const graphCount = await page.locator(COMPONENT_SELECTORS.plotlyGraph).count();
-        
+
         if (graphCount > 0) {
           await visualUtils.waitForPlotlyRender();
           await visualUtils.screenshotComponent(
@@ -97,21 +97,21 @@ test.describe('Theme Visual Validation Tests', () => {
           await page.evaluate((theme) => {
             const graphDiv = document.createElement('div');
             graphDiv.setAttribute('data-testid', 'themed-test-graph');
-            
+
             const isDark = theme.includes('dark') || theme === 'cyborg' || theme === 'darkly';
             const bgColor = isDark ? '#2c3e50' : '#f8f9fa';
             const textColor = isDark ? '#ecf0f1' : '#2c3e50';
             const accentColor = isDark ? '#3498db' : '#007bff';
-            
+
             graphDiv.style.cssText = `
-              width: 100%; 
-              height: 400px; 
+              width: 100%;
+              height: 400px;
               background: ${bgColor};
               border: 1px solid ${isDark ? '#34495e' : '#dee2e6'};
               border-radius: 8px;
               margin: 20px 0;
             `;
-            
+
             graphDiv.innerHTML = `
               <div style="
                 width: 100%;
@@ -151,7 +151,7 @@ test.describe('Theme Visual Validation Tests', () => {
                 </div>
               </div>
             `;
-            
+
             const container = document.querySelector('[data-testid="main-content"]') || document.body;
             container.appendChild(graphDiv);
           }, themeName);
@@ -169,9 +169,9 @@ test.describe('Theme Visual Validation Tests', () => {
         await page.evaluate((theme) => {
           const formDiv = document.createElement('div');
           formDiv.setAttribute('data-testid', 'themed-form-controls');
-          
+
           const isDark = theme.includes('dark') || theme === 'cyborg' || theme === 'darkly';
-          
+
           formDiv.style.cssText = 'padding: 20px; max-width: 600px; margin: 20px auto;';
           formDiv.innerHTML = `
             <h3>Form Controls - ${theme} Theme</h3>
@@ -179,20 +179,20 @@ test.describe('Theme Visual Validation Tests', () => {
               <div>
                 <label style="display: block; margin-bottom: 5px;">Text Input:</label>
                 <input type="text" value="Sample text" style="
-                  width: 100%; 
-                  padding: 10px; 
+                  width: 100%;
+                  padding: 10px;
                   border: 1px solid ${isDark ? '#555' : '#ced4da'};
                   background: ${isDark ? '#2c3e50' : '#ffffff'};
                   color: ${isDark ? '#ecf0f1' : '#495057'};
                   border-radius: 4px;
                 ">
               </div>
-              
+
               <div>
                 <label style="display: block; margin-bottom: 5px;">Select Dropdown:</label>
                 <select style="
-                  width: 100%; 
-                  padding: 10px; 
+                  width: 100%;
+                  padding: 10px;
                   border: 1px solid ${isDark ? '#555' : '#ced4da'};
                   background: ${isDark ? '#2c3e50' : '#ffffff'};
                   color: ${isDark ? '#ecf0f1' : '#495057'};
@@ -203,12 +203,12 @@ test.describe('Theme Visual Validation Tests', () => {
                   <option>Option 3</option>
                 </select>
               </div>
-              
+
               <div>
                 <label style="display: block; margin-bottom: 5px;">Textarea:</label>
                 <textarea style="
-                  width: 100%; 
-                  padding: 10px; 
+                  width: 100%;
+                  padding: 10px;
                   height: 80px;
                   border: 1px solid ${isDark ? '#555' : '#ced4da'};
                   background: ${isDark ? '#2c3e50' : '#ffffff'};
@@ -217,36 +217,36 @@ test.describe('Theme Visual Validation Tests', () => {
                   resize: vertical;
                 ">Sample textarea content</textarea>
               </div>
-              
+
               <div style="display: flex; gap: 15px; align-items: center;">
                 <label style="display: flex; align-items: center; gap: 5px;">
                   <input type="checkbox" checked style="
-                    width: 16px; 
+                    width: 16px;
                     height: 16px;
                     accent-color: ${isDark ? '#3498db' : '#007bff'};
-                  "> 
+                  ">
                   Checked Checkbox
                 </label>
                 <label style="display: flex; align-items: center; gap: 5px;">
                   <input type="radio" name="theme-radio" checked style="
-                    width: 16px; 
+                    width: 16px;
                     height: 16px;
                     accent-color: ${isDark ? '#3498db' : '#007bff'};
-                  "> 
+                  ">
                   Selected Radio
                 </label>
               </div>
-              
+
               <div>
                 <input type="range" min="0" max="100" value="50" style="
                   width: 100%;
                   accent-color: ${isDark ? '#3498db' : '#007bff'};
                 ">
               </div>
-              
+
               <div style="display: flex; gap: 10px;">
                 <button type="button" style="
-                  padding: 10px 20px; 
+                  padding: 10px 20px;
                   background: ${isDark ? '#3498db' : '#007bff'};
                   color: white;
                   border: none;
@@ -254,7 +254,7 @@ test.describe('Theme Visual Validation Tests', () => {
                   cursor: pointer;
                 ">Primary Button</button>
                 <button type="button" style="
-                  padding: 10px 20px; 
+                  padding: 10px 20px;
                   background: ${isDark ? '#7f8c8d' : '#6c757d'};
                   color: white;
                   border: none;
@@ -262,7 +262,7 @@ test.describe('Theme Visual Validation Tests', () => {
                   cursor: pointer;
                 ">Secondary Button</button>
                 <button type="button" disabled style="
-                  padding: 10px 20px; 
+                  padding: 10px 20px;
                   background: ${isDark ? '#34495e' : '#e9ecef'};
                   color: ${isDark ? '#7f8c8d' : '#6c757d'};
                   border: none;
@@ -287,9 +287,9 @@ test.describe('Theme Visual Validation Tests', () => {
         await page.evaluate((theme) => {
           const paletteDiv = document.createElement('div');
           paletteDiv.setAttribute('data-testid', 'theme-color-palette');
-          
+
           const isDark = theme.includes('dark') || theme === 'cyborg' || theme === 'darkly';
-          
+
           // Define color palettes for different themes
           const colorPalettes = {
             light: {
@@ -372,13 +372,13 @@ test.describe('Theme Visual Validation Tests', () => {
           };
 
           const palette = colorPalettes[theme] || colorPalettes[isDark ? 'dark' : 'light'];
-          
+
           paletteDiv.style.cssText = `
-            padding: 20px; 
+            padding: 20px;
             background: ${palette.background};
             color: ${palette.text};
           `;
-          
+
           paletteDiv.innerHTML = `
             <h3 style="color: ${palette.text}; margin-bottom: 20px;">${theme.toUpperCase()} Theme - Color Palette</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
@@ -397,7 +397,7 @@ test.describe('Theme Visual Validation Tests', () => {
                 </div>
               `).join('')}
             </div>
-            
+
             <div style="margin-top: 30px;">
               <h4 style="color: ${palette.text};">Color Combinations</h4>
               <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px;">
@@ -449,12 +449,12 @@ test.describe('Theme Visual Validation Tests', () => {
 
   // Test theme transitions and animations
   test.describe('Theme Transition Testing', () => {
-    
+
     test('Light to Dark Theme Transition @visual @theme @transition', async ({ page }) => {
       // Start with light theme
       await visualUtils.setTheme('light');
       await visualUtils.screenshotFullPage('transition-light-before', THEME_CONFIG);
-      
+
       // Enable animations to test transition
       await page.evaluate(() => {
         // Remove animation disabling styles
@@ -465,7 +465,7 @@ test.describe('Theme Visual Validation Tests', () => {
           }
         });
       });
-      
+
       // Transition to dark theme
       await visualUtils.setTheme('dark');
       await visualUtils.screenshotFullPage('transition-dark-after', THEME_CONFIG);
@@ -473,7 +473,7 @@ test.describe('Theme Visual Validation Tests', () => {
 
     test('Bootstrap Theme Variants Transition @visual @theme @transition', async ({ page }) => {
       const themeSequence: (keyof typeof THEME_CONFIGS)[] = ['bootstrap', 'cerulean', 'cosmo'];
-      
+
       for (let i = 0; i < themeSequence.length; i++) {
         await visualUtils.setTheme(themeSequence[i]);
         await visualUtils.screenshotFullPage(
@@ -485,7 +485,7 @@ test.describe('Theme Visual Validation Tests', () => {
 
     test('Dark Theme Variants Transition @visual @theme @transition', async ({ page }) => {
       const darkThemeSequence: (keyof typeof THEME_CONFIGS)[] = ['dark', 'cyborg', 'darkly'];
-      
+
       for (let i = 0; i < darkThemeSequence.length; i++) {
         await visualUtils.setTheme(darkThemeSequence[i]);
         await visualUtils.screenshotFullPage(
@@ -498,7 +498,7 @@ test.describe('Theme Visual Validation Tests', () => {
     test('Theme Switcher Component Animation @visual @theme @transition', async ({ page }) => {
       // Test theme switcher states if it exists
       const switcherExists = await page.locator(COMPONENT_SELECTORS.themeSwitcher).count() > 0;
-      
+
       if (switcherExists) {
         // Test different states of theme switcher
         await visualUtils.screenshotComponent(
@@ -506,7 +506,7 @@ test.describe('Theme Visual Validation Tests', () => {
           'theme-switcher-light',
           THEME_CONFIG
         );
-        
+
         await visualUtils.setTheme('dark');
         await visualUtils.screenshotComponent(
           COMPONENT_SELECTORS.themeSwitcher,
@@ -568,11 +568,11 @@ test.describe('Theme Visual Validation Tests', () => {
 
   // Test theme accessibility and contrast
   test.describe('Theme Accessibility Testing', () => {
-    
+
     test('Color Contrast Validation @visual @theme @accessibility', async ({ page }) => {
       for (const [themeName, themeConfig] of Object.entries(THEME_CONFIGS)) {
         await visualUtils.setTheme(themeName as keyof typeof THEME_CONFIGS);
-        
+
         // Create contrast testing elements
         await page.evaluate((theme) => {
           const contrastDiv = document.createElement('div');
@@ -586,32 +586,32 @@ test.describe('Theme Visual Validation Tests', () => {
                 <p><em>Italic text</em> should maintain readability</p>
                 <p><small>Small text should meet enhanced contrast requirements</small></p>
               </div>
-              
+
               <div style="display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0;">
                 <button style="padding: 10px 20px; background: var(--bs-primary, #007bff); color: white; border: none; border-radius: 4px;">Primary Action</button>
                 <button style="padding: 10px 20px; background: var(--bs-secondary, #6c757d); color: white; border: none; border-radius: 4px;">Secondary Action</button>
                 <button style="padding: 10px 20px; background: var(--bs-success, #28a745); color: white; border: none; border-radius: 4px;">Success Action</button>
                 <button style="padding: 10px 20px; background: var(--bs-danger, #dc3545); color: white; border: none; border-radius: 4px;">Danger Action</button>
               </div>
-              
+
               <div style="margin: 20px 0;">
                 <a href="#" style="color: var(--bs-primary, #007bff);">Link text should have sufficient contrast</a>
               </div>
-              
+
               <div style="background: var(--bs-light, #f8f9fa); padding: 15px; margin: 20px 0; border: 1px solid var(--bs-border-color, #dee2e6);">
                 <p style="margin: 0;">Text on light background should maintain readability</p>
               </div>
-              
+
               <div style="background: var(--bs-dark, #343a40); color: var(--bs-light, #f8f9fa); padding: 15px; margin: 20px 0;">
                 <p style="margin: 0;">Text on dark background should maintain readability</p>
               </div>
             </div>
           `;
-          
+
           // Remove existing test if present
           const existing = document.querySelector('[data-testid="contrast-test"]');
           if (existing) existing.remove();
-          
+
           document.body.appendChild(contrastDiv);
         }, themeName);
 
@@ -627,15 +627,15 @@ test.describe('Theme Visual Validation Tests', () => {
       // Test themes with forced high contrast
       for (const themeName of ['light', 'dark']) {
         await visualUtils.setTheme(themeName as keyof typeof THEME_CONFIGS);
-        
+
         // Enable high contrast mode
         await page.emulateMedia({ forcedColors: 'active' });
-        
+
         await visualUtils.screenshotFullPage(
           `theme-high-contrast-${themeName}`,
           THEME_CONFIG
         );
-        
+
         // Reset forced colors
         await page.emulateMedia({ forcedColors: 'none' });
       }
@@ -644,7 +644,7 @@ test.describe('Theme Visual Validation Tests', () => {
     test('Focus Indicators in Different Themes @visual @theme @accessibility', async ({ page }) => {
       for (const themeName of ['light', 'dark', 'cyborg', 'darkly']) {
         await visualUtils.setTheme(themeName as keyof typeof THEME_CONFIGS);
-        
+
         // Create focusable elements
         await page.evaluate(() => {
           const focusDiv = document.createElement('div');
@@ -662,21 +662,21 @@ test.describe('Theme Visual Validation Tests', () => {
               </div>
             </div>
           `;
-          
+
           // Remove existing test if present
           const existing = document.querySelector('[data-testid="focus-indicators-test"]');
           if (existing) existing.remove();
-          
+
           document.body.appendChild(focusDiv);
         });
 
         // Focus each element and take screenshots
         const focusableElements = await page.locator('[data-testid="focus-indicators-test"] button, [data-testid="focus-indicators-test"] input, [data-testid="focus-indicators-test"] select, [data-testid="focus-indicators-test"] textarea, [data-testid="focus-indicators-test"] a, [data-testid="focus-indicators-test"] [tabindex]').all();
-        
+
         for (let i = 0; i < focusableElements.length; i++) {
           await focusableElements[i].focus();
           await page.waitForTimeout(100);
-          
+
           await visualUtils.screenshotComponent(
             '[data-testid="focus-indicators-test"]',
             `theme-focus-${themeName}-element-${i}`,
@@ -689,17 +689,17 @@ test.describe('Theme Visual Validation Tests', () => {
 
   // Test theme responsiveness across viewports
   test.describe('Theme Responsive Behavior', () => {
-    
+
     test('Theme Consistency Across Viewports @visual @theme @responsive', async ({ page }) => {
       const testViewports: (keyof typeof RESPONSIVE_VIEWPORTS)[] = ['mobile', 'tablet', 'desktop'];
       const testThemes: (keyof typeof THEME_CONFIGS)[] = ['light', 'dark'];
-      
+
       for (const themeName of testThemes) {
         await visualUtils.setTheme(themeName);
-        
+
         for (const viewportName of testViewports) {
           await visualUtils.setViewport(viewportName);
-          
+
           await visualUtils.screenshotFullPage(
             `theme-responsive-${themeName}-${viewportName}`,
             THEME_CONFIG
@@ -710,17 +710,17 @@ test.describe('Theme Visual Validation Tests', () => {
 
     test('Theme Switcher Responsiveness @visual @theme @responsive', async ({ page }) => {
       const testViewports: (keyof typeof RESPONSIVE_VIEWPORTS)[] = ['mobile', 'desktop'];
-      
+
       for (const viewportName of testViewports) {
         await visualUtils.setViewport(viewportName);
-        
+
         // Create responsive theme switcher mockup
         await page.evaluate((viewport) => {
           const switcherDiv = document.createElement('div');
           switcherDiv.setAttribute('data-testid', 'responsive-theme-switcher');
-          
+
           const isMobile = viewport === 'mobile';
-          
+
           switcherDiv.innerHTML = `
             <div style="
               padding: 20px;
@@ -737,7 +737,7 @@ test.describe('Theme Visual Validation Tests', () => {
                 <h4 style="margin: 0;">Theme Settings</h4>
                 ${isMobile ? '' : '<p style="margin: 5px 0 0 0; color: var(--bs-secondary, #6c757d);">Choose your preferred theme</p>'}
               </div>
-              
+
               <div style="
                 display: flex;
                 gap: 10px;
@@ -773,11 +773,11 @@ test.describe('Theme Visual Validation Tests', () => {
               </div>
             </div>
           `;
-          
+
           // Remove existing test if present
           const existing = document.querySelector('[data-testid="responsive-theme-switcher"]');
           if (existing) existing.remove();
-          
+
           document.body.appendChild(switcherDiv);
         }, viewportName);
 

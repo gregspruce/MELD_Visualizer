@@ -5,11 +5,11 @@
 
 import { test, expect, devices } from '@playwright/test';
 import { VisualTestUtils } from './visual-utils';
-import { 
-  BROWSER_CONFIGS, 
-  RESPONSIVE_VIEWPORTS, 
+import {
+  BROWSER_CONFIGS,
+  RESPONSIVE_VIEWPORTS,
   COMPONENT_SELECTORS,
-  STRICT_VISUAL_CONFIG 
+  STRICT_VISUAL_CONFIG
 } from './visual-config';
 
 // Test configuration for cross-browser consistency
@@ -23,16 +23,16 @@ const CROSS_BROWSER_CONFIG = {
 for (const [browserName, browserConfig] of Object.entries(BROWSER_CONFIGS)) {
   test.describe(`Cross-Browser Visual Tests - ${browserName}`, () => {
     let visualUtils: VisualTestUtils;
-    
+
     test.beforeEach(async ({ page }) => {
       visualUtils = new VisualTestUtils(page);
-      
+
       // Navigate to the application
       await page.goto('http://localhost:8050', { waitUntil: 'networkidle' });
-      
+
       // Disable animations for consistent screenshots
       await visualUtils.disableAnimations();
-      
+
       // Wait for initial page load
       await page.waitForLoadState('domcontentloaded');
       await visualUtils.waitForAnimationsToComplete();
@@ -80,8 +80,8 @@ for (const [browserName, browserConfig] of Object.entries(BROWSER_CONFIGS)) {
           <h2>Heading 2 - Secondary Title</h2>
           <h3>Heading 3 - Tertiary Title</h3>
           <p>Regular paragraph text with <strong>bold</strong> and <em>italic</em> formatting.</p>
-          <p>This is a longer paragraph to test line spacing and text flow across different browsers. 
-             It includes various punctuation marks: commas, periods, semicolons; exclamation points! 
+          <p>This is a longer paragraph to test line spacing and text flow across different browsers.
+             It includes various punctuation marks: commas, periods, semicolons; exclamation points!
              And question marks? Plus numbers like 123, 456.789, and special characters like @#$%.</p>
           <ul>
             <li>Unordered list item one</li>
@@ -119,17 +119,17 @@ for (const [browserName, browserConfig] of Object.entries(BROWSER_CONFIGS)) {
         formDiv.innerHTML = `
           <div style="padding: 20px; max-width: 500px;">
             <h3>Form Controls Cross-Browser Test</h3>
-            
+
             <div style="margin-bottom: 15px;">
               <label>Text Input:</label>
               <input type="text" value="Sample text" style="width: 100%; padding: 8px;">
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label>Password Input:</label>
               <input type="password" value="password123" style="width: 100%; padding: 8px;">
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label>Select Dropdown:</label>
               <select style="width: 100%; padding: 8px;">
@@ -138,41 +138,41 @@ for (const [browserName, browserConfig] of Object.entries(BROWSER_CONFIGS)) {
                 <option>Option 3</option>
               </select>
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label>Textarea:</label>
               <textarea style="width: 100%; padding: 8px; height: 80px;">Sample textarea content
 Line 2 of content</textarea>
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label>
                 <input type="checkbox" checked> Checked Checkbox
               </label>
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label>
                 <input type="checkbox"> Unchecked Checkbox
               </label>
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label>
                 <input type="radio" name="radio-test" checked> Selected Radio
               </label>
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <label>
                 <input type="radio" name="radio-test"> Unselected Radio
               </label>
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <input type="range" min="0" max="100" value="50" style="width: 100%;">
             </div>
-            
+
             <div style="margin-bottom: 15px;">
               <button type="button" style="padding: 10px 20px; margin-right: 10px;">Primary Button</button>
               <button type="button" disabled style="padding: 10px 20px;">Disabled Button</button>
@@ -197,7 +197,7 @@ Line 2 of content</textarea>
         layoutDiv.innerHTML = `
           <div style="padding: 20px;">
             <h3>CSS Grid and Flexbox Layout Test</h3>
-            
+
             <h4>CSS Grid Layout:</h4>
             <div style="
               display: grid;
@@ -211,7 +211,7 @@ Line 2 of content</textarea>
               <div style="background: #c0c0c0; padding: 20px; text-align: center; grid-column: span 2;">Spanning Item</div>
               <div style="background: #b0b0b0; padding: 20px; text-align: center;">Grid Item 6</div>
             </div>
-            
+
             <h4>Flexbox Layout:</h4>
             <div style="
               display: flex;
@@ -225,7 +225,7 @@ Line 2 of content</textarea>
               <div style="background: #eeffee; padding: 10px; flex: 1; margin: 0 10px;">Flexible Item</div>
               <div style="background: #eeeeff; padding: 10px;">Flex Item 3</div>
             </div>
-            
+
             <div style="
               display: flex;
               flex-direction: column;
@@ -257,7 +257,7 @@ Line 2 of content</textarea>
         effectsDiv.innerHTML = `
           <div style="padding: 20px;">
             <h3>CSS Effects Cross-Browser Test</h3>
-            
+
             <div style="display: flex; flex-wrap: wrap; gap: 20px;">
               <div style="
                 width: 100px;
@@ -269,7 +269,7 @@ Line 2 of content</textarea>
                 justify-content: center;
                 color: white;
               ">Rounded</div>
-              
+
               <div style="
                 width: 100px;
                 height: 100px;
@@ -280,7 +280,7 @@ Line 2 of content</textarea>
                 justify-content: center;
                 color: white;
               ">Circle</div>
-              
+
               <div style="
                 width: 100px;
                 height: 100px;
@@ -290,7 +290,7 @@ Line 2 of content</textarea>
                 align-items: center;
                 justify-content: center;
               ">Shadow</div>
-              
+
               <div style="
                 width: 100px;
                 height: 100px;
@@ -302,7 +302,7 @@ Line 2 of content</textarea>
                 justify-content: center;
                 color: white;
               ">Both</div>
-              
+
               <div style="
                 width: 100px;
                 height: 100px;
@@ -313,7 +313,7 @@ Line 2 of content</textarea>
                 justify-content: center;
                 color: white;
               ">Gradient</div>
-              
+
               <div style="
                 width: 100px;
                 height: 100px;
@@ -342,7 +342,7 @@ Line 2 of content</textarea>
     for (const [viewportName, viewport] of Object.entries(RESPONSIVE_VIEWPORTS)) {
       test(`${browserName} - Responsive Layout ${viewportName} @visual @cross-browser @responsive`, async ({ page }) => {
         await visualUtils.setViewport(viewportName as keyof typeof RESPONSIVE_VIEWPORTS);
-        
+
         await visualUtils.screenshotFullPage(
           `cross-browser-responsive-${browserName}-${viewportName}`,
           CROSS_BROWSER_CONFIG
@@ -358,7 +358,7 @@ test.describe('Cross-Browser Comparison Tests', () => {
     // This test would run after all browser-specific tests
     // and compare the results to identify inconsistencies
     console.log('Cross-browser comparison would be performed here');
-    
+
     // In a real implementation, you would:
     // 1. Load screenshots from different browsers
     // 2. Use image comparison tools to identify differences
@@ -371,10 +371,10 @@ test.describe('Cross-Browser Comparison Tests', () => {
 test.describe('Browser-Specific Regression Tests', () => {
   test('Safari-specific font rendering issues @visual @cross-browser @safari', async ({ page, browserName }) => {
     test.skip(browserName !== 'webkit', 'Safari-specific test');
-    
+
     const visualUtils = new VisualTestUtils(page);
     await page.goto('http://localhost:8050');
-    
+
     // Test Safari-specific font rendering quirks
     await visualUtils.screenshotComponent(
       'body',
@@ -385,10 +385,10 @@ test.describe('Browser-Specific Regression Tests', () => {
 
   test('Firefox flexbox rendering edge cases @visual @cross-browser @firefox', async ({ page, browserName }) => {
     test.skip(browserName !== 'firefox', 'Firefox-specific test');
-    
+
     const visualUtils = new VisualTestUtils(page);
     await page.goto('http://localhost:8050');
-    
+
     // Test Firefox flexbox quirks
     if (await page.locator('.d-flex').count() > 0) {
       await visualUtils.screenshotComponent(
@@ -401,10 +401,10 @@ test.describe('Browser-Specific Regression Tests', () => {
 
   test('Chrome scrollbar styling @visual @cross-browser @chrome', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Chrome-specific test');
-    
+
     const visualUtils = new VisualTestUtils(page);
     await page.goto('http://localhost:8050');
-    
+
     // Create scrollable content to test scrollbar styling
     await page.evaluate(() => {
       const scrollDiv = document.createElement('div');

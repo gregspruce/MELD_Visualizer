@@ -136,49 +136,49 @@ export class CallbackDependencyAnalyzer {
     bottlenecks: string[];
   }> {
     const graph = await this.buildDependencyGraph();
-    
+
     return await this.page.evaluate((graphData) => {
       const { nodes, edges } = graphData;
-      
+
       // Topological sort for execution order
       const inDegree = new Map<string, number>();
       const adjList = new Map<string, string[]>();
-      
+
       // Initialize
       nodes.forEach(node => {
         inDegree.set(node.id, 0);
         adjList.set(node.id, []);
       });
-      
+
       // Build adjacency list and calculate in-degrees
       edges.forEach(edge => {
         adjList.get(edge.from)!.push(edge.to);
         inDegree.set(edge.to, (inDegree.get(edge.to) || 0) + 1);
       });
-      
+
       // Kahn's algorithm for topological sorting
       const queue: string[] = [];
       const result: string[] = [];
       const parallelizable: string[][] = [];
-      
+
       // Start with nodes that have no dependencies
       nodes.forEach(node => {
         if (inDegree.get(node.id) === 0) {
           queue.push(node.id);
         }
       });
-      
+
       while (queue.length > 0) {
         const currentLevel = [...queue];
         if (currentLevel.length > 1) {
           parallelizable.push(currentLevel);
         }
-        
+
         queue.length = 0;
-        
+
         currentLevel.forEach(nodeId => {
           result.push(nodeId);
-          
+
           const neighbors = adjList.get(nodeId) || [];
           neighbors.forEach(neighbor => {
             inDegree.set(neighbor, inDegree.get(neighbor)! - 1);
@@ -188,7 +188,7 @@ export class CallbackDependencyAnalyzer {
           });
         });
       }
-      
+
       // Identify bottlenecks (nodes with high fan-in/fan-out)
       const bottlenecks = nodes
         .filter(node => {
@@ -197,7 +197,7 @@ export class CallbackDependencyAnalyzer {
           return fanIn > 3 || fanOut > 3;
         })
         .map(node => node.id);
-      
+
       return {
         order: result,
         parallelizable,
@@ -223,7 +223,7 @@ export class CallbackFlowTester {
     validateTiming?: boolean;
   }): Promise<CallbackFlowResult> {
     const { triggerAction, expectedFlow, timeout = 30000, validateTiming = true } = options;
-    
+
     // Set up comprehensive callback monitoring
     await this.page.evaluate(() => {
       (window as any).__callbackFlowMonitoring = {
@@ -233,17 +233,17 @@ export class CallbackFlowTester {
         componentStates: new Map(),
         networkRequests: []
       };
-      
+
       const dash = (window as any).dash_clientside;
       const monitoring = (window as any).__callbackFlowMonitoring;
-      
+
       if (dash && !dash.__flowMonitoringHooked) {
         // Hook into callback execution
         const originalCallback = dash.callback;
         dash.callback = function(callbackId: string, inputs: any, state: any) {
           if (monitoring.active) {
             const startTime = performance.now();
-            
+
             // Record component states before callback
             const preStates = new Map();
             Object.keys(inputs).forEach(key => {
@@ -257,12 +257,12 @@ export class CallbackFlowTester {
                 });
               }
             });
-            
+
             const result = originalCallback.call(this, callbackId, inputs, state);
-            
+
             const handleResult = (outputs: any) => {
               const endTime = performance.now();
-              
+
               // Record component states after callback
               const postStates = new Map();
               Object.keys(outputs || {}).forEach(key => {
@@ -276,7 +276,7 @@ export class CallbackFlowTester {
                   });
                 }
               });
-              
+
               monitoring.flows.push({
                 callbackId,
                 startTime: startTime - monitoring.startTime,
@@ -289,21 +289,21 @@ export class CallbackFlowTester {
                 order: monitoring.flows.length
               });
             };
-            
+
             if (result && typeof result.then === 'function') {
               result.then(handleResult);
             } else {
               handleResult(result);
             }
-            
+
             return result;
           }
-          
+
           return originalCallback.call(this, callbackId, inputs, state);
         };
-        
+
         dash.__flowMonitoringHooked = true;
-        
+
         // Hook into network requests
         const originalFetch = window.fetch;
         window.fetch = function(...args) {
@@ -356,30 +356,30 @@ export class CallbackFlowTester {
    * Analyze callback flow results against expectations
    */
   private analyzeCallbackFlow(
-    flowData: any, 
-    expectedFlow: CallbackFlowExpectation[], 
+    flowData: any,
+    expectedFlow: CallbackFlowExpectation[],
     validateTiming: boolean
   ): CallbackFlowResult {
     const { flows, networkRequests, totalTime } = flowData;
     const issues: string[] = [];
     const timingIssues: string[] = [];
-    
+
     // Validate execution order
     expectedFlow.forEach((expectation, index) => {
       const actualFlow = flows.find((f: any) => f.callbackId.includes(expectation.callbackPattern));
-      
+
       if (!actualFlow) {
         issues.push(`Expected callback matching '${expectation.callbackPattern}' was not found`);
         return;
       }
-      
+
       // Validate timing constraints
       if (validateTiming && expectation.maxDuration) {
         if (actualFlow.duration > expectation.maxDuration) {
           timingIssues.push(`Callback '${actualFlow.callbackId}' took ${actualFlow.duration}ms (max: ${expectation.maxDuration}ms)`);
         }
       }
-      
+
       // Validate dependencies
       if (expectation.dependencies) {
         expectation.dependencies.forEach(dep => {
@@ -389,7 +389,7 @@ export class CallbackFlowTester {
           }
         });
       }
-      
+
       // Validate component state changes
       if (expectation.expectedStateChanges) {
         expectation.expectedStateChanges.forEach(change => {
@@ -398,29 +398,29 @@ export class CallbackFlowTester {
             issues.push(`Component '${change.componentId}' state not recorded`);
             return;
           }
-          
+
           if (change.property === 'visible' && componentState.visible !== change.expectedValue) {
             issues.push(`Component '${change.componentId}' visibility should be ${change.expectedValue}`);
           }
-          
+
           if (change.property === 'value' && componentState.value !== change.expectedValue) {
             issues.push(`Component '${change.componentId}' value should be '${change.expectedValue}', got '${componentState.value}'`);
           }
         });
       }
     });
-    
+
     // Analyze performance
     const performanceMetrics = {
       totalExecutionTime: totalTime,
       callbackCount: flows.length,
       averageCallbackTime: flows.length > 0 ? flows.reduce((sum: number, f: any) => sum + f.duration, 0) / flows.length : 0,
       networkRequestCount: networkRequests.length,
-      slowestCallback: flows.reduce((slowest: any, current: any) => 
+      slowestCallback: flows.reduce((slowest: any, current: any) =>
         current.duration > (slowest?.duration || 0) ? current : slowest, null
       )
     };
-    
+
     return {
       success: issues.length === 0,
       executionOrder: flows.map((f: any) => ({ id: f.callbackId, order: f.order, duration: f.duration })),
@@ -455,12 +455,12 @@ export class CallbackErrorResilienceTester {
     recoveryActions?: Array<() => Promise<void>>;
   }): Promise<ErrorResilienceResult> {
     const { errorTrigger, expectedErrorHandling, recoveryActions = [] } = options;
-    
+
     // Set up error monitoring
     const errorMonitoring = await this.setupErrorMonitoring();
-    
+
     await errorMonitoring.start();
-    
+
     // Trigger error
     let errorTriggered = false;
     try {
@@ -469,20 +469,20 @@ export class CallbackErrorResilienceTester {
     } catch (error) {
       errorTriggered = true;
     }
-    
+
     // Check initial error handling
     const initialResults = await errorMonitoring.getResults();
-    
+
     // Test recovery
     const recoveryResults: RecoveryTestResult[] = [];
-    
+
     for (const [index, recoveryAction] of recoveryActions.entries()) {
       try {
         await recoveryAction();
         await this.page.waitForTimeout(1000);
-        
+
         const afterRecovery = await errorMonitoring.getResults();
-        
+
         recoveryResults.push({
           actionIndex: index,
           successful: afterRecovery.callbacksWorking && !afterRecovery.hasActiveErrors,
@@ -499,11 +499,11 @@ export class CallbackErrorResilienceTester {
         });
       }
     }
-    
+
     await errorMonitoring.stop();
-    
+
     const finalResults = await errorMonitoring.getResults();
-    
+
     return {
       errorTriggered,
       errorsCaught: finalResults.errorCount > 0,
@@ -529,9 +529,9 @@ export class CallbackErrorResilienceTester {
         lastErrorTime: 0,
         callbacksWorking: true
       };
-      
+
       const monitoring = (window as any).__errorMonitoring;
-      
+
       // Monitor console errors
       const originalConsoleError = console.error;
       console.error = function(...args) {
@@ -545,7 +545,7 @@ export class CallbackErrorResilienceTester {
         }
         originalConsoleError.apply(console, args);
       };
-      
+
       // Monitor callback errors
       const dash = (window as any).dash_clientside;
       if (dash && !dash.__errorMonitoringHooked) {
@@ -553,7 +553,7 @@ export class CallbackErrorResilienceTester {
         dash.callback = function(callbackId: string, inputs: any, state: any) {
           try {
             const result = originalCallback.call(this, callbackId, inputs, state);
-            
+
             if (result && typeof result.then === 'function') {
               return result.catch((error: any) => {
                 if (monitoring.active) {
@@ -569,7 +569,7 @@ export class CallbackErrorResilienceTester {
                 throw error;
               });
             }
-            
+
             return result;
           } catch (error: any) {
             if (monitoring.active) {
@@ -585,15 +585,15 @@ export class CallbackErrorResilienceTester {
             throw error;
           }
         };
-        
+
         dash.__errorMonitoringHooked = true;
       }
-      
+
       // Monitor network errors
       const originalFetch = window.fetch;
       window.fetch = function(...args) {
         const promise = originalFetch.apply(this, args);
-        
+
         if (monitoring.active) {
           promise.catch(error => {
             monitoring.networkErrors.push({
@@ -604,10 +604,10 @@ export class CallbackErrorResilienceTester {
             monitoring.lastErrorTime = Date.now();
           });
         }
-        
+
         return promise;
       };
-      
+
       // Monitor unhandled promise rejections
       window.addEventListener('unhandledrejection', event => {
         if (monitoring.active) {
@@ -619,7 +619,7 @@ export class CallbackErrorResilienceTester {
           monitoring.lastErrorTime = Date.now();
         }
       });
-      
+
       // Monitor JavaScript errors
       window.addEventListener('error', event => {
         if (monitoring.active) {
@@ -649,17 +649,17 @@ export class CallbackErrorResilienceTester {
           monitoring.callbacksWorking = true;
         });
       },
-      
+
       stop: async () => {
         await this.page.evaluate(() => {
           (window as any).__errorMonitoring.active = false;
         });
       },
-      
+
       getResults: async () => {
         return await this.page.evaluate(() => {
           const monitoring = (window as any).__errorMonitoring;
-          
+
           // Test if callbacks are still working by checking if Dash is responsive
           try {
             const dash = (window as any).dash_clientside;
@@ -667,14 +667,14 @@ export class CallbackErrorResilienceTester {
           } catch {
             monitoring.callbacksWorking = false;
           }
-          
+
           const allErrors = [
             ...monitoring.errors,
             ...monitoring.callbackErrors.map((e: any) => ({ type: 'callback_error', ...e })),
             ...monitoring.networkErrors.map((e: any) => ({ type: 'network_error', ...e })),
             ...monitoring.consoleErrors.map((e: any) => ({ type: 'console_error', ...e }))
           ];
-          
+
           return {
             errorCount: allErrors.length,
             errorTypes: [...new Set(allErrors.map(e => e.type))],
@@ -700,14 +700,14 @@ export class CallbackErrorResilienceTester {
       '.notification.error',
       '.toast.error'
     ];
-    
+
     for (const selector of errorSelectors) {
       if (await this.page.locator(selector).count() > 0) {
         const isVisible = await this.page.locator(selector).isVisible();
         if (isVisible) return true;
       }
     }
-    
+
     return false;
   }
 
@@ -715,30 +715,30 @@ export class CallbackErrorResilienceTester {
    * Validate error handling against expectations
    */
   private validateErrorHandling(
-    results: any, 
+    results: any,
     expectations: ErrorHandlingExpectation
   ): { valid: boolean; issues: string[] } {
     const issues: string[] = [];
-    
+
     if (expectations.shouldCatchErrors && results.errorCount === 0) {
       issues.push('Expected errors to be caught, but none were detected');
     }
-    
+
     if (expectations.shouldStayResponsive && !results.callbacksWorking) {
       issues.push('App became unresponsive after error');
     }
-    
+
     if (expectations.shouldDisplayErrorToUser && !await this.checkErrorDisplayed()) {
       issues.push('Error should be displayed to user but was not found');
     }
-    
+
     if (expectations.maxErrorRecoveryTime && results.lastErrorTime) {
       const recoveryTime = Date.now() - results.lastErrorTime;
       if (recoveryTime > expectations.maxErrorRecoveryTime) {
         issues.push(`Error recovery took ${recoveryTime}ms (max: ${expectations.maxErrorRecoveryTime}ms)`);
       }
     }
-    
+
     return {
       valid: issues.length === 0,
       issues

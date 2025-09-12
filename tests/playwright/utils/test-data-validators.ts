@@ -3,11 +3,11 @@
  * Comprehensive validation and transformation utilities for MELD Visualizer testing
  */
 
-import type { 
-  MELDData, 
-  TestTypes, 
-  DashComponents, 
-  PlotlyTypes 
+import type {
+  MELDData,
+  TestTypes,
+  DashComponents,
+  PlotlyTypes
 } from '../types';
 
 /**
@@ -44,7 +44,7 @@ export class MELDDataValidator {
    * Validate a single MELD data point with comprehensive checks
    */
   static validateDataPoint(
-    point: unknown, 
+    point: unknown,
     rowIndex?: number
   ): { isValid: boolean; errors: MELDData.ValidationError[]; warnings: MELDData.ValidationWarning[] } {
     const errors: MELDData.ValidationError[] = [];
@@ -81,7 +81,7 @@ export class MELDDataValidator {
       const value = dataPoint[field];
       if (value !== undefined && value !== null) {
         const numericValue = Number(value);
-        
+
         if (isNaN(numericValue)) {
           errors.push({
             field,
@@ -96,7 +96,7 @@ export class MELDDataValidator {
           if (range && (numericValue < range.min || numericValue > range.max)) {
             const severity = this.isRangeCritical(field) ? 'error' : 'warning';
             const message = `Field '${field}' value ${numericValue} is outside expected range [${range.min}, ${range.max}]`;
-            
+
             if (severity === 'error') {
               errors.push({ field, row: rowIndex || 0, value, message, severity });
             } else {
@@ -158,7 +158,7 @@ export class MELDDataValidator {
         message: 'Data must be an array',
         severity: 'error'
       });
-      
+
       return {
         isValid: false,
         errors: allErrors,
@@ -179,7 +179,7 @@ export class MELDDataValidator {
       const result = this.validateDataPoint(point, index);
       allErrors.push(...result.errors);
       allWarnings.push(...result.warnings);
-      
+
       if (result.isValid) {
         validRows++;
       }
@@ -227,7 +227,7 @@ export class MELDDataValidator {
    * Perform physics-based consistency checks
    */
   private static performConsistencyChecks(
-    point: Partial<MELDData.DataPoint>, 
+    point: Partial<MELDData.DataPoint>,
     rowIndex: number,
     warnings: MELDData.ValidationWarning[]
   ): void {
@@ -281,7 +281,7 @@ export class MELDDataValidator {
     encoding: 'utf-8',
     validateOnParse: true
   }): { data: MELDData.DataPoint[]; validation: MELDData.ValidationResult } {
-    const lines = csvContent.split('\n').filter(line => 
+    const lines = csvContent.split('\n').filter(line =>
       options.skipEmptyLines ? line.trim() : true
     );
 
@@ -305,23 +305,23 @@ export class MELDDataValidator {
           dataQuality: 'poor'
         }
       };
-      
+
       return { data: [], validation };
     }
 
     // Parse header
-    const headers = lines[0].split(options.delimiter).map(h => 
+    const headers = lines[0].split(options.delimiter).map(h =>
       options.trimHeaders ? h.trim() : h
     );
 
     // Parse data rows
     const dataRows: MELDData.DataPoint[] = [];
     const maxRows = options.maxRows || lines.length - 1;
-    
+
     for (let i = 1; i <= Math.min(maxRows, lines.length - 1); i++) {
       const values = lines[i].split(options.delimiter);
       const row: Partial<MELDData.DataPoint> = {};
-      
+
       headers.forEach((header, index) => {
         const value = values[index]?.trim();
         if (value !== undefined) {
@@ -334,7 +334,7 @@ export class MELDDataValidator {
           }
         }
       });
-      
+
       dataRows.push(row as MELDData.DataPoint);
     }
 
@@ -372,7 +372,7 @@ export class TestDataGenerator {
   static generateMELDDataset(config: TestTypes.TestDataGeneratorConfig): MELDData.Dataset {
     const generator = new MELDTestDataGenerator(config);
     const dataPoints = generator.generateDataPoints();
-    
+
     return {
       data: dataPoints,
       metadata: {
@@ -417,7 +417,7 @@ export class TestDataGenerator {
         patterns: {},
         distributions: {}
       }),
-      
+
       standard: this.generateMELDDataset({
         seed: 23456,
         count: 100,
@@ -433,7 +433,7 @@ export class TestDataGenerator {
           SpinVel: 'normal'
         }
       }),
-      
+
       large: this.generateMELDDataset({
         seed: 34567,
         count: 1000,
@@ -442,7 +442,7 @@ export class TestDataGenerator {
         patterns: {},
         distributions: {}
       }),
-      
+
       edge: this.generateMELDDataset({
         seed: 45678,
         count: 10,
@@ -467,7 +467,7 @@ export class TestDataGenerator {
       if (values.length === 0) {
         return { min: 0, max: 0, mean: 0, median: 0, stdDev: 0, range: 0 };
       }
-      
+
       const sorted = values.sort((a, b) => a - b);
       const min = sorted[0];
       const max = sorted[sorted.length - 1];
@@ -475,11 +475,11 @@ export class TestDataGenerator {
       const median = sorted.length % 2 === 0
         ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
         : sorted[Math.floor(sorted.length / 2)];
-      
+
       const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
       const stdDev = Math.sqrt(variance);
       const range = max - min;
-      
+
       return { min, max, mean, median, stdDev, range };
     };
 
@@ -532,13 +532,13 @@ class MELDTestDataGenerator {
   generateDataPoints(): MELDData.DataPoint[] {
     const points: MELDData.DataPoint[] = [];
     const { count, seed = 12345 } = this.config;
-    
+
     let random = this.createSeededRandom(seed);
     const baseDate = new Date('2024-01-15T10:00:00.000Z');
-    
+
     for (let i = 0; i < count; i++) {
       const timestamp = new Date(baseDate.getTime() + i * 1000);
-      
+
       points.push({
         Date: timestamp.toISOString().split('T')[0],
         Time: timestamp.toTimeString().split(' ')[0] + '.00',
@@ -572,7 +572,7 @@ class MELDTestDataGenerator {
         Tool2Temp: this.generateValue('Tool2Temp', random, 50, 100)
       });
     }
-    
+
     return points;
   }
 
@@ -584,17 +584,17 @@ class MELDTestDataGenerator {
   }
 
   private generateValue(
-    field: keyof MELDData.DataPoint, 
-    random: () => number, 
-    min: number, 
+    field: keyof MELDData.DataPoint,
+    random: () => number,
+    min: number,
     max: number
   ): number {
     const range = this.config.ranges?.[field];
     const actualMin = range ? range[0] : min;
     const actualMax = range ? range[1] : max;
-    
+
     const distribution = this.config.distributions?.[field] || 'uniform';
-    
+
     switch (distribution) {
       case 'normal':
         const u1 = random();
@@ -603,11 +603,11 @@ class MELDTestDataGenerator {
         const mean = (actualMin + actualMax) / 2;
         const stdDev = (actualMax - actualMin) / 6;
         return Math.max(actualMin, Math.min(actualMax, mean + z0 * stdDev));
-      
+
       case 'exponential':
         const lambda = 1 / ((actualMax - actualMin) / 2);
         return actualMin - Math.log(random()) / lambda;
-      
+
       default:
         return actualMin + random() * (actualMax - actualMin);
     }
@@ -627,7 +627,7 @@ export class PerformanceTestUtils {
       const metrics = results
         .map(r => r.performance)
         .filter(p => p !== undefined) as TestTypes.PerformanceMetrics[];
-      
+
       if (metrics.length === 0) {
         return {
           loadTime: 5000,
@@ -638,7 +638,7 @@ export class PerformanceTestUtils {
           networkRequests: 50
         };
       }
-      
+
       return {
         loadTime: Math.max(...metrics.map(m => m.loadTime)),
         renderTime: Math.max(...metrics.map(m => m.renderTime)),
@@ -654,27 +654,27 @@ export class PerformanceTestUtils {
    * Benchmark test execution time
    */
   static async benchmark<T>(
-    name: string, 
+    name: string,
     testFunction: () => Promise<T>
   ): Promise<{ result: T; duration: number; memoryUsage: number }> {
     const startTime = process.hrtime.bigint();
     const startMemory = process.memoryUsage().heapUsed;
-    
+
     try {
       const result = await testFunction();
       const endTime = process.hrtime.bigint();
       const endMemory = process.memoryUsage().heapUsed;
-      
+
       const duration = Number(endTime - startTime) / 1000000; // Convert to milliseconds
       const memoryUsage = endMemory - startMemory;
-      
+
       console.log(`⏱️  Benchmark "${name}": ${duration.toFixed(2)}ms, Memory: ${memoryUsage} bytes`);
-      
+
       return { result, duration, memoryUsage };
     } catch (error) {
       const endTime = process.hrtime.bigint();
       const duration = Number(endTime - startTime) / 1000000;
-      
+
       console.error(`❌ Benchmark "${name}" failed after ${duration.toFixed(2)}ms:`, error);
       throw error;
     }
@@ -690,33 +690,33 @@ export class ConfigValidator implements TestTypes.ConfigValidator {
    */
   validateTestConfig(config: TestTypes.MELDTestConfig): { valid: boolean; errors: ReadonlyArray<string> } {
     const errors: string[] = [];
-    
+
     try {
       // Validate URL
       new URL(config.baseURL);
     } catch {
       errors.push(`Invalid baseURL: ${config.baseURL}`);
     }
-    
+
     // Validate timeouts
     Object.entries(config.timeout).forEach(([key, value]) => {
       if (typeof value !== 'number' || value <= 0) {
         errors.push(`Invalid timeout ${key}: ${value}`);
       }
     });
-    
+
     // Validate viewport
     if (config.viewport.width <= 0 || config.viewport.height <= 0) {
       errors.push(`Invalid viewport dimensions: ${config.viewport.width}x${config.viewport.height}`);
     }
-    
+
     // Validate performance thresholds
     Object.entries(config.performance).forEach(([key, value]) => {
       if (typeof value !== 'number' || value <= 0) {
         errors.push(`Invalid performance threshold ${key}: ${value}`);
       }
     });
-    
+
     return {
       valid: errors.length === 0,
       errors
@@ -737,9 +737,9 @@ export class ConfigValidator implements TestTypes.ConfigValidator {
     if (typeof config !== 'object' || config === null) {
       return false;
     }
-    
+
     const plotlyConfig = config as PlotlyTypes.PlotlyConfig;
-    
+
     // Check for valid boolean properties
     const booleanProps = ['staticPlot', 'editable', 'responsive', 'scrollZoom'];
     for (const prop of booleanProps) {
@@ -748,7 +748,7 @@ export class ConfigValidator implements TestTypes.ConfigValidator {
         return false;
       }
     }
-    
+
     return true;
   }
 
@@ -759,9 +759,9 @@ export class ConfigValidator implements TestTypes.ConfigValidator {
     if (typeof selectors !== 'object' || selectors === null) {
       return false;
     }
-    
+
     const pageSelectors = selectors as TestTypes.PageSelectors;
-    
+
     // Check required sections
     const requiredSections = ['app', 'upload', 'tabs', 'graph', 'controls', 'table'];
     for (const section of requiredSections) {
@@ -769,12 +769,12 @@ export class ConfigValidator implements TestTypes.ConfigValidator {
         return false;
       }
     }
-    
+
     // Check that tab selector is a function
     if (typeof pageSelectors.tabs.tab !== 'function') {
       return false;
     }
-    
+
     return true;
   }
 }

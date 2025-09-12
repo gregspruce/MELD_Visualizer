@@ -5,11 +5,11 @@
 
 import { test, expect } from '@playwright/test';
 import { VisualTestUtils } from './visual-utils';
-import { 
+import {
   COMPONENT_SELECTORS,
   DEFAULT_VISUAL_CONFIG,
   ACCESSIBILITY_CONFIG,
-  THEME_CONFIGS 
+  THEME_CONFIGS
 } from './visual-config';
 
 // Accessibility-specific configuration
@@ -21,23 +21,23 @@ const ACCESSIBILITY_CONFIG_VISUAL = {
 
 test.describe('Accessibility Visual Testing', () => {
   let visualUtils: VisualTestUtils;
-  
+
   test.beforeEach(async ({ page }) => {
     visualUtils = new VisualTestUtils(page);
-    
+
     // Navigate to the application
     await page.goto('http://localhost:8050', { waitUntil: 'networkidle' });
-    
+
     // Disable animations for consistent screenshots
     await visualUtils.disableAnimations();
-    
+
     // Wait for initial page load
     await page.waitForLoadState('domcontentloaded');
     await visualUtils.waitForAnimationsToComplete();
   });
 
   test.describe('Focus Indicators and Visual Hierarchy', () => {
-    
+
     test('Focus Ring Visibility @visual @accessibility @focus', async ({ page }) => {
       // Create comprehensive focus indicator test
       await page.evaluate(() => {
@@ -46,7 +46,7 @@ test.describe('Accessibility Visual Testing', () => {
         focusDiv.innerHTML = `
           <div style="padding: 40px; background: #ffffff;">
             <h3>Focus Indicator Visibility Test</h3>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px;">
               <!-- Standard Form Elements -->
               <div>
@@ -60,7 +60,7 @@ test.describe('Accessibility Visual Testing', () => {
                     outline: none;
                     transition: all 0.2s ease;
                   ">
-                  
+
                   <textarea placeholder="Textarea" style="
                     padding: 10px 12px;
                     border: 2px solid #dee2e6;
@@ -71,7 +71,7 @@ test.describe('Accessibility Visual Testing', () => {
                     resize: vertical;
                     transition: all 0.2s ease;
                   "></textarea>
-                  
+
                   <select style="
                     padding: 10px 12px;
                     border: 2px solid #dee2e6;
@@ -84,7 +84,7 @@ test.describe('Accessibility Visual Testing', () => {
                     <option>Option 1</option>
                     <option>Option 2</option>
                   </select>
-                  
+
                   <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <input type="checkbox" style="
                       width: 16px;
@@ -94,7 +94,7 @@ test.describe('Accessibility Visual Testing', () => {
                     ">
                     <span>Checkbox option</span>
                   </label>
-                  
+
                   <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <input type="radio" name="radio-group" style="
                       width: 16px;
@@ -106,7 +106,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </label>
                 </div>
               </div>
-              
+
               <!-- Buttons -->
               <div>
                 <h4 style="margin-bottom: 20px;">Interactive Buttons</h4>
@@ -122,7 +122,7 @@ test.describe('Accessibility Visual Testing', () => {
                     outline: none;
                     transition: all 0.2s ease;
                   ">Primary Button</button>
-                  
+
                   <button style="
                     background: transparent;
                     color: #007bff;
@@ -134,7 +134,7 @@ test.describe('Accessibility Visual Testing', () => {
                     outline: none;
                     transition: all 0.2s ease;
                   ">Secondary Button</button>
-                  
+
                   <button disabled style="
                     background: #6c757d;
                     color: white;
@@ -148,7 +148,7 @@ test.describe('Accessibility Visual Testing', () => {
                   ">Disabled Button</button>
                 </div>
               </div>
-              
+
               <!-- Links and Navigation -->
               <div>
                 <h4 style="margin-bottom: 20px;">Links & Navigation</h4>
@@ -159,7 +159,7 @@ test.describe('Accessibility Visual Testing', () => {
                     outline: none;
                     transition: all 0.2s ease;
                   ">Standard Link</a>
-                  
+
                   <a href="#" style="
                     color: #007bff;
                     text-decoration: none;
@@ -168,7 +168,7 @@ test.describe('Accessibility Visual Testing', () => {
                     border-radius: 4px;
                     transition: all 0.2s ease;
                   ">Button-style Link</a>
-                  
+
                   <div style="display: flex; gap: 20px;">
                     <a href="#" style="
                       color: #6c757d;
@@ -197,7 +197,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </div>
                 </div>
               </div>
-              
+
               <!-- Custom Interactive Elements -->
               <div>
                 <h4 style="margin-bottom: 20px;">Custom Interactive</h4>
@@ -211,7 +211,7 @@ test.describe('Accessibility Visual Testing', () => {
                     outline: none;
                     transition: all 0.2s ease;
                   ">Custom Button (div)</div>
-                  
+
                   <div tabindex="0" role="menuitem" style="
                     padding: 8px 12px;
                     border: 1px solid #dee2e6;
@@ -220,7 +220,7 @@ test.describe('Accessibility Visual Testing', () => {
                     outline: none;
                     transition: all 0.2s ease;
                   ">Menu Item</div>
-                  
+
                   <div tabindex="0" role="slider" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="
                     width: 200px;
                     height: 20px;
@@ -247,7 +247,7 @@ test.describe('Accessibility Visual Testing', () => {
               </div>
             </div>
           </div>
-          
+
           <style>
             /* Enhanced focus styles for accessibility */
             *:focus {
@@ -255,7 +255,7 @@ test.describe('Accessibility Visual Testing', () => {
               outline-offset: 2px !important;
               box-shadow: 0 0 0 2px rgba(0, 95, 204, 0.25) !important;
             }
-            
+
             /* Special focus styles for buttons */
             button:focus, [role="button"]:focus {
               outline: 3px solid #005fcc !important;
@@ -263,7 +263,7 @@ test.describe('Accessibility Visual Testing', () => {
               box-shadow: 0 0 0 2px rgba(0, 95, 204, 0.25) !important;
               transform: translateY(-1px);
             }
-            
+
             /* Link focus styles */
             a:focus {
               outline: 3px solid #005fcc !important;
@@ -271,7 +271,7 @@ test.describe('Accessibility Visual Testing', () => {
               background-color: rgba(0, 95, 204, 0.1) !important;
               border-radius: 2px;
             }
-            
+
             /* Form element focus styles */
             input:focus, textarea:focus, select:focus {
               border-color: #007bff !important;
@@ -279,7 +279,7 @@ test.describe('Accessibility Visual Testing', () => {
               outline-offset: 2px !important;
               box-shadow: 0 0 0 2px rgba(0, 95, 204, 0.25) !important;
             }
-            
+
             /* Checkbox and radio focus styles */
             input[type="checkbox"]:focus, input[type="radio"]:focus {
               outline: 3px solid #005fcc !important;
@@ -300,11 +300,11 @@ test.describe('Accessibility Visual Testing', () => {
 
       // Focus different elements and capture each state
       const focusableElements = await page.locator('[data-testid="focus-indicators-comprehensive"] input, [data-testid="focus-indicators-comprehensive"] textarea, [data-testid="focus-indicators-comprehensive"] select, [data-testid="focus-indicators-comprehensive"] button, [data-testid="focus-indicators-comprehensive"] a, [data-testid="focus-indicators-comprehensive"] [tabindex]').all();
-      
+
       for (let i = 0; i < Math.min(focusableElements.length, 8); i++) {
         await focusableElements[i].focus();
         await page.waitForTimeout(200);
-        
+
         await visualUtils.screenshotComponent(
           '[data-testid="focus-indicators-comprehensive"]',
           `focus-indicator-element-${i + 1}`,
@@ -323,7 +323,7 @@ test.describe('Accessibility Visual Testing', () => {
             <p style="color: #6c757d; margin-bottom: 30px;">
               Elements should be focusable in logical order. Current focus is highlighted.
             </p>
-            
+
             <!-- Navigation header -->
             <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -336,7 +336,7 @@ test.describe('Accessibility Visual Testing', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Main content area -->
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
               <div>
@@ -352,7 +352,7 @@ test.describe('Accessibility Visual Testing', () => {
                       margin-top: 4px;
                     ">
                   </label>
-                  
+
                   <label>
                     Email:
                     <input type="email" tabindex="6" style="
@@ -363,7 +363,7 @@ test.describe('Accessibility Visual Testing', () => {
                       margin-top: 4px;
                     ">
                   </label>
-                  
+
                   <label>
                     Message:
                     <textarea tabindex="7" style="
@@ -376,7 +376,7 @@ test.describe('Accessibility Visual Testing', () => {
                       resize: vertical;
                     "></textarea>
                   </label>
-                  
+
                   <div style="display: flex; gap: 10px;">
                     <button type="submit" tabindex="8" style="
                       background: #28a745;
@@ -395,7 +395,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </div>
                 </form>
               </div>
-              
+
               <!-- Sidebar -->
               <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
                 <h4>Sidebar</h4>
@@ -421,7 +421,7 @@ test.describe('Accessibility Visual Testing', () => {
                     border-radius: 4px;
                     border: 1px solid transparent;
                   ">Related Link 3</a>
-                  
+
                   <div style="margin-top: 20px;">
                     <h5>Quick Actions</h5>
                     <button tabindex="13" style="
@@ -445,7 +445,7 @@ test.describe('Accessibility Visual Testing', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Skip link (usually hidden) -->
             <a href="#main-content" style="
               position: absolute;
@@ -459,7 +459,7 @@ test.describe('Accessibility Visual Testing', () => {
               border-radius: 0 0 4px 4px;
               transition: top 0.2s;
             " tabindex="0" onfocus="this.style.top='0';" onblur="this.style.top='-40px';">Skip to main content</a>
-            
+
             <div style="
               position: fixed;
               bottom: 20px;
@@ -474,7 +474,7 @@ test.describe('Accessibility Visual Testing', () => {
               Current focus: None
             </div>
           </div>
-          
+
           <style>
             *:focus {
               outline: 3px solid #ff6b35 !important;
@@ -482,7 +482,7 @@ test.describe('Accessibility Visual Testing', () => {
               box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.25) !important;
             }
           </style>
-          
+
           <script>
             // Track focus for visual indication
             let focusCounter = 0;
@@ -513,7 +513,7 @@ test.describe('Accessibility Visual Testing', () => {
       for (let i = 0; i < 8; i++) {
         await page.keyboard.press('Tab');
         await page.waitForTimeout(200);
-        
+
         await visualUtils.screenshotComponent(
           '[data-testid="tab-navigation-order"]',
           `tab-navigation-step-${i + 1}`,
@@ -525,7 +525,7 @@ test.describe('Accessibility Visual Testing', () => {
       await page.keyboard.press('Home'); // Go to beginning
       await page.keyboard.press('Tab'); // Focus skip link
       await page.waitForTimeout(200);
-      
+
       await visualUtils.screenshotComponent(
         '[data-testid="tab-navigation-order"]',
         'tab-navigation-skip-link',
@@ -535,7 +535,7 @@ test.describe('Accessibility Visual Testing', () => {
   });
 
   test.describe('Color Contrast and WCAG Compliance', () => {
-    
+
     test('Color Contrast Validation @visual @accessibility @contrast', async ({ page }) => {
       await page.evaluate(() => {
         const contrastDiv = document.createElement('div');
@@ -543,7 +543,7 @@ test.describe('Accessibility Visual Testing', () => {
         contrastDiv.innerHTML = `
           <div style="padding: 40px;">
             <h3>Color Contrast Validation (WCAG 2.1 AA/AAA)</h3>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px;">
               <!-- WCAG AA Compliant (4.5:1 minimum) -->
               <div>
@@ -567,7 +567,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </div>
                 </div>
               </div>
-              
+
               <!-- WCAG AAA Compliant (7:1 minimum) -->
               <div>
                 <h4>WCAG AAA Enhanced Contrast</h4>
@@ -590,7 +590,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </div>
                 </div>
               </div>
-              
+
               <!-- Border Case Examples -->
               <div>
                 <h4>Border Cases & Warnings</h4>
@@ -615,7 +615,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </div>
                 </div>
               </div>
-              
+
               <!-- Interactive Element Contrast -->
               <div>
                 <h4>Interactive Elements</h4>
@@ -662,7 +662,7 @@ test.describe('Accessibility Visual Testing', () => {
                 </div>
               </div>
             </div>
-            
+
             <div style="margin-top: 40px; padding: 20px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; color: #155724;">
               <h5 style="margin: 0 0 10px 0;">WCAG 2.1 Contrast Requirements:</h5>
               <ul style="margin: 0; padding-left: 20px;">
@@ -688,7 +688,7 @@ test.describe('Accessibility Visual Testing', () => {
     test('High Contrast Mode Compatibility @visual @accessibility @high-contrast', async ({ page }) => {
       // Test with forced colors (Windows High Contrast Mode simulation)
       await page.emulateMedia({ forcedColors: 'active' });
-      
+
       await page.evaluate(() => {
         const highContrastDiv = document.createElement('div');
         highContrastDiv.setAttribute('data-testid', 'high-contrast-mode');
@@ -698,7 +698,7 @@ test.describe('Accessibility Visual Testing', () => {
             <p style="margin-bottom: 30px;">
               This page should maintain functionality and readability in high contrast mode.
             </p>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
               <!-- Form Elements -->
               <div style="border: 1px solid; padding: 20px; border-radius: 8px;">
@@ -728,7 +728,7 @@ test.describe('Accessibility Visual Testing', () => {
                   "></textarea>
                 </div>
               </div>
-              
+
               <!-- Buttons -->
               <div style="border: 1px solid; padding: 20px; border-radius: 8px;">
                 <h4>Interactive Buttons</h4>
@@ -756,7 +756,7 @@ test.describe('Accessibility Visual Testing', () => {
                   ">Disabled Button</button>
                 </div>
               </div>
-              
+
               <!-- Links and Navigation -->
               <div style="border: 1px solid; padding: 20px; border-radius: 8px;">
                 <h4>Links & Navigation</h4>
@@ -770,7 +770,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </nav>
                 </div>
               </div>
-              
+
               <!-- Status Messages -->
               <div style="border: 1px solid; padding: 20px; border-radius: 8px;">
                 <h4>Status Messages</h4>
@@ -805,7 +805,7 @@ test.describe('Accessibility Visual Testing', () => {
                 </div>
               </div>
             </div>
-            
+
             <div style="margin-top: 30px; padding: 15px; border: 1px solid; background: Canvas; color: CanvasText;">
               <strong>High Contrast Mode Notes:</strong>
               <ul style="margin: 10px 0 0 20px;">
@@ -828,11 +828,11 @@ test.describe('Accessibility Visual Testing', () => {
 
       // Test focus states in high contrast mode
       const focusableElements = await page.locator('[data-testid="high-contrast-mode"] input, [data-testid="high-contrast-mode"] select, [data-testid="high-contrast-mode"] button, [data-testid="high-contrast-mode"] a').all();
-      
+
       for (let i = 0; i < Math.min(focusableElements.length, 4); i++) {
         await focusableElements[i].focus();
         await page.waitForTimeout(200);
-        
+
         await visualUtils.screenshotComponent(
           '[data-testid="high-contrast-mode"]',
           `high-contrast-focus-${i + 1}`,
@@ -846,7 +846,7 @@ test.describe('Accessibility Visual Testing', () => {
   });
 
   test.describe('Screen Reader and Assistive Technology Support', () => {
-    
+
     test('ARIA Labels and Descriptions @visual @accessibility @aria', async ({ page }) => {
       await page.evaluate(() => {
         const ariaDiv = document.createElement('div');
@@ -857,7 +857,7 @@ test.describe('Accessibility Visual Testing', () => {
             <p style="margin-bottom: 30px; color: #6c757d;">
               Visual representation of elements with ARIA attributes for screen reader support.
             </p>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
               <!-- Form with ARIA Labels -->
               <div style="border: 1px solid #dee2e6; padding: 25px; border-radius: 8px;">
@@ -867,8 +867,8 @@ test.describe('Accessibility Visual Testing', () => {
                     <label for="username" style="display: block; margin-bottom: 5px; font-weight: 500;">
                       Username <span style="color: #dc3545;" aria-label="required">*</span>
                     </label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       id="username"
                       aria-required="true"
                       aria-describedby="username-help username-error"
@@ -886,13 +886,13 @@ test.describe('Accessibility Visual Testing', () => {
                       Username is required
                     </div>
                   </div>
-                  
+
                   <div>
                     <label for="password" style="display: block; margin-bottom: 5px; font-weight: 500;">
                       Password <span style="color: #dc3545;" aria-label="required">*</span>
                     </label>
-                    <input 
-                      type="password" 
+                    <input
+                      type="password"
                       id="password"
                       aria-required="true"
                       aria-describedby="password-strength"
@@ -907,7 +907,7 @@ test.describe('Accessibility Visual Testing', () => {
                       Password strength: <span style="color: #ffc107;">Weak</span>
                     </div>
                   </div>
-                  
+
                   <fieldset style="border: 1px solid #dee2e6; padding: 15px; border-radius: 4px;">
                     <legend style="padding: 0 8px; font-weight: 500;">Account Type</legend>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -929,14 +929,14 @@ test.describe('Accessibility Visual Testing', () => {
                   </fieldset>
                 </form>
               </div>
-              
+
               <!-- Interactive Elements with ARIA -->
               <div style="border: 1px solid #dee2e6; padding: 25px; border-radius: 8px;">
                 <h4>Interactive Elements</h4>
                 <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 15px;">
                   <!-- Custom Button -->
-                  <div role="button" 
-                       tabindex="0" 
+                  <div role="button"
+                       tabindex="0"
                        aria-pressed="false"
                        aria-describedby="toggle-desc"
                        style="
@@ -959,16 +959,16 @@ test.describe('Accessibility Visual Testing', () => {
                   <div id="toggle-desc" style="font-size: 12px; color: #6c757d; text-align: center;">
                     Status: <span id="toggle-status">OFF</span>
                   </div>
-                  
+
                   <!-- Progress Indicator -->
                   <div>
                     <label for="file-progress" style="display: block; margin-bottom: 8px; font-weight: 500;">
                       File Upload Progress
                     </label>
-                    <div 
-                      role="progressbar" 
-                      aria-valuenow="65" 
-                      aria-valuemin="0" 
+                    <div
+                      role="progressbar"
+                      aria-valuenow="65"
+                      aria-valuemin="0"
                       aria-valuemax="100"
                       aria-labelledby="file-progress"
                       aria-describedby="progress-desc"
@@ -990,7 +990,7 @@ test.describe('Accessibility Visual Testing', () => {
                       Uploading... 65% complete (2.1 MB of 3.2 MB)
                     </div>
                   </div>
-                  
+
                   <!-- Alert Messages -->
                   <div>
                     <h5>Status Messages</h5>
@@ -1019,7 +1019,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </div>
                 </div>
               </div>
-              
+
               <!-- Data Table with ARIA -->
               <div style="border: 1px solid #dee2e6; padding: 25px; border-radius: 8px; grid-column: 1 / -1;">
                 <h4>Data Table with ARIA Support</h4>
@@ -1107,7 +1107,7 @@ test.describe('Accessibility Visual Testing', () => {
       // Test interactive states
       await page.click('[role="button"][aria-pressed]');
       await page.waitForTimeout(200);
-      
+
       await visualUtils.screenshotComponent(
         '[data-testid="aria-labels-descriptions"]',
         'aria-interactive-states',
@@ -1122,7 +1122,7 @@ test.describe('Accessibility Visual Testing', () => {
         errorDiv.innerHTML = `
           <div style="padding: 40px;">
             <h3>Accessible Error States and Validation</h3>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-top: 30px;">
               <!-- Form Validation Errors -->
               <div style="border: 1px solid #dee2e6; padding: 25px; border-radius: 8px;">
@@ -1133,8 +1133,8 @@ test.describe('Accessibility Visual Testing', () => {
                     <label for="email-error" style="display: block; margin-bottom: 5px; font-weight: 500;">
                       Email Address <span style="color: #dc3545;" aria-label="required">*</span>
                     </label>
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       id="email-error"
                       value="invalid-email"
                       aria-required="true"
@@ -1152,8 +1152,8 @@ test.describe('Accessibility Visual Testing', () => {
                       Enter a valid email address
                     </div>
                     <div id="email-error-msg" role="alert" style="
-                      font-size: 12px; 
-                      color: #dc3545; 
+                      font-size: 12px;
+                      color: #dc3545;
                       margin-top: 4px;
                       display: flex;
                       align-items: center;
@@ -1163,14 +1163,14 @@ test.describe('Accessibility Visual Testing', () => {
                       Please enter a valid email address
                     </div>
                   </div>
-                  
+
                   <!-- Field with success -->
                   <div>
                     <label for="name-success" style="display: block; margin-bottom: 5px; font-weight: 500;">
                       Full Name <span style="color: #dc3545;" aria-label="required">*</span>
                     </label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       id="name-success"
                       value="John Doe"
                       aria-required="true"
@@ -1185,8 +1185,8 @@ test.describe('Accessibility Visual Testing', () => {
                       "
                     >
                     <div id="name-success-msg" role="status" style="
-                      font-size: 12px; 
-                      color: #28a745; 
+                      font-size: 12px;
+                      color: #28a745;
                       margin-top: 4px;
                       display: flex;
                       align-items: center;
@@ -1196,14 +1196,14 @@ test.describe('Accessibility Visual Testing', () => {
                       Name looks good
                     </div>
                   </div>
-                  
+
                   <!-- Field with warning -->
                   <div>
                     <label for="password-warning" style="display: block; margin-bottom: 5px; font-weight: 500;">
                       Password <span style="color: #dc3545;" aria-label="required">*</span>
                     </label>
-                    <input 
-                      type="password" 
+                    <input
+                      type="password"
                       id="password-warning"
                       value="123456"
                       aria-required="true"
@@ -1217,8 +1217,8 @@ test.describe('Accessibility Visual Testing', () => {
                       "
                     >
                     <div id="password-warning-msg" role="status" aria-live="polite" style="
-                      font-size: 12px; 
-                      color: #856404; 
+                      font-size: 12px;
+                      color: #856404;
                       margin-top: 4px;
                       display: flex;
                       align-items: center;
@@ -1230,7 +1230,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </div>
                 </form>
               </div>
-              
+
               <!-- Global Error Messages -->
               <div style="border: 1px solid #dee2e6; padding: 25px; border-radius: 8px;">
                 <h4>Global Error Messages</h4>
@@ -1263,7 +1263,7 @@ test.describe('Accessibility Visual Testing', () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Warning Message -->
                   <div role="status" aria-live="polite" style="
                     background: #fff3cd;
@@ -1283,7 +1283,7 @@ test.describe('Accessibility Visual Testing', () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Info Message -->
                   <div role="status" aria-live="polite" style="
                     background: #d1ecf1;
@@ -1303,7 +1303,7 @@ test.describe('Accessibility Visual Testing', () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Success Message -->
                   <div role="status" aria-live="polite" style="
                     background: #d4edda;
@@ -1325,7 +1325,7 @@ test.describe('Accessibility Visual Testing', () => {
                   </div>
                 </div>
               </div>
-              
+
               <!-- Loading and Processing States -->
               <div style="border: 1px solid #dee2e6; padding: 25px; border-radius: 8px; grid-column: 1 / -1;">
                 <h4>Loading and Processing States</h4>
@@ -1345,7 +1345,7 @@ test.describe('Accessibility Visual Testing', () => {
                       <p style="margin: 0; color: #6c757d;">Loading your data...</p>
                     </div>
                   </div>
-                  
+
                   <!-- Processing State -->
                   <div style="text-align: center; padding: 20px;">
                     <div role="status" aria-live="polite" aria-label="Processing request">
@@ -1357,15 +1357,15 @@ test.describe('Accessibility Visual Testing', () => {
                       <p style="margin: 0; color: #6c757d;">Processing your request...</p>
                     </div>
                   </div>
-                  
+
                   <!-- Upload Progress -->
                   <div style="padding: 20px;">
                     <div role="status" aria-live="polite">
                       <h5 style="margin: 0 0 10px 0;">File Upload Progress</h5>
-                      <div 
-                        role="progressbar" 
-                        aria-valuenow="75" 
-                        aria-valuemin="0" 
+                      <div
+                        role="progressbar"
+                        aria-valuenow="75"
+                        aria-valuemin="0"
                         aria-valuemax="100"
                         aria-label="Upload progress: 75% complete"
                         style="
@@ -1392,13 +1392,13 @@ test.describe('Accessibility Visual Testing', () => {
               </div>
             </div>
           </div>
-          
+
           <style>
             @keyframes spin {
               0% { transform: rotate(0deg); }
               100% { transform: rotate(360deg); }
             }
-            
+
             @keyframes pulse {
               0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
               40% { transform: scale(1); opacity: 1; }
@@ -1417,19 +1417,19 @@ test.describe('Accessibility Visual Testing', () => {
   });
 
   test.describe('Theme Accessibility Across All Themes', () => {
-    
+
     test('Focus Indicators Across Themes @visual @accessibility @theme-focus', async ({ page }) => {
       const themes: (keyof typeof THEME_CONFIGS)[] = ['light', 'dark', 'cyborg', 'darkly'];
-      
+
       for (const themeName of themes) {
         await visualUtils.setTheme(themeName);
-        
+
         // Create theme-specific focus test
         await page.evaluate((theme) => {
           // Remove existing test
           const existing = document.querySelector('[data-testid="theme-focus-test"]');
           if (existing) existing.remove();
-          
+
           const focusDiv = document.createElement('div');
           focusDiv.setAttribute('data-testid', 'theme-focus-test');
           focusDiv.innerHTML = `
@@ -1443,7 +1443,7 @@ test.describe('Accessibility Visual Testing', () => {
                   padding: 10px 20px;
                   border-radius: 4px;
                 ">Primary Button</button>
-                
+
                 <input type="text" placeholder="Text input" style="
                   padding: 10px;
                   border: 1px solid var(--bs-border-color, #dee2e6);
@@ -1451,7 +1451,7 @@ test.describe('Accessibility Visual Testing', () => {
                   background: var(--bs-body-bg, white);
                   color: var(--bs-body-color, #212529);
                 ">
-                
+
                 <select style="
                   padding: 10px;
                   border: 1px solid var(--bs-border-color, #dee2e6);
@@ -1461,13 +1461,13 @@ test.describe('Accessibility Visual Testing', () => {
                 ">
                   <option>Select option</option>
                 </select>
-                
+
                 <a href="#" style="
                   color: var(--bs-primary, #007bff);
                   text-decoration: underline;
                   padding: 10px;
                 ">Sample Link</a>
-                
+
                 <div tabindex="0" style="
                   background: var(--bs-secondary, #6c757d);
                   color: var(--bs-light, white);
@@ -1483,11 +1483,11 @@ test.describe('Accessibility Visual Testing', () => {
 
         // Focus each element
         const focusableElements = await page.locator('[data-testid="theme-focus-test"] button, [data-testid="theme-focus-test"] input, [data-testid="theme-focus-test"] select, [data-testid="theme-focus-test"] a, [data-testid="theme-focus-test"] [tabindex]').all();
-        
+
         for (let i = 0; i < focusableElements.length; i++) {
           await focusableElements[i].focus();
           await page.waitForTimeout(200);
-          
+
           await visualUtils.screenshotComponent(
             '[data-testid="theme-focus-test"]',
             `theme-focus-${themeName}-element-${i + 1}`,

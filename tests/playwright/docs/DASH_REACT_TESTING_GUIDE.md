@@ -55,18 +55,18 @@ import { DashComponentStateInspector } from '../utils/dash-react-test-helpers';
 
 test('should validate component state transitions', async ({ mcpPage, dashReactContext }) => {
   const inspector = dashReactContext.inspector;
-  
+
   // Get component state
   const initialState = await inspector.getComponentState('upload-dropzone');
   expect(initialState.isConnected).toBe(true);
   expect(initialState.hasCallbacks).toBe(true);
-  
+
   // Validate props
   const validation = await inspector.validateComponentProps('upload-dropzone', {
     accept: { type: 'string', required: false },
     disabled: { type: 'boolean', required: false }
   });
-  
+
   expect(validation.valid).toBe(true);
 });
 ```
@@ -80,7 +80,7 @@ import { CallbackFlowTester } from '../utils/dash-callback-testing-strategies';
 
 test('should execute callbacks in correct order', async ({ mcpPage }) => {
   const flowTester = new CallbackFlowTester(mcpPage);
-  
+
   const flowResult = await flowTester.testCallbackFlow({
     triggerAction: async () => {
       await mcpPage.locator('input[type="file"]').setInputFiles('test.csv');
@@ -100,7 +100,7 @@ test('should execute callbacks in correct order', async ({ mcpPage }) => {
       }
     ]
   });
-  
+
   expect(flowResult.success).toBe(true);
   expect(flowResult.issues).toHaveLength(0);
 });
@@ -115,7 +115,7 @@ import { DashPerformanceBenchmarker } from '../utils/dash-lifecycle-performance-
 
 test('should meet performance benchmarks', async ({ mcpPage }) => {
   const benchmarker = new DashPerformanceBenchmarker(mcpPage);
-  
+
   const results = await benchmarker.benchmarkApplication([
     {
       name: 'Component Render Performance',
@@ -126,7 +126,7 @@ test('should meet performance benchmarks', async ({ mcpPage }) => {
       ]
     }
   ]);
-  
+
   expect(results.overall.averageLoadTime).toBeLessThan(5000);
   expect(results.overall.renderPerformance).toBeGreaterThan(80);
 });
@@ -137,17 +137,17 @@ test('should meet performance benchmarks', async ({ mcpPage }) => {
 ### React Component Lifecycle
 
 ```typescript
-test('should handle component lifecycle correctly', async ({ 
-  mcpPage, 
-  dashReactContext 
+test('should handle component lifecycle correctly', async ({
+  mcpPage,
+  dashReactContext
 }) => {
   const lifecycle = dashReactContext.lifecycle;
-  
+
   // Test mounting
   const mountResult = await lifecycle.testComponentMount('my-component');
   expect(mountResult.mounted).toBe(true);
   expect(mountResult.hasCallbacks).toBe(true);
-  
+
   // Test updates
   const updateResult = await lifecycle.testComponentUpdate(
     'my-component',
@@ -155,7 +155,7 @@ test('should handle component lifecycle correctly', async ({
   );
   expect(updateResult.updated).toBe(true);
   expect(updateResult.reRendered).toBe(true);
-  
+
   // Test cleanup
   const cleanupResult = await lifecycle.testComponentCleanup(
     'my-component',
@@ -172,28 +172,28 @@ test('should handle component lifecycle correctly', async ({
 ### React Event Handling
 
 ```typescript
-test('should handle React synthetic events', async ({ 
-  mcpPage, 
-  dashReactContext 
+test('should handle React synthetic events', async ({
+  mcpPage,
+  dashReactContext
 }) => {
   const events = dashReactContext.events;
-  
+
   // Test controlled component behavior
   const controlledTest = await events.testControlledBehavior(
     'input-component',
     'test-value'
   );
-  
+
   expect(controlledTest.isControlled).toBe(true);
   expect(controlledTest.valueChangedByUser).toBe(true);
-  
+
   // Test synthetic events
   await events.dispatchSyntheticEvent(
     'upload-dropzone',
     'dragenter',
     { dataTransfer: { files: [] } }
   );
-  
+
   // Verify event handling
   const dropzone = mcpPage.locator('[data-testid="upload-dropzone"]');
   await expect(dropzone).toHaveClass(/drag-over/);
@@ -207,13 +207,13 @@ test('should handle React synthetic events', async ({
 ```typescript
 test('should analyze callback dependencies', async ({ mcpPage }) => {
   const analyzer = new CallbackDependencyAnalyzer(mcpPage);
-  
+
   const graph = await analyzer.buildDependencyGraph();
-  
+
   // Validate graph structure
   expect(graph.nodes.length).toBeGreaterThan(0);
   expect(graph.cycles).toHaveLength(0); // No circular dependencies
-  
+
   // Get execution order
   const order = await analyzer.getRecommendedExecutionOrder();
   expect(order.order.length).toBe(graph.nodes.length);
@@ -223,12 +223,12 @@ test('should analyze callback dependencies', async ({ mcpPage }) => {
 ### Error Resilience
 
 ```typescript
-test('should handle callback errors gracefully', async ({ 
-  mcpPage, 
-  testFiles 
+test('should handle callback errors gracefully', async ({
+  mcpPage,
+  testFiles
 }) => {
   const errorTester = new CallbackErrorResilienceTester(mcpPage);
-  
+
   const resilience = await errorTester.testErrorResilience({
     errorTrigger: async () => {
       // Upload corrupted file to trigger error
@@ -248,7 +248,7 @@ test('should handle callback errors gracefully', async ({
       }
     ]
   });
-  
+
   expect(resilience.errorTriggered).toBe(true);
   expect(resilience.appStillResponsive).toBe(true);
   expect(resilience.recoveryResults[0].successful).toBe(true);
@@ -260,14 +260,14 @@ test('should handle callback errors gracefully', async ({
 ### Memory Management
 
 ```typescript
-test('should manage memory efficiently', async ({ 
-  mcpPage, 
-  dashReactContext 
+test('should manage memory efficiently', async ({
+  mcpPage,
+  dashReactContext
 }) => {
   const profiler = dashReactContext.performance;
-  
+
   const memoryProfile = await profiler.profileMemoryUsage(30000);
-  
+
   // Perform memory-intensive operations
   for (let i = 0; i < 10; i++) {
     await mcpPage.locator('[data-testid="generate-large-graph"]').click();
@@ -275,7 +275,7 @@ test('should manage memory efficiently', async ({
     await mcpPage.locator('[data-testid="clear-graph"]').click();
     await mcpPage.waitForTimeout(500);
   }
-  
+
   expect(memoryProfile.memoryGrowth).toBeLessThan(50_000_000); // <50MB growth
   expect(memoryProfile.gcTriggered).toBe(true); // GC should run
 });
@@ -284,24 +284,24 @@ test('should manage memory efficiently', async ({
 ### Render Performance
 
 ```typescript
-test('should optimize render performance', async ({ 
-  mcpPage, 
-  dashReactContext 
+test('should optimize render performance', async ({
+  mcpPage,
+  dashReactContext
 }) => {
   const inspector = dashReactContext.inspector;
   const renderTracker = await inspector.trackReRenders('component-id');
-  
+
   await renderTracker.startTracking();
-  
+
   // Perform actions that should NOT cause re-renders
   await mcpPage.hover('[data-testid="static-element"]');
   await mcpPage.mouse.move(100, 100);
-  
+
   // Perform actions that SHOULD cause re-renders
   await mcpPage.locator('[data-testid="update-button"]').click();
-  
+
   const stats = await renderTracker.stopTracking();
-  
+
   expect(stats.renderCount).toBeLessThan(3); // Minimal re-renders
   expect(stats.averageRenderTime).toBeLessThan(50); // Fast renders
 });
@@ -320,15 +320,15 @@ test.describe('Component Name - React/Dash Integration', () => {
     await dashAppReady; // Wait for Dash app to be ready
     performanceMonitor.mark('test-start');
   });
-  
+
   test.describe('React State Management', () => {
     // State-specific tests
   });
-  
+
   test.describe('Dash Callback Integration', () => {
     // Callback-specific tests
   });
-  
+
   test.describe('Performance Validation', () => {
     // Performance tests
   });
@@ -339,14 +339,14 @@ test.describe('Component Name - React/Dash Integration', () => {
 
 ```typescript
 // Always validate component state consistency
-test('should maintain consistent state', async ({ 
-  componentStateValidator 
+test('should maintain consistent state', async ({
+  componentStateValidator
 }) => {
   const validation = await componentStateValidator('component-id', {
     requiredProp: { type: 'string', required: true },
     optionalProp: { type: 'boolean', required: false }
   });
-  
+
   expect(validation.valid).toBe(true);
   expect(validation.errors).toHaveLength(0);
 });
@@ -356,20 +356,20 @@ test('should maintain consistent state', async ({
 
 ```typescript
 // Test callback execution order
-test('should execute callbacks in correct order', async ({ 
-  callbackOrderValidator 
+test('should execute callbacks in correct order', async ({
+  callbackOrderValidator
 }) => {
   const validator = await callbackOrderValidator([
     'input-validation-callback',
     'data-processing-callback',
     'ui-update-callback'
   ]);
-  
+
   await validator.startMonitoring();
-  
+
   // Trigger action
   await mcpPage.locator('[data-testid="submit"]').click();
-  
+
   const result = await validator.validateOrder();
   expect(result.valid).toBe(true);
 });
@@ -379,18 +379,18 @@ test('should execute callbacks in correct order', async ({
 
 ```typescript
 // Always include performance assertions
-test('should meet performance requirements', async ({ 
+test('should meet performance requirements', async ({
   reactRenderProfiler,
-  performanceMonitor 
+  performanceMonitor
 }) => {
   const profiler = await reactRenderProfiler('component-id');
   await profiler.startProfiling();
-  
+
   // Perform test actions
-  
+
   const profile = await profiler.getProfile();
   const metrics = await performanceMonitor.getMetrics();
-  
+
   expect(profile.averageRenderTime).toBeLessThan(100);
   expect(metrics.memoryUsage).toBeLessThan(100_000_000);
 });
@@ -401,23 +401,23 @@ test('should meet performance requirements', async ({
 ### 1. File Upload Testing
 
 ```typescript
-test('should handle file upload with React state', async ({ 
-  mcpPage, 
-  testFiles, 
-  dashReactContext 
+test('should handle file upload with React state', async ({
+  mcpPage,
+  testFiles,
+  dashReactContext
 }) => {
   // Track component state during upload
   const stateTracker = await dashReactContext.inspector.trackReRenders('upload-component');
   await stateTracker.startTracking();
-  
+
   // Upload file
   await mcpPage.setInputFiles('input[type="file"]', testFiles.validMELDData.path);
-  
+
   // Wait for processing
   await mcpPage.waitForSelector('[data-testid="upload-success"]');
-  
+
   const renderStats = await stateTracker.stopTracking();
-  
+
   // Validate state management
   expect(renderStats.renderCount).toBeGreaterThan(0);
   expect(renderStats.averageRenderTime).toBeLessThan(200);
@@ -427,25 +427,25 @@ test('should handle file upload with React state', async ({
 ### 2. Theme Testing
 
 ```typescript
-test('should handle theme changes efficiently', async ({ 
-  mcpPage, 
-  dashReactContext 
+test('should handle theme changes efficiently', async ({
+  mcpPage,
+  dashReactContext
 }) => {
   const renderTracker = await dashReactContext.inspector.trackReRenders('app-container');
   await renderTracker.startTracking();
-  
+
   // Change theme
   await mcpPage.locator('[data-testid="theme-toggle"]').click();
   await mcpPage.waitForTimeout(1000);
-  
+
   const stats = await renderTracker.stopTracking();
-  
+
   // Theme change should be efficient
   expect(stats.renderCount).toBeLessThan(10);
   expect(stats.averageRenderTime).toBeLessThan(100);
-  
+
   // Verify theme applied
-  const theme = await mcpPage.evaluate(() => 
+  const theme = await mcpPage.evaluate(() =>
     document.body.getAttribute('data-theme')
   );
   expect(theme).toBeTruthy();
@@ -455,26 +455,26 @@ test('should handle theme changes efficiently', async ({
 ### 3. Data Visualization Testing
 
 ```typescript
-test('should render Plotly graphs with React optimization', async ({ 
-  mcpPage, 
-  dashReactContext 
+test('should render Plotly graphs with React optimization', async ({
+  mcpPage,
+  dashReactContext
 }) => {
   // Wait for Plotly to render
   await mcpPage.waitForFunction(() => {
     const plot = document.querySelector('.js-plotly-plot') as any;
     return plot && plot._fullData && plot._fullData.length > 0;
   });
-  
+
   // Test interaction performance
   const renderTracker = await dashReactContext.inspector.trackReRenders('graph-container');
   await renderTracker.startTracking();
-  
+
   // Plotly interactions shouldn't trigger React re-renders
   await mcpPage.locator('.js-plotly-plot').hover();
   await mcpPage.mouse.wheel(0, -100);
-  
+
   const stats = await renderTracker.stopTracking();
-  
+
   // Minimal React involvement in Plotly interactions
   expect(stats.renderCount).toBeLessThan(2);
 });
@@ -526,16 +526,16 @@ test('should render Plotly graphs with React optimization', async ({
 2. **Memory Leak Detection**
    ```typescript
    // Check for memory leaks
-   const memoryBefore = await mcpPage.evaluate(() => 
+   const memoryBefore = await mcpPage.evaluate(() =>
      (performance as any).memory?.usedJSHeapSize || 0
    );
-   
+
    // ... perform test actions ...
-   
-   const memoryAfter = await mcpPage.evaluate(() => 
+
+   const memoryAfter = await mcpPage.evaluate(() =>
      (performance as any).memory?.usedJSHeapSize || 0
    );
-   
+
    const memoryGrowth = memoryAfter - memoryBefore;
    expect(memoryGrowth).toBeLessThan(10_000_000); // 10MB threshold
    ```
@@ -545,7 +545,7 @@ test('should render Plotly graphs with React optimization', async ({
    // Access React fiber for debugging
    const reactInfo = await mcpPage.evaluate((id) => {
      const element = document.getElementById(id);
-     const reactKey = Object.keys(element).find(key => 
+     const reactKey = Object.keys(element).find(key =>
        key.startsWith('__reactFiber')
      );
      return reactKey ? (element as any)[reactKey] : null;
@@ -561,7 +561,7 @@ import { test, expect } from '../utils/enhanced-dash-fixtures';
 import { CallbackFlowTester } from '../utils/dash-callback-testing-strategies';
 
 test.describe('MELD Data Upload - Complete Integration Test', () => {
-  test('should handle complete upload workflow', async ({ 
+  test('should handle complete upload workflow', async ({
     mcpPage,
     testFiles,
     dashReactContext,
@@ -573,14 +573,14 @@ test.describe('MELD Data Upload - Complete Integration Test', () => {
     // Setup performance monitoring
     const profiler = await reactRenderProfiler('upload-dropzone');
     await profiler.startProfiling();
-    
+
     // Validate initial component state
     const initialValidation = await componentStateValidator('upload-dropzone', {
       accept: { type: 'string', required: false },
       disabled: { type: 'boolean', required: false }
     });
     expect(initialValidation.valid).toBe(true);
-    
+
     // Setup callback monitoring
     const callbackValidator = await callbackOrderValidator([
       'upload-file-callback',
@@ -588,37 +588,37 @@ test.describe('MELD Data Upload - Complete Integration Test', () => {
       'ui-update-callback'
     ]);
     await callbackValidator.startMonitoring();
-    
+
     performanceMonitor.mark('upload-test-start');
-    
+
     // Perform file upload
     await mcpPage.setInputFiles('input[type="file"]', testFiles.validMELDData.path);
-    
+
     // Wait for completion
     await mcpPage.waitForSelector('[data-testid="upload-success"]', { timeout: 15000 });
-    
+
     performanceMonitor.mark('upload-test-complete');
-    
+
     // Validate callback execution
     const callbackResult = await callbackValidator.validateOrder();
     expect(callbackResult.valid).toBe(true);
     expect(callbackResult.issues).toHaveLength(0);
-    
+
     // Validate render performance
     const renderProfile = await profiler.getProfile();
     expect(renderProfile.renderCount).toBeGreaterThan(0);
     expect(renderProfile.averageRenderTime).toBeLessThan(150);
     expect(renderProfile.heavyRenders.length).toBeLessThan(2);
-    
+
     // Validate overall performance
     const metrics = await performanceMonitor.getMetrics();
     expect(metrics.loadTime).toBeLessThan(10000);
     expect(metrics.memoryUsage).toBeLessThan(50_000_000);
-    
+
     // Validate final component state
     const finalState = await dashReactContext.inspector.getComponentState('upload-dropzone');
     expect(finalState.isConnected).toBe(true);
-    
+
     // Test error recovery
     const errorTester = new CallbackFlowTester(mcpPage);
     const errorResult = await errorTester.testCallbackFlow({
@@ -639,7 +639,7 @@ test.describe('MELD Data Upload - Complete Integration Test', () => {
         }
       ]
     });
-    
+
     expect(errorResult.success).toBe(true);
   });
 });

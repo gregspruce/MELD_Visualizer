@@ -27,7 +27,9 @@ logger = logging.getLogger(__name__)
 # Regex patterns with timeout protection
 SAFE_GCODE_PATTERN = re.compile(r"^([A-Z])([-+]?\d{0,10}(?:\.\d{0,6})?)$")
 
-# Import standardized error handling
+
+class SecurityError(Exception):
+    """Exception raised for security-related errors."""
 
 
 class FileValidator:

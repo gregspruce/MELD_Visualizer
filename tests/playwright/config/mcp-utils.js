@@ -37,7 +37,7 @@ class PlaywrightMCPUtils {
 
     // Set up network interception
     await this.setupNetworkInterception(context);
-    
+
     // Set up console monitoring
     await this.setupConsoleMonitoring(context);
 
@@ -54,7 +54,7 @@ class PlaywrightMCPUtils {
       const url = request.url();
       const method = request.method();
       const headers = request.headers();
-      
+
       // Log network activity
       this.networkLogs.push({
         timestamp: new Date().toISOString(),
@@ -74,7 +74,7 @@ class PlaywrightMCPUtils {
       } else {
         // Continue with normal request
         const response = await route.fetch();
-        
+
         // Log response
         this.networkLogs.push({
           timestamp: new Date().toISOString(),
@@ -83,7 +83,7 @@ class PlaywrightMCPUtils {
           status: response.status(),
           type: 'response'
         });
-        
+
         await route.fulfill({ response });
       }
     });
@@ -103,9 +103,9 @@ class PlaywrightMCPUtils {
           text: msg.text(),
           url: page.url()
         };
-        
+
         this.consoleLogs.push(logEntry);
-        
+
         // Flag errors and warnings
         if (msg.type() === 'error' || msg.type() === 'warning') {
           console.log(`🚨 ${msg.type().toUpperCase()}: ${msg.text()}`);
@@ -133,7 +133,7 @@ class PlaywrightMCPUtils {
           failure: request.failure()?.errorText,
           method: request.method()
         };
-        
+
         this.networkLogs.push(failure);
         console.error('🌐 Request Failed:', request.url(), request.failure()?.errorText);
       });
@@ -148,14 +148,14 @@ class PlaywrightMCPUtils {
   async handleDashCallback(route, request) {
     const url = request.url();
     const postData = request.postData();
-    
+
     // Parse the callback request
     let mockResponse = { multi: true, response: {} };
-    
+
     try {
       if (postData) {
         const data = JSON.parse(postData);
-        
+
         // Mock responses for common MELD Visualizer callbacks
         if (data.output && data.output.includes('graph-3d')) {
           // Mock 3D graph update
@@ -178,7 +178,7 @@ class PlaywrightMCPUtils {
     } catch (error) {
       console.warn('Failed to parse callback data:', error.message);
     }
-    
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -213,7 +213,7 @@ class PlaywrightMCPUtils {
    */
   async takeScreenshot(page, name, options = {}) {
     const screenshotPath = `${this.screenshotDir}/${name}-${Date.now()}.png`;
-    
+
     const defaultOptions = {
       path: screenshotPath,
       fullPage: true,
@@ -222,7 +222,7 @@ class PlaywrightMCPUtils {
     };
 
     await page.screenshot(defaultOptions);
-    
+
     return {
       path: screenshotPath,
       name,
@@ -238,7 +238,7 @@ class PlaywrightMCPUtils {
    */
   async compareScreenshot(page, name, options = {}) {
     const { threshold = 0.2, clip = null } = options;
-    
+
     try {
       await page.screenshot({
         path: `../visual/expected/${name}.png`,
@@ -246,12 +246,12 @@ class PlaywrightMCPUtils {
         clip,
         threshold
       });
-      
+
       return { success: true, name };
     } catch (error) {
-      return { 
-        success: false, 
-        name, 
+      return {
+        success: false,
+        name,
         error: error.message,
         diff: error.diff || null
       };
@@ -265,13 +265,13 @@ class PlaywrightMCPUtils {
    */
   async waitForPlotlyGraph(page, selector = '.js-plotly-plot') {
     await page.waitForSelector(selector, { timeout: 30000 });
-    
+
     // Wait for Plotly to finish rendering
     await page.waitForFunction((sel) => {
       const element = document.querySelector(sel);
       return element && element._fullLayout && element._fullData;
     }, selector, { timeout: 30000 });
-    
+
     // Additional wait for animations to complete
     await page.waitForTimeout(1000);
   }
@@ -284,7 +284,7 @@ class PlaywrightMCPUtils {
     const metrics = await page.evaluate(() => {
       const navigation = performance.getEntriesByType('navigation')[0];
       const paint = performance.getEntriesByType('paint');
-      
+
       return {
         loadTime: navigation ? navigation.loadEventEnd - navigation.fetchStart : 0,
         domContentLoaded: navigation ? navigation.domContentLoadedEventEnd - navigation.fetchStart : 0,
@@ -293,7 +293,7 @@ class PlaywrightMCPUtils {
         timestamp: Date.now()
       };
     });
-    
+
     return metrics;
   }
 
@@ -313,7 +313,7 @@ class PlaywrightMCPUtils {
         consoleWarnings: this.consoleLogs.filter(l => l.type === 'warning').length
       }
     };
-    
+
     return logData;
   }
 

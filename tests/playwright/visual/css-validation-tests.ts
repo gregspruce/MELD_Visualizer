@@ -5,11 +5,11 @@
 
 import { test, expect } from '@playwright/test';
 import { VisualTestUtils } from './visual-utils';
-import { 
+import {
   COMPONENT_SELECTORS,
   DEFAULT_VISUAL_CONFIG,
   PERFORMANCE_THRESHOLDS,
-  RESPONSIVE_VIEWPORTS 
+  RESPONSIVE_VIEWPORTS
 } from './visual-config';
 
 // CSS validation specific configuration
@@ -21,23 +21,23 @@ const CSS_VALIDATION_CONFIG = {
 
 test.describe('CSS Validation and Performance Tests', () => {
   let visualUtils: VisualTestUtils;
-  
+
   test.beforeEach(async ({ page }) => {
     visualUtils = new VisualTestUtils(page);
-    
+
     // Navigate to the application
     await page.goto('http://localhost:8050', { waitUntil: 'networkidle' });
-    
+
     // Disable animations for consistent screenshots
     await visualUtils.disableAnimations();
-    
+
     // Wait for initial page load
     await page.waitForLoadState('domcontentloaded');
     await visualUtils.waitForAnimationsToComplete();
   });
 
   test.describe('CSS Grid and Flexbox Validation', () => {
-    
+
     test('CSS Grid Layout Consistency @visual @css @grid', async ({ page }) => {
       await page.evaluate(() => {
         const gridDiv = document.createElement('div');
@@ -45,7 +45,7 @@ test.describe('CSS Validation and Performance Tests', () => {
         gridDiv.innerHTML = `
           <div style="padding: 40px;">
             <h3>CSS Grid Layout Validation</h3>
-            
+
             <!-- Basic Grid Layout -->
             <div style="margin-bottom: 40px;">
               <h4>Basic Grid (3 columns, auto rows)</h4>
@@ -65,7 +65,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 <div style="background: #e0f2f1; padding: 15px; border-radius: 4px; text-align: center;">Item 6</div>
               </div>
             </div>
-            
+
             <!-- Complex Grid Layout -->
             <div style="margin-bottom: 40px;">
               <h4>Complex Grid (Named lines, spanning)</h4>
@@ -89,7 +89,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                   justify-content: center;
                   border-radius: 4px;
                 ">Header (spans full width)</div>
-                
+
                 <div style="
                   grid-column: sidebar-start / sidebar-end;
                   grid-row: content-start / footer-start;
@@ -100,7 +100,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                   justify-content: center;
                   border-radius: 4px;
                 ">Sidebar</div>
-                
+
                 <div style="
                   grid-column: main-start / main-end;
                   grid-row: content-start / content-end;
@@ -118,7 +118,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                     <li>Proper spacing and alignment</li>
                   </ul>
                 </div>
-                
+
                 <div style="
                   grid-column: sidebar-start / main-end;
                   grid-row: footer-start / footer-end;
@@ -131,7 +131,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 ">Footer (spans full width)</div>
               </div>
             </div>
-            
+
             <!-- Auto-fit and minmax -->
             <div style="margin-bottom: 40px;">
               <h4>Auto-fit with minmax (responsive cards)</h4>
@@ -185,7 +185,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Grid alignment -->
             <div>
               <h4>Grid Alignment Properties</h4>
@@ -318,7 +318,7 @@ test.describe('CSS Validation and Performance Tests', () => {
         flexDiv.innerHTML = `
           <div style="padding: 40px;">
             <h3>CSS Flexbox Layout Validation</h3>
-            
+
             <!-- Basic Flex Container -->
             <div style="margin-bottom: 40px;">
               <h4>Basic Flexbox (row direction)</h4>
@@ -334,7 +334,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 <div style="background: #e8f5e8; padding: 15px; border-radius: 4px;">Item 3</div>
               </div>
             </div>
-            
+
             <!-- Flex Direction Variations -->
             <div style="margin-bottom: 40px;">
               <h4>Flex Direction Variations</h4>
@@ -405,7 +405,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Justify Content Options -->
             <div style="margin-bottom: 40px;">
               <h4>Justify Content (main axis alignment)</h4>
@@ -492,7 +492,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Align Items Options -->
             <div style="margin-bottom: 40px;">
               <h4>Align Items (cross axis alignment)</h4>
@@ -563,7 +563,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Flex Wrap -->
             <div>
               <h4>Flex Wrap Behavior</h4>
@@ -619,7 +619,7 @@ test.describe('CSS Validation and Performance Tests', () => {
   });
 
   test.describe('Typography and Font Rendering', () => {
-    
+
     test('Font Stack and Typography Consistency @visual @css @typography', async ({ page }) => {
       await page.evaluate(() => {
         const typoDiv = document.createElement('div');
@@ -627,7 +627,7 @@ test.describe('CSS Validation and Performance Tests', () => {
         typoDiv.innerHTML = `
           <div style="padding: 40px;">
             <h3>Typography and Font Rendering Consistency</h3>
-            
+
             <!-- Font Stack Testing -->
             <div style="margin-bottom: 40px;">
               <h4>System Font Stacks</h4>
@@ -655,7 +655,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h5>Monospace Font Stack</h5>
                   <div style="
@@ -681,7 +681,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Typography Scale -->
             <div style="margin-bottom: 40px;">
               <h4>Typography Scale and Hierarchy</h4>
@@ -704,25 +704,25 @@ test.describe('CSS Validation and Performance Tests', () => {
                 <h6 style="margin: 0 0 16px 0; font-size: 1rem; font-weight: 600; line-height: 1.45; color: #212529;">
                   Heading 6 (h6) - 1rem / 16px
                 </h6>
-                
+
                 <p style="margin: 0 0 16px 0; font-size: 1rem; line-height: 1.5; color: #212529;">
                   <strong>Body text (normal):</strong> This is the standard body text used throughout the application. It should be highly readable and maintain good contrast ratios. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </p>
-                
+
                 <p style="margin: 0 0 16px 0; font-size: 1.125rem; line-height: 1.5; color: #212529;">
                   <strong>Large body text:</strong> This slightly larger text is used for introductory paragraphs or important content that needs emphasis. It maintains readability while drawing attention.
                 </p>
-                
+
                 <p style="margin: 0 0 16px 0; font-size: 0.875rem; line-height: 1.4; color: #6c757d;">
                   <strong>Small text:</strong> This smaller text is used for captions, footnotes, and supplementary information. It should still maintain readability while being clearly secondary to the main content.
                 </p>
-                
+
                 <p style="margin: 0; font-size: 0.75rem; line-height: 1.3; color: #6c757d;">
                   <strong>Extra small text:</strong> Used for metadata, timestamps, and fine print. This is the minimum readable size for the application.
                 </p>
               </div>
             </div>
-            
+
             <!-- Text Formatting and Styling -->
             <div style="margin-bottom: 40px;">
               <h4>Text Formatting and Styling</h4>
@@ -731,36 +731,36 @@ test.describe('CSS Validation and Performance Tests', () => {
                   <div>
                     <h5>Text Emphasis</h5>
                     <p style="margin-bottom: 15px;">
-                      This paragraph contains <strong>bold text</strong>, <em>italic text</em>, 
+                      This paragraph contains <strong>bold text</strong>, <em>italic text</em>,
                       <u>underlined text</u>, and <mark style="background: #fff3cd; padding: 2px 4px;">highlighted text</mark>.
                     </p>
                     <p style="margin-bottom: 15px;">
-                      <small>This is small text</small> and this is 
+                      <small>This is small text</small> and this is
                       <span style="font-size: 1.125rem;">slightly larger text</span> for comparison.
                     </p>
                     <p style="margin-bottom: 15px;">
-                      Text can be <span style="text-decoration: line-through;">struck through</span>, 
+                      Text can be <span style="text-decoration: line-through;">struck through</span>,
                       <sup>superscript</sup>, or <sub>subscript</sub>.
                     </p>
                   </div>
-                  
+
                   <div>
                     <h5>Code and Technical Text</h5>
                     <p style="margin-bottom: 15px;">
                       Inline code: <code style="
-                        background: #f8f9fa; 
-                        color: #e83e8c; 
-                        padding: 2px 4px; 
-                        border-radius: 3px; 
+                        background: #f8f9fa;
+                        color: #e83e8c;
+                        padding: 2px 4px;
+                        border-radius: 3px;
                         font-family: 'SFMono-Regular', Consolas, monospace;
                         font-size: 0.875em;
                       ">console.log('Hello');</code>
                     </p>
                     <pre style="
-                      background: #f8f9fa; 
-                      color: #212529; 
-                      padding: 15px; 
-                      border-radius: 4px; 
+                      background: #f8f9fa;
+                      color: #212529;
+                      padding: 15px;
+                      border-radius: 4px;
                       border: 1px solid #e9ecef;
                       font-family: 'SFMono-Regular', Consolas, monospace;
                       font-size: 0.875rem;
@@ -776,11 +776,11 @@ test.describe('CSS Validation and Performance Tests', () => {
                     <p style="margin: 0;">
                       Variable name: <var style="font-style: italic; color: #6f42c1;">userName</var><br>
                       Keyboard input: <kbd style="
-                        background: #212529; 
-                        color: #fff; 
-                        padding: 2px 4px; 
-                        border-radius: 3px; 
-                        font-family: monospace; 
+                        background: #212529;
+                        color: #fff;
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                        font-family: monospace;
                         font-size: 0.875em;
                       ">Ctrl+C</kbd>
                     </p>
@@ -788,7 +788,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Link Styles and States -->
             <div>
               <h4>Link Styles and States</h4>
@@ -809,7 +809,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                       <a href="#" style="color: #28a745; text-decoration: none; border-bottom: 2px solid #28a745;">Link with border</a>
                     </p>
                   </div>
-                  
+
                   <div>
                     <h5>Button-style Links</h5>
                     <p style="margin-bottom: 10px;">
@@ -872,7 +872,7 @@ test.describe('CSS Validation and Performance Tests', () => {
         spacingDiv.innerHTML = `
           <div style="padding: 40px;">
             <h3>Line Height and Text Spacing Validation</h3>
-            
+
             <!-- Line Height Variations -->
             <div style="margin-bottom: 40px;">
               <h4>Line Height Variations</h4>
@@ -883,14 +883,14 @@ test.describe('CSS Validation and Performance Tests', () => {
                     This paragraph has a tight line height of 1.2. Notice how the lines are closer together, which can be useful for headings but may reduce readability for body text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                   </p>
                 </div>
-                
+
                 <div style="border: 1px solid #28a745; padding: 20px; border-radius: 8px;">
                   <h5>line-height: 1.5 (Standard)</h5>
                   <p style="line-height: 1.5; margin: 0; background: #e8f5e8; padding: 10px; border-radius: 4px;">
                     This paragraph has the standard line height of 1.5, which is generally recommended for body text as it provides good readability and comfortable reading experience. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                   </p>
                 </div>
-                
+
                 <div style="border: 1px solid #ffc107; padding: 20px; border-radius: 8px;">
                   <h5>line-height: 1.8 (Loose)</h5>
                   <p style="line-height: 1.8; margin: 0; background: #fffbf0; padding: 10px; border-radius: 4px;">
@@ -899,7 +899,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Paragraph Spacing -->
             <div style="margin-bottom: 40px;">
               <h4>Paragraph and Element Spacing</h4>
@@ -921,7 +921,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </p>
               </div>
             </div>
-            
+
             <!-- Letter and Word Spacing -->
             <div style="margin-bottom: 40px;">
               <h4>Letter and Word Spacing</h4>
@@ -943,7 +943,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div style="border: 1px solid #6f42c1; padding: 20px; border-radius: 8px;">
                   <h5>Word Spacing Variations</h5>
                   <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -963,7 +963,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Text Alignment -->
             <div>
               <h4>Text Alignment and Justification</h4>
@@ -973,31 +973,31 @@ test.describe('CSS Validation and Performance Tests', () => {
                   <p style="text-align: left; margin-bottom: 15px; line-height: 1.5; background: #fff4e6; padding: 10px; border-radius: 4px;">
                     This paragraph is left-aligned, which is the default and most common alignment for reading. It provides a consistent left edge that guides the eye from line to line.
                   </p>
-                  
+
                   <h5 style="text-align: center;">Center Aligned</h5>
                   <p style="text-align: center; margin-bottom: 15px; line-height: 1.5; background: #fff4e6; padding: 10px; border-radius: 4px;">
                     This paragraph is center-aligned, which is often used for headings, poetry, or short announcements but can be harder to read for longer text.
                   </p>
-                  
+
                   <h5 style="text-align: right;">Right Aligned</h5>
                   <p style="text-align: right; margin-bottom: 0; line-height: 1.5; background: #fff4e6; padding: 10px; border-radius: 4px;">
                     This paragraph is right-aligned, which is uncommon in English but might be used for specific design purposes or in languages that read right-to-left.
                   </p>
                 </div>
-                
+
                 <div style="border: 1px solid #20c997; padding: 20px; border-radius: 8px;">
                   <h5 style="margin-top: 0;">Justified Text</h5>
                   <p style="text-align: justify; margin-bottom: 15px; line-height: 1.6; background: #e6fdf5; padding: 15px; border-radius: 4px;">
                     This paragraph is justified, meaning the text is aligned to both the left and right margins. The spacing between words is adjusted to achieve this alignment. While this can create a clean, formal appearance, it may sometimes result in irregular word spacing that can affect readability, especially in narrow columns or with certain fonts.
                   </p>
-                  
+
                   <h5>Text with Hyphenation</h5>
                   <p style="
-                    text-align: justify; 
-                    margin-bottom: 0; 
-                    line-height: 1.6; 
-                    background: #e6fdf5; 
-                    padding: 15px; 
+                    text-align: justify;
+                    margin-bottom: 0;
+                    line-height: 1.6;
+                    background: #e6fdf5;
+                    padding: 15px;
                     border-radius: 4px;
                     hyphens: auto;
                     -webkit-hyphens: auto;
@@ -1022,7 +1022,7 @@ test.describe('CSS Validation and Performance Tests', () => {
   });
 
   test.describe('CSS Performance and Layout Metrics', () => {
-    
+
     test('Layout Stability and CLS Assessment @visual @css @performance', async ({ page }) => {
       // Monitor layout shifts during page interactions
       await page.evaluate(() => {
@@ -1035,7 +1035,7 @@ test.describe('CSS Validation and Performance Tests', () => {
             <p style="color: #6c757d; margin-bottom: 30px;">
               This test evaluates layout stability and measures cumulative layout shift (CLS)
             </p>
-            
+
             <!-- Stable Layout Section -->
             <div style="margin-bottom: 40px;">
               <h4>Stable Layout (Good)</h4>
@@ -1059,7 +1059,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Dynamic Loading Section -->
             <div style="margin-bottom: 40px;">
               <h4>Dynamic Content Loading</h4>
@@ -1090,7 +1090,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Responsive Image Section -->
             <div style="margin-bottom: 40px;">
               <h4>Image Loading Behavior</h4>
@@ -1139,7 +1139,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Performance Metrics Display -->
             <div>
               <h4>Layout Performance Metrics</h4>
@@ -1164,11 +1164,11 @@ test.describe('CSS Validation and Performance Tests', () => {
               </div>
             </div>
           </div>
-          
+
           <script>
             // Layout shift monitoring
             let clsScore = 0;
-            
+
             // Performance observer for CLS
             if ('LayoutShift' in window) {
               new PerformanceObserver(function(entries) {
@@ -1180,7 +1180,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 }
               }).observe({type: 'layout-shift', buffered: true});
             }
-            
+
             // Performance observer for paint metrics
             new PerformanceObserver(function(entries) {
               for (const entry of entries.getEntries()) {
@@ -1192,7 +1192,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 }
               }
             }).observe({type: 'paint', buffered: true});
-            
+
             // Dynamic content loading function
             function loadDynamicContent() {
               const placeholder = document.getElementById('content-placeholder');
@@ -1247,31 +1247,31 @@ test.describe('CSS Validation and Performance Tests', () => {
             --danger-color: #dc3545;
             --warning-color: #ffc107;
             --info-color: #17a2b8;
-            
+
             --primary-rgb: 0, 123, 255;
             --secondary-rgb: 108, 117, 125;
-            
+
             --font-size-sm: 0.875rem;
             --font-size-base: 1rem;
             --font-size-lg: 1.125rem;
             --font-size-xl: 1.25rem;
-            
+
             --spacing-xs: 0.25rem;
             --spacing-sm: 0.5rem;
             --spacing-md: 1rem;
             --spacing-lg: 1.5rem;
             --spacing-xl: 3rem;
-            
+
             --border-radius-sm: 0.25rem;
             --border-radius: 0.5rem;
             --border-radius-lg: 0.75rem;
-            
+
             --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
             --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
             --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
           ">
             <h3>CSS Custom Properties and Variables</h3>
-            
+
             <!-- Color Variables -->
             <div style="margin-bottom: var(--spacing-xl);">
               <h4>Color System Variables</h4>
@@ -1344,7 +1344,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Alpha/Opacity Variables -->
             <div style="margin-bottom: var(--spacing-xl);">
               <h4>Color with Alpha Variables</h4>
@@ -1389,7 +1389,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Typography Variables -->
             <div style="margin-bottom: var(--spacing-xl);">
               <h4>Typography Variables</h4>
@@ -1413,7 +1413,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </p>
               </div>
             </div>
-            
+
             <!-- Spacing Variables -->
             <div style="margin-bottom: var(--spacing-xl);">
               <h4>Spacing Scale Variables</h4>
@@ -1465,7 +1465,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Shadow and Border Radius Variables -->
             <div>
               <h4>Shadow and Border Radius Variables</h4>
@@ -1509,7 +1509,7 @@ test.describe('CSS Validation and Performance Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Theme Switcher Demo -->
             <div style="margin-top: var(--spacing-xl); text-align: center;">
               <button onclick="toggleTheme()" style="
@@ -1528,13 +1528,13 @@ test.describe('CSS Validation and Performance Tests', () => {
               </button>
             </div>
           </div>
-          
+
           <script>
             let isDarkTheme = false;
-            
+
             function toggleTheme() {
               const container = document.querySelector('[data-testid="css-variables-test"] > div');
-              
+
               if (!isDarkTheme) {
                 // Apply dark theme variables
                 container.style.setProperty('--primary-color', '#0d6efd');

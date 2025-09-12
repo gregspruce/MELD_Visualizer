@@ -5,11 +5,11 @@
 
 import { test, expect } from '@playwright/test';
 import { VisualTestUtils } from './visual-utils';
-import { 
+import {
   COMPONENT_SELECTORS,
   DEFAULT_VISUAL_CONFIG,
   ANIMATION_DURATIONS,
-  RESPONSIVE_VIEWPORTS 
+  RESPONSIVE_VIEWPORTS
 } from './visual-config';
 
 // Animation-specific configuration
@@ -29,20 +29,20 @@ const STATIC_CONFIG = {
 
 test.describe('Animation and Transition Visual Tests', () => {
   let visualUtils: VisualTestUtils;
-  
+
   test.beforeEach(async ({ page }) => {
     visualUtils = new VisualTestUtils(page);
-    
+
     // Navigate to the application
     await page.goto('http://localhost:8050', { waitUntil: 'networkidle' });
-    
+
     // Wait for initial page load
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
   });
 
   test.describe('Theme Transition Animations', () => {
-    
+
     test('Theme Transition Animation Sequence @visual @animation @theme', async ({ page }) => {
       // Enable animations for this test
       await page.evaluate(() => {
@@ -98,7 +98,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 " id="toggle-knob"></div>
               </div>
             </div>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
               <div style="
                 background: var(--primary-color);
@@ -123,7 +123,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 <p style="margin: 0;">Border and text color transitions</p>
               </div>
             </div>
-            
+
             <div style="margin-top: 30px;">
               <div style="
                 width: 100%;
@@ -148,16 +148,16 @@ test.describe('Animation and Transition Visual Tests', () => {
               ">Progress indicator with theme colors</p>
             </div>
           </div>
-          
+
           <script>
             let isDark = false;
             const toggle = document.getElementById('theme-toggle');
             const container = document.getElementById('theme-container');
             const knob = document.getElementById('toggle-knob');
-            
+
             toggle.addEventListener('click', function() {
               isDark = !isDark;
-              
+
               if (isDark) {
                 container.style.setProperty('--bg-color', '#1a1a1a');
                 container.style.setProperty('--text-color', '#ffffff');
@@ -186,7 +186,7 @@ test.describe('Animation and Transition Visual Tests', () => {
 
       // Trigger transition
       await page.click('#theme-toggle');
-      
+
       // Capture mid-transition (if possible)
       await page.waitForTimeout(150); // Half of transition duration
       await visualUtils.screenshotComponent(
@@ -197,7 +197,7 @@ test.describe('Animation and Transition Visual Tests', () => {
 
       // Wait for transition to complete
       await page.waitForTimeout(ANIMATION_DURATIONS.themeTransition);
-      
+
       // Capture after state
       await visualUtils.screenshotComponent(
         '[data-testid="animated-theme-switcher"]',
@@ -213,7 +213,7 @@ test.describe('Animation and Transition Visual Tests', () => {
         colorDiv.innerHTML = `
           <div style="padding: 20px;">
             <h4>Smooth Color Transition Effects</h4>
-            
+
             <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
               <button class="transition-btn" style="
                 background: #007bff;
@@ -235,7 +235,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 this.style.transform='translateY(0)';
                 this.style.boxShadow='0 2px 4px rgba(0, 123, 255, 0.3)';
               ">Hover Effect</button>
-              
+
               <div class="color-morph" style="
                 width: 120px;
                 height: 60px;
@@ -250,7 +250,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 transition: all 0.4s ease;
                 animation: colorShift 3s infinite;
               ">Morphing</div>
-              
+
               <div style="
                 width: 100px;
                 height: 100px;
@@ -275,7 +275,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 ">Spinning</div>
               </div>
             </div>
-            
+
             <div style="margin-top: 40px;">
               <h5>Gradient Transitions</h5>
               <div style="
@@ -292,7 +292,7 @@ test.describe('Animation and Transition Visual Tests', () => {
               ">Animated Gradient Background</div>
             </div>
           </div>
-          
+
           <style>
             @keyframes colorShift {
               0% { background: linear-gradient(45deg, #ff6b6b, #4ecdc4); }
@@ -301,12 +301,12 @@ test.describe('Animation and Transition Visual Tests', () => {
               75% { background: linear-gradient(45deg, #96ceb4, #feca57); }
               100% { background: linear-gradient(45deg, #feca57, #ff6b6b); }
             }
-            
+
             @keyframes rotate {
               from { transform: rotate(0deg); }
               to { transform: rotate(360deg); }
             }
-            
+
             @keyframes gradientShift {
               0% { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); }
               25% { background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%); }
@@ -314,7 +314,7 @@ test.describe('Animation and Transition Visual Tests', () => {
               75% { background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%); }
               100% { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); }
             }
-            
+
             .color-morph:hover {
               transform: scale(1.1);
               filter: brightness(1.1);
@@ -326,7 +326,7 @@ test.describe('Animation and Transition Visual Tests', () => {
 
       // Wait for animations to start
       await page.waitForTimeout(500);
-      
+
       // Capture at different animation phases
       await visualUtils.screenshotComponent(
         '[data-testid="smooth-color-transitions"]',
@@ -351,7 +351,7 @@ test.describe('Animation and Transition Visual Tests', () => {
   });
 
   test.describe('Loading Animation Consistency', () => {
-    
+
     test('Loading Spinners Animation States @visual @animation @loading', async ({ page }) => {
       await page.evaluate(() => {
         const loadingDiv = document.createElement('div');
@@ -359,7 +359,7 @@ test.describe('Animation and Transition Visual Tests', () => {
         loadingDiv.innerHTML = `
           <div style="padding: 40px;">
             <h4>Loading Animation States</h4>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 30px;">
               <!-- Classic Spinner -->
               <div style="text-align: center;">
@@ -375,7 +375,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 <h6>Classic Spinner</h6>
                 <p style="font-size: 12px; color: #666;">1s linear infinite</p>
               </div>
-              
+
               <!-- Pulsing Circle -->
               <div style="text-align: center;">
                 <div style="
@@ -389,7 +389,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 <h6>Pulsing Circle</h6>
                 <p style="font-size: 12px; color: #666;">1.5s ease-in-out infinite</p>
               </div>
-              
+
               <!-- Bouncing Dots -->
               <div style="text-align: center;">
                 <div style="display: flex; justify-content: center; gap: 8px; margin: 0 auto 15px; width: 70px;">
@@ -400,7 +400,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 <h6>Bouncing Dots</h6>
                 <p style="font-size: 12px; color: #666;">1.4s staggered bounce</p>
               </div>
-              
+
               <!-- Growing Bars -->
               <div style="text-align: center;">
                 <div style="display: flex; justify-content: center; align-items: flex-end; gap: 4px; height: 50px; margin-bottom: 15px;">
@@ -413,7 +413,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 <h6>Growing Bars</h6>
                 <p style="font-size: 12px; color: #666;">1.2s staggered growth</p>
               </div>
-              
+
               <!-- Rotating Squares -->
               <div style="text-align: center;">
                 <div style="
@@ -426,7 +426,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 <h6>Rotating Square</h6>
                 <p style="font-size: 12px; color: #666;">2s ease-in-out infinite</p>
               </div>
-              
+
               <!-- Wave Effect -->
               <div style="text-align: center;">
                 <div style="display: flex; justify-content: center; align-items: center; height: 50px; margin-bottom: 15px;">
@@ -444,34 +444,34 @@ test.describe('Animation and Transition Visual Tests', () => {
               </div>
             </div>
           </div>
-          
+
           <style>
             @keyframes spin {
               0% { transform: rotate(0deg); }
               100% { transform: rotate(360deg); }
             }
-            
+
             @keyframes pulse {
               0%, 100% { transform: scale(0.5); opacity: 1; }
               50% { transform: scale(1.2); opacity: 0.7; }
             }
-            
+
             @keyframes bounce {
               0%, 80%, 100% { transform: scale(0); }
               40% { transform: scale(1); }
             }
-            
+
             @keyframes grow {
               0%, 40%, 100% { height: 10px; }
               20% { height: 50px; }
             }
-            
+
             @keyframes rotateSquare {
               0% { transform: perspective(120px) rotateX(0deg) rotateY(0deg); }
               50% { transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg); }
               100% { transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg); }
             }
-            
+
             @keyframes wave {
               0% { transform: rotate(0deg); border-width: 3px; }
               50% { transform: rotate(180deg); border-width: 1px; }
@@ -500,7 +500,7 @@ test.describe('Animation and Transition Visual Tests', () => {
         progressDiv.innerHTML = `
           <div style="padding: 40px;">
             <h4>Progress Bar Animations</h4>
-            
+
             <div style="display: flex; flex-direction: column; gap: 30px; margin-top: 30px;">
               <!-- Linear Progress -->
               <div>
@@ -523,7 +523,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 </div>
                 <p style="font-size: 12px; color: #666;">Fills over 3 seconds</p>
               </div>
-              
+
               <!-- Indeterminate Progress -->
               <div>
                 <h6>Indeterminate Progress</h6>
@@ -547,7 +547,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 </div>
                 <p style="font-size: 12px; color: #666;">Continuous sliding animation</p>
               </div>
-              
+
               <!-- Striped Progress -->
               <div>
                 <h6>Striped Animated Progress</h6>
@@ -576,7 +576,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 </div>
                 <p style="font-size: 12px; color: #666;">Animated diagonal stripes</p>
               </div>
-              
+
               <!-- Circular Progress -->
               <div>
                 <h6>Circular Progress</h6>
@@ -605,7 +605,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                       color: #007bff;
                     ">75%</div>
                   </div>
-                  
+
                   <div style="
                     width: 60px;
                     height: 60px;
@@ -617,7 +617,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 </div>
                 <p style="font-size: 12px; color: #666;">Determinate and spinning variants</p>
               </div>
-              
+
               <!-- Multi-step Progress -->
               <div>
                 <h6>Multi-step Progress</h6>
@@ -645,7 +645,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                       transform: translateY(-50%);
                     "></div>
                   </div>
-                  
+
                   <div style="
                     width: 30px;
                     height: 30px;
@@ -670,7 +670,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                       transform: translateY(-50%);
                     "></div>
                   </div>
-                  
+
                   <div style="
                     width: 30px;
                     height: 30px;
@@ -688,23 +688,23 @@ test.describe('Animation and Transition Visual Tests', () => {
               </div>
             </div>
           </div>
-          
+
           <style>
             @keyframes progressFill {
               from { width: 0%; }
               to { width: 75%; }
             }
-            
+
             @keyframes indeterminateProgress {
               0% { left: -30%; }
               100% { left: 100%; }
             }
-            
+
             @keyframes moveStripes {
               0% { background-position: 0 0; }
               100% { background-position: 40px 0; }
             }
-            
+
             @keyframes circularProgress {
               from { background: conic-gradient(#007bff 0deg, #e9ecef 0deg); }
               to { background: conic-gradient(#007bff 270deg, #e9ecef 270deg); }
@@ -739,7 +739,7 @@ test.describe('Animation and Transition Visual Tests', () => {
   });
 
   test.describe('Interactive Feedback Animations', () => {
-    
+
     test('Button Hover and Click Animations @visual @animation @interaction', async ({ page }) => {
       await page.evaluate(() => {
         const buttonDiv = document.createElement('div');
@@ -747,7 +747,7 @@ test.describe('Animation and Transition Visual Tests', () => {
         buttonDiv.innerHTML = `
           <div style="padding: 40px;">
             <h4>Interactive Button Animations</h4>
-            
+
             <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 30px;">
               <!-- Hover Scale -->
               <button style="
@@ -771,7 +771,7 @@ test.describe('Animation and Transition Visual Tests', () => {
               " onmouseup="
                 this.style.transform='scale(1.05)';
               ">Hover Scale</button>
-              
+
               <!-- Slide Up -->
               <button style="
                 background: #28a745;
@@ -790,7 +790,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 this.style.transform='translateY(0)';
                 this.style.boxShadow='none';
               ">Slide Up</button>
-              
+
               <!-- Ripple Effect -->
               <button style="
                 background: #dc3545;
@@ -821,7 +821,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 this.appendChild(ripple);
                 setTimeout(() => ripple.remove(), 600);
               ">Ripple Click</button>
-              
+
               <!-- Bounce -->
               <button style="
                 background: #ffc107;
@@ -837,7 +837,7 @@ test.describe('Animation and Transition Visual Tests', () => {
               " onanimationend="
                 this.style.animation='';
               ">Bounce Hover</button>
-              
+
               <!-- Glow Effect -->
               <button style="
                 background: #6f42c1;
@@ -854,7 +854,7 @@ test.describe('Animation and Transition Visual Tests', () => {
               " onmouseout="
                 this.style.boxShadow='none';
               ">Glow Effect</button>
-              
+
               <!-- Rotate -->
               <button style="
                 background: #17a2b8;
@@ -871,7 +871,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 this.style.transform='rotateY(0deg)';
               ">Flip Rotate</button>
             </div>
-            
+
             <div style="margin-top: 40px;">
               <h5>Loading States</h5>
               <div style="display: flex; gap: 20px; margin-top: 20px;">
@@ -898,7 +898,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                   "></div>
                   Loading...
                 </button>
-                
+
                 <button style="
                   background: #28a745;
                   color: white;
@@ -917,17 +917,17 @@ test.describe('Animation and Transition Visual Tests', () => {
               </div>
             </div>
           </div>
-          
+
           <style>
             @keyframes ripple {
               to { transform: scale(4); opacity: 0; }
             }
-            
+
             @keyframes bounce {
               0%, 100% { transform: translateY(0); }
               50% { transform: translateY(-10px); }
             }
-            
+
             @keyframes successPulse {
               0%, 100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
               70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
@@ -969,7 +969,7 @@ test.describe('Animation and Transition Visual Tests', () => {
         formDiv.innerHTML = `
           <div style="padding: 40px;">
             <h4>Form Input Focus Animations</h4>
-            
+
             <div style="display: flex; flex-direction: column; gap: 30px; margin-top: 30px; max-width: 400px;">
               <!-- Floating Label -->
               <div style="position: relative;">
@@ -1006,7 +1006,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                   padding: 0 4px;
                 ">Floating Label Input</label>
               </div>
-              
+
               <!-- Underline Animation -->
               <div style="position: relative;">
                 <input type="text" style="
@@ -1043,7 +1043,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                   font-size: 14px;
                 ">Underline Animation</label>
               </div>
-              
+
               <!-- Glow Focus -->
               <input type="text" placeholder="Glow Focus Effect" style="
                 width: 100%;
@@ -1062,7 +1062,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 this.style.boxShadow='none';
                 this.style.transform='scale(1)';
               ">
-              
+
               <!-- Slide In Label -->
               <div style="position: relative; overflow: hidden;">
                 <input type="text" style="
@@ -1100,7 +1100,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                   padding: 0 4px;
                 ">Slide In Effect</label>
               </div>
-              
+
               <!-- Search Input with Icon -->
               <div style="position: relative;">
                 <input type="search" placeholder="Search with animation..." style="
@@ -1149,7 +1149,7 @@ test.describe('Animation and Transition Visual Tests', () => {
       // Focus first input to show floating label animation
       await page.focus('#floating-input');
       await page.waitForTimeout(400);
-      
+
       await visualUtils.screenshotComponent(
         '[data-testid="form-input-animations"]',
         'form-input-animations-focused',
@@ -1173,7 +1173,7 @@ test.describe('Animation and Transition Visual Tests', () => {
   });
 
   test.describe('Plotly Graph Interaction Animations', () => {
-    
+
     test('Plotly Graph Animation States @visual @animation @plotly', async ({ page }) => {
       await page.evaluate(() => {
         const plotlyDiv = document.createElement('div');
@@ -1181,7 +1181,7 @@ test.describe('Animation and Transition Visual Tests', () => {
         plotlyDiv.innerHTML = `
           <div style="padding: 20px;">
             <h4>Plotly Graph Animation States</h4>
-            
+
             <!-- Mock animated graph container -->
             <div style="
               width: 100%;
@@ -1211,7 +1211,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 <button style="width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; transition: background-color 0.2s;">🔍</button>
                 <button style="width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; transition: background-color 0.2s;">📐</button>
               </div>
-              
+
               <!-- Animated data points -->
               <svg width="100%" height="100%" style="position: absolute;">
                 <defs>
@@ -1228,7 +1228,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                     <stop offset="100%" style="stop-color:#bd2130;stop-opacity:0.6" />
                   </radialGradient>
                 </defs>
-                
+
                 <!-- Animated scatter points -->
                 <circle cx="150" cy="120" r="0" fill="url(#point1)" style="animation: growPoint 1s ease-out 0.2s forwards;">
                   <animate attributeName="r" values="0;8;6;8" dur="2s" repeatCount="indefinite" begin="1s"/>
@@ -1245,7 +1245,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 <circle cx="180" cy="300" r="0" fill="url(#point2)" style="animation: growPoint 1s ease-out 1.0s forwards;">
                   <animate attributeName="r" values="0;9;7;9" dur="2.3s" repeatCount="indefinite" begin="1.8s"/>
                 </circle>
-                
+
                 <!-- Animated connecting lines -->
                 <path d="M 150,120 Q 215,150 280,180" stroke="#007bff" stroke-width="2" fill="none" opacity="0.6" style="
                   stroke-dasharray: 200;
@@ -1257,7 +1257,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                   stroke-dashoffset: 100;
                   animation: drawLine 1.5s ease-in-out 2s forwards;
                 "/>
-                
+
                 <!-- Axis lines with animation -->
                 <line x1="50" y1="50" x2="50" y2="450" stroke="#6c757d" stroke-width="2" style="
                   stroke-dasharray: 400;
@@ -1269,12 +1269,12 @@ test.describe('Animation and Transition Visual Tests', () => {
                   stroke-dashoffset: 500;
                   animation: drawLine 1s ease-in-out 0.7s forwards;
                 "/>
-                
+
                 <!-- Axis labels -->
                 <text x="300" y="480" text-anchor="middle" fill="#6c757d" font-size="14" style="animation: fadeIn 1s ease-in-out 2s forwards; opacity: 0;">X-Axis</text>
                 <text x="25" y="250" text-anchor="middle" fill="#6c757d" font-size="14" transform="rotate(-90 25 250)" style="animation: fadeIn 1s ease-in-out 2s forwards; opacity: 0;">Y-Axis</text>
               </svg>
-              
+
               <!-- Animated legend -->
               <div style="
                 position: absolute;
@@ -1302,7 +1302,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                   <span>Category C</span>
                 </div>
               </div>
-              
+
               <!-- Loading overlay that fades out -->
               <div style="
                 position: absolute;
@@ -1332,33 +1332,33 @@ test.describe('Animation and Transition Visual Tests', () => {
               </div>
             </div>
           </div>
-          
+
           <style>
             @keyframes fadeIn {
               from { opacity: 0; }
               to { opacity: 1; }
             }
-            
+
             @keyframes fadeOut {
               from { opacity: 1; }
               to { opacity: 0; }
             }
-            
+
             @keyframes growPoint {
               from { r: 0; }
               to { r: 8; }
             }
-            
+
             @keyframes drawLine {
               from { stroke-dashoffset: 200; }
               to { stroke-dashoffset: 0; }
             }
-            
+
             @keyframes slideInUp {
               from { opacity: 0; transform: translateY(20px); }
               to { opacity: 1; transform: translateY(0); }
             }
-            
+
             @keyframes pulse {
               0%, 100% { transform: scale(1); }
               50% { transform: scale(1.1); }
@@ -1393,7 +1393,7 @@ test.describe('Animation and Transition Visual Tests', () => {
   });
 
   test.describe('Reduced Motion Testing', () => {
-    
+
     test('Reduced Motion Compliance @visual @animation @accessibility', async ({ page }) => {
       // Enable reduced motion preference
       await visualUtils.enableReducedMotion();
@@ -1404,7 +1404,7 @@ test.describe('Animation and Transition Visual Tests', () => {
         motionDiv.innerHTML = `
           <div style="padding: 40px;">
             <h4>Reduced Motion Compliance Test</h4>
-            
+
             <div style="display: flex; flex-direction: column; gap: 30px; margin-top: 30px;">
               <!-- Elements that should respect reduced motion -->
               <div>
@@ -1426,7 +1426,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                   this.style.transform='translateY(0)';
                 ">Hover Transition</button>
               </div>
-              
+
               <div>
                 <h6>Animations (should be disabled with reduced motion)</h6>
                 <div style="
@@ -1437,7 +1437,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                   animation: pulse 2s ease-in-out infinite;
                 "></div>
               </div>
-              
+
               <div>
                 <h6>Loading Spinners (functional animations - allowed)</h6>
                 <div style="
@@ -1449,7 +1449,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                   animation: spin 1s linear infinite;
                 "></div>
               </div>
-              
+
               <div>
                 <h6>Parallax/Auto-playing (should be disabled)</h6>
                 <div style="
@@ -1484,7 +1484,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 </div>
               </div>
             </div>
-            
+
             <div style="
               margin-top: 30px;
               padding: 15px;
@@ -1497,7 +1497,7 @@ test.describe('Animation and Transition Visual Tests', () => {
               <strong>Note:</strong> With reduced motion enabled, decorative animations should be disabled while functional animations (like loading indicators) remain active for usability.
             </div>
           </div>
-          
+
           <style>
             /* Respect user's motion preferences */
             @media (prefers-reduced-motion: reduce) {
@@ -1506,14 +1506,14 @@ test.describe('Animation and Transition Visual Tests', () => {
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
               }
-              
+
               /* Keep essential animations for functionality */
               [data-essential-animation] {
                 animation-duration: revert !important;
                 animation-iteration-count: revert !important;
               }
             }
-            
+
             @keyframes movePattern {
               from { transform: translate(-10%, -10%); }
               to { transform: translate(10%, 10%); }
@@ -1533,7 +1533,7 @@ test.describe('Animation and Transition Visual Tests', () => {
       // Test hover state with reduced motion
       await page.hover('[data-testid="reduced-motion-test"] button');
       await page.waitForTimeout(100); // Should be instant with reduced motion
-      
+
       await visualUtils.screenshotComponent(
         '[data-testid="reduced-motion-test"]',
         'reduced-motion-hover-state',
@@ -1543,7 +1543,7 @@ test.describe('Animation and Transition Visual Tests', () => {
   });
 
   test.describe('Animation Performance Testing', () => {
-    
+
     test('Animation Performance Impact @visual @animation @performance', async ({ page }) => {
       // Create multiple animated elements to test performance
       await page.evaluate(() => {
@@ -1553,7 +1553,7 @@ test.describe('Animation and Transition Visual Tests', () => {
           <div style="padding: 20px;">
             <h4>Animation Performance Test</h4>
             <p style="font-size: 14px; color: #6c757d;">Multiple animated elements to test rendering performance</p>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; margin-top: 20px;">
               ${Array.from({ length: 20 }, (_, i) => `
                 <div style="
@@ -1567,7 +1567,7 @@ test.describe('Animation and Transition Visual Tests', () => {
                 "></div>
               `).join('')}
             </div>
-            
+
             <div style="margin-top: 40px;">
               <h6>Complex Synchronized Animations</h6>
               <div style="display: flex; justify-content: center; align-items: end; gap: 4px; height: 100px; margin: 20px 0;">
@@ -1582,12 +1582,12 @@ test.describe('Animation and Transition Visual Tests', () => {
                 `).join('')}
               </div>
             </div>
-            
+
             <div style="margin-top: 30px; padding: 12px; background: #f8f9fa; border-radius: 4px; font-size: 12px; color: #6c757d;">
               Performance Note: This test includes 32 simultaneously animated elements to evaluate smooth rendering capabilities.
             </div>
           </div>
-          
+
           <style>
             @keyframes complexAnimation {
               0% { transform: scale(1) rotate(0deg); }
@@ -1596,7 +1596,7 @@ test.describe('Animation and Transition Visual Tests', () => {
               75% { transform: scale(1.1) rotate(270deg); }
               100% { transform: scale(1) rotate(360deg); }
             }
-            
+
             @keyframes waveHeight {
               0%, 100% { height: 20px; }
               50% { height: 80px; }

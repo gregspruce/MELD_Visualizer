@@ -13,9 +13,6 @@ from ..constants import (
     VIEWPORT_CHECK_INTERVAL_MS,
 )
 
-# Temporarily disabled - components not integrated properly
-# from .enhanced_ui import EnhancedUIComponents, UserFeedbackManager
-
 
 # --- Responsive Plot Utilities ---
 def create_responsive_graph(graph_id, plot_type="scatter_3d", **kwargs):
@@ -807,6 +804,8 @@ def get_layout(app):
         [
             # Hot-reload components for dynamic theme/config updates
             create_theme_injection_component(),
+            # Enhanced UI scripts and styles
+            add_enhanced_ui_scripts(),
             # Viewport detection for responsive plot scaling
             add_viewport_detection(),
             dbc.Container(
@@ -818,8 +817,14 @@ def get_layout(app):
                     dcc.Store(id="store-config-warnings"),
                     dcc.Store(id="store-column-ranges"),
                     dcc.Store(id="store-config-updated"),
+                    # Enhanced UI stores
+                    dcc.Store(id="ui-state-store"),
+                    dcc.Store(id="loading-state-store"),
+                    dcc.Store(id="toast-trigger-store"),
                     # Theme update feedback message
                     html.Div(id="theme-update-message", style={"display": "none"}),
+                    # Enhanced UI containers - loading-overlay created by JavaScript to avoid conflicts
+                    html.Div(id="toast-container", className="toast-container"),
                     build_header(),
                     build_app_body_with_tabs(),
                 ],

@@ -7,11 +7,11 @@
 - **Date**: [YYYY-MM-DD]
 
 ## Current State
-- **What's Working**: 
+- **What's Working**:
   - [List functional features]
-- **What's Not Working**: 
+- **What's Not Working**:
   - [List broken features]
-- **What Was Rolled Back**: 
+- **What Was Rolled Back**:
   - [List reverted changes and why]
 
 ## Task for Next Agent

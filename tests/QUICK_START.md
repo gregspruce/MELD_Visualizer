@@ -234,15 +234,15 @@ from tests.playwright.fixtures.page_objects import MeldVisualizerPage
 
 async def test_file_upload(page):
     meld_page = MeldVisualizerPage(page)
-    
+
     # Navigate and wait for app to load
     await meld_page.navigate()
     await meld_page.wait_for_app_ready()
-    
+
     # Upload test file
     test_file = "tests/playwright/fixtures/test_data/sample_meld_data.csv"
     await meld_page.upload_csv_file(test_file)
-    
+
     # Verify results
     await meld_page.wait_for_graph_render()
     assert "data loaded" in await meld_page.get_output_filename()

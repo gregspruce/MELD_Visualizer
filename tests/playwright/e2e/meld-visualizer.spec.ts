@@ -13,30 +13,30 @@ import type { MELDData, TestTypes, DashComponents, PlotlyTypes } from '../types'
  * @regression - Full regression testing
  */
 test.describe('MELD Visualizer - Core Functionality', () => {
-  
+
   /**
    * Application Loading and Initialization
    * Verifies that the Dash application loads correctly with all components
    */
-  test('should load application successfully @smoke', async ({ 
-    homePage, 
-    consoleMonitor, 
-    performanceMonitor 
+  test('should load application successfully @smoke', async ({
+    homePage,
+    consoleMonitor,
+    performanceMonitor
   }) => {
     // Navigate to home page with type-safe page object
     await homePage.goto();
-    
+
     // Verify page elements are present
     await expect(homePage.header).toBeVisible();
     await expect(homePage.navigation).toBeVisible();
-    
+
     // Check performance metrics meet thresholds
     const metrics = await performanceMonitor.getMetrics();
     expect(metrics).toMeetPerformanceThresholds({
       loadTime: 5000,
       renderTime: 2000
     });
-    
+
     // Ensure no console errors during load
     consoleMonitor.expectNoErrors();
   });
@@ -45,20 +45,20 @@ test.describe('MELD Visualizer - Core Functionality', () => {
    * Theme Switching Functionality
    * Tests theme changes with type safety for theme names
    */
-  test('should switch themes correctly @smoke', async ({ 
-    homePage, 
-    consoleMonitor 
+  test('should switch themes correctly @smoke', async ({
+    homePage,
+    consoleMonitor
   }) => {
     await homePage.goto();
-    
+
     // Test each theme with type-safe theme names
     const themes: DashComponents.ThemeConfig['name'][] = ['light', 'dark', 'plotly', 'plotly_dark'];
-    
+
     for (const theme of themes) {
       await homePage.switchTheme(theme);
-      
+
       const currentTheme = await homePage.getCurrentTheme();
-      
+
       // Type-safe theme validation
       if (theme === 'dark' || theme === 'plotly_dark') {
         expect(currentTheme).toBe('dark');
@@ -66,7 +66,7 @@ test.describe('MELD Visualizer - Core Functionality', () => {
         expect(currentTheme).toBe('light');
       }
     }
-    
+
     // Verify no errors during theme switching
     consoleMonitor.expectNoErrors();
   });
@@ -75,12 +75,12 @@ test.describe('MELD Visualizer - Core Functionality', () => {
    * Tab Navigation Testing
    * Verifies tab navigation works with proper type safety
    */
-  test('should navigate between tabs @smoke', async ({ 
-    homePage, 
-    mcpPage 
+  test('should navigate between tabs @smoke', async ({
+    homePage,
+    mcpPage
   }) => {
     await homePage.goto();
-    
+
     // Define test tabs with proper typing
     const testTabs: Array<{ id: string; expectedContent: string }> = [
       { id: 'upload', expectedContent: 'upload' },
@@ -88,13 +88,13 @@ test.describe('MELD Visualizer - Core Functionality', () => {
       { id: 'data', expectedContent: 'table' },
       { id: 'settings', expectedContent: 'settings' }
     ];
-    
+
     for (const tab of testTabs) {
       await homePage.navigateToTab(tab.id);
-      
+
       // Wait for tab content to load
       await mcpPage.waitForTimeout(500);
-      
+
       // Verify tab is active using type-safe selectors
       const isActive = await mcpPage.locator(`[data-tab="${tab.id}"].active`).isVisible();
       expect(isActive).toBeTruthy();
@@ -107,40 +107,40 @@ test.describe('MELD Visualizer - Core Functionality', () => {
  * Comprehensive testing of file upload functionality with type-safe data handling
  */
 test.describe('MELD Visualizer - File Upload', () => {
-  
+
   /**
    * Valid File Upload Test
    * Tests upload of valid MELD data with full validation
    */
-  test('should upload valid MELD data file @regression', async ({ 
-    uploadPage, 
-    testFiles, 
+  test('should upload valid MELD data file @regression', async ({
+    uploadPage,
+    testFiles,
     consoleMonitor,
     performanceMonitor
   }) => {
     await uploadPage.goto();
-    
+
     // Use type-safe test fixture
     const validFile = testFiles.validMELDData;
-    
+
     // Validate file data before upload
     const { data, validation } = MELDDataValidator.parseCSV(validFile.content);
     expect(validation.isValid).toBeTruthy();
     expect(data).toBeValidMELDData();
-    
+
     // Perform upload with performance monitoring
     performanceMonitor.mark('upload-start');
     await uploadPage.uploadFile(validFile);
     performanceMonitor.mark('upload-complete');
-    
+
     // Verify upload success
     const status = await uploadPage.getUploadStatus();
     expect(status).toBe('success');
-    
+
     // Check performance
     const metrics = await performanceMonitor.getMetrics();
     expect(metrics.loadTime).toBeLessThan(30000); // 30 second max for large files
-    
+
     // Ensure no console errors
     consoleMonitor.expectNoErrors();
   });
@@ -149,21 +149,21 @@ test.describe('MELD Visualizer - File Upload', () => {
    * Invalid File Upload Test
    * Tests error handling for invalid data with type safety
    */
-  test('should handle invalid file upload gracefully @regression', async ({ 
-    uploadPage, 
+  test('should handle invalid file upload gracefully @regression', async ({
+    uploadPage,
     testFiles,
     consoleMonitor
   }) => {
     await uploadPage.goto();
-    
+
     // Test with invalid data file
     const invalidFile = testFiles.invalidMELDData;
-    
+
     // Validate that file is indeed invalid
     const { validation } = MELDDataValidator.parseCSV(invalidFile.content);
     expect(validation.isValid).toBeFalsy();
     expect(validation.errors.length).toBeGreaterThan(0);
-    
+
     try {
       await uploadPage.uploadFile(invalidFile);
       const status = await uploadPage.getUploadStatus();
@@ -172,7 +172,7 @@ test.describe('MELD Visualizer - File Upload', () => {
       // Upload should fail gracefully
       expect(error).toBeInstanceOf(Error);
     }
-    
+
     // Should have no unexpected console errors
     const errors = consoleMonitor.getErrors();
     const unexpectedErrors = errors.filter(e => !e.text.includes('validation'));
@@ -183,25 +183,25 @@ test.describe('MELD Visualizer - File Upload', () => {
    * Large File Upload Performance Test
    * Tests performance with large datasets
    */
-  test('should handle large file uploads within time limits @performance', async ({ 
-    uploadPage, 
+  test('should handle large file uploads within time limits @performance', async ({
+    uploadPage,
     testFiles,
-    performanceMonitor 
+    performanceMonitor
   }) => {
     await uploadPage.goto();
-    
+
     const largeFile = testFiles.largeMELDData;
-    
+
     // Verify file is actually large
     expect(largeFile.size).toBeGreaterThan(100_000); // 100KB minimum
-    
+
     performanceMonitor.mark('large-upload-start');
     await uploadPage.uploadFile(largeFile);
     performanceMonitor.mark('large-upload-complete');
-    
+
     const status = await uploadPage.getUploadStatus();
     expect(status).toBe('success');
-    
+
     // Check upload performance
     const metrics = await performanceMonitor.getMetrics();
     expect(metrics.loadTime).toBeLessThan(60_000); // 60 seconds max
@@ -213,42 +213,42 @@ test.describe('MELD Visualizer - File Upload', () => {
  * Tests 3D visualization with type-safe Plotly integration
  */
 test.describe('MELD Visualizer - Data Visualization', () => {
-  
+
   /**
    * 3D Graph Rendering Test
    * Verifies Plotly 3D graph renders correctly with proper data
    */
-  test('should render 3D visualization correctly @smoke', async ({ 
-    visualizationPage, 
+  test('should render 3D visualization correctly @smoke', async ({
+    visualizationPage,
     testFiles,
     visualTester,
-    consoleMonitor 
+    consoleMonitor
   }) => {
     // First upload data
     await visualizationPage.goto();
-    
+
     // Wait for any existing graph to load or timeout gracefully
     try {
-      await visualTester.waitForPlotlyGraph('.js-plotly-plot', { 
+      await visualTester.waitForPlotlyGraph('.js-plotly-plot', {
         timeout: 10_000,
         expectedTraces: 1,
-        validateData: true 
+        validateData: true
       });
     } catch {
       // No existing graph, which is fine for this test
     }
-    
+
     // Verify graph container exists
     await expect(visualizationPage.plotlyGraph).toBeVisible();
-    
+
     // Check for proper 3D scene setup
     const cameraPosition = await visualizationPage.getCameraPosition();
     expect(cameraPosition).not.toBeNull();
-    
+
     // Verify graph is interactive
     const isInteractive = await visualizationPage.isGraphInteractive();
     expect(isInteractive).toBeTruthy();
-    
+
     // Ensure no rendering errors
     consoleMonitor.expectNoErrors();
   });
@@ -257,30 +257,30 @@ test.describe('MELD Visualizer - Data Visualization', () => {
    * Graph Interaction Testing
    * Tests user interactions with the 3D visualization
    */
-  test('should support graph interactions @regression', async ({ 
-    visualizationPage, 
-    mcpPage 
+  test('should support graph interactions @regression', async ({
+    visualizationPage,
+    mcpPage
   }) => {
     await visualizationPage.goto();
-    
+
     try {
       await visualizationPage.waitForGraphRender();
-      
+
       // Test reset functionality
       await visualizationPage.resetView();
-      
+
       // Get initial camera position after reset
       const initialCamera = await visualizationPage.getCameraPosition();
       expect(initialCamera).not.toBeNull();
-      
+
       // Test export functionality
       const exportedFile = await visualizationPage.exportData('csv');
       expect(exportedFile).toContain('.csv');
-      
+
       // Test trace count
       const traceCount = await visualizationPage.getTraceCount();
       expect(traceCount).toBeGreaterThanOrEqual(0);
-      
+
     } catch (error) {
       // Log error for debugging but don't fail if no data is loaded
       console.log('Graph interaction test skipped - no data loaded:', error);
@@ -291,31 +291,31 @@ test.describe('MELD Visualizer - Data Visualization', () => {
    * Data Points Extraction Test
    * Verifies data extraction with proper typing
    */
-  test('should extract data points with correct types @regression', async ({ 
-    visualizationPage, 
-    testFiles 
+  test('should extract data points with correct types @regression', async ({
+    visualizationPage,
+    testFiles
   }) => {
     await visualizationPage.goto();
-    
+
     try {
       await visualizationPage.waitForGraphRender();
-      
+
       // Extract data points with type safety
       const dataPoints = await visualizationPage.getDataPoints();
-      
+
       // Validate data structure
       expect(Array.isArray(dataPoints)).toBeTruthy();
-      
+
       if (dataPoints.length > 0) {
         const firstPoint = dataPoints[0];
-        
+
         // Type-safe property checks
         expect(typeof firstPoint.x).toBe('number');
         expect(typeof firstPoint.y).toBe('number');
         expect(typeof firstPoint.z).toBe('number');
         expect(typeof firstPoint.temperature).toBe('number');
         expect(typeof firstPoint.timestamp).toBe('string');
-        
+
         // Validate as MELD point
         expect([firstPoint]).toBeValidMELDData();
       }
@@ -330,36 +330,36 @@ test.describe('MELD Visualizer - Data Visualization', () => {
  * Comprehensive visual testing with type-safe configuration
  */
 test.describe('MELD Visualizer - Visual Regression', () => {
-  
+
   /**
    * Application Layout Visual Test
    * Captures and compares application layout
    */
-  test('should maintain consistent visual layout @visual', async ({ 
-    homePage, 
+  test('should maintain consistent visual layout @visual', async ({
+    homePage,
     visualTester,
-    mcpPage 
+    mcpPage
   }) => {
     await homePage.goto();
-    
+
     // Wait for complete load
     await mcpPage.waitForLoadState('networkidle');
-    
+
     // Take screenshot with type-safe configuration
     const screenshotResult = await visualTester.takeScreenshot('homepage-layout', {
       fullPage: true,
       animations: 'disabled'
     });
-    
+
     expect(screenshotResult.success).toBeTruthy();
-    
+
     // Compare with baseline
     const comparisonResult = await visualTester.compareScreenshot('homepage-layout', {
       threshold: 0.1,
       fullPage: true,
       animations: 'disabled'
     });
-    
+
     expect(comparisonResult.passed).toBeTruthy();
   });
 
@@ -367,30 +367,30 @@ test.describe('MELD Visualizer - Visual Regression', () => {
    * Theme Visual Consistency Test
    * Verifies visual consistency across themes
    */
-  test('should maintain visual consistency across themes @visual', async ({ 
-    homePage, 
-    visualTester 
+  test('should maintain visual consistency across themes @visual', async ({
+    homePage,
+    visualTester
   }) => {
     await homePage.goto();
-    
+
     const themes: DashComponents.ThemeConfig['name'][] = ['light', 'dark'];
-    
+
     for (const theme of themes) {
       await homePage.switchTheme(theme);
-      
+
       const screenshotResult = await visualTester.takeScreenshot(`theme-${theme}`, {
         fullPage: true,
         animations: 'disabled'
       });
-      
+
       expect(screenshotResult.success).toBeTruthy();
-      
+
       // Visual comparison with theme-specific baseline
       const comparisonResult = await visualTester.compareScreenshot(`theme-${theme}`, {
         threshold: 0.15, // Slightly higher threshold for theme changes
         animations: 'disabled'
       });
-      
+
       // Log result for debugging
       if (!comparisonResult.passed) {
         console.warn(`Theme ${theme} visual regression detected`);
@@ -404,28 +404,28 @@ test.describe('MELD Visualizer - Visual Regression', () => {
  * Comprehensive performance testing with type-safe metrics
  */
 test.describe('MELD Visualizer - Performance', () => {
-  
+
   /**
    * Application Load Performance Test
    * Measures and validates load performance
    */
-  test('should load within performance thresholds @performance', async ({ 
-    homePage, 
-    performanceMonitor 
+  test('should load within performance thresholds @performance', async ({
+    homePage,
+    performanceMonitor
   }) => {
     performanceMonitor.mark('app-load-start');
     await homePage.goto();
     performanceMonitor.mark('app-load-complete');
-    
+
     const metrics = await performanceMonitor.getMetrics();
-    
+
     // Type-safe performance validation
     expect(metrics).toMeetPerformanceThresholds({
       loadTime: 5000,
       renderTime: 2000,
       memoryUsage: 100_000_000 // 100MB
     });
-    
+
     // Log performance metrics for monitoring
     console.log('📊 Performance Metrics:', {
       loadTime: `${metrics.loadTime}ms`,
@@ -438,32 +438,32 @@ test.describe('MELD Visualizer - Performance', () => {
    * Large Dataset Performance Test
    * Tests performance with large MELD datasets
    */
-  test('should handle large datasets efficiently @performance', async ({ 
-    uploadPage, 
+  test('should handle large datasets efficiently @performance', async ({
+    uploadPage,
     visualizationPage,
     testFiles,
-    performanceMonitor 
+    performanceMonitor
   }) => {
     // Upload large dataset
     await uploadPage.goto();
-    
+
     performanceMonitor.mark('large-data-upload-start');
     await uploadPage.uploadFile(testFiles.largeMELDData);
     performanceMonitor.mark('large-data-upload-complete');
-    
+
     // Navigate to visualization
     await visualizationPage.goto();
-    
+
     performanceMonitor.mark('large-data-render-start');
     await visualizationPage.waitForGraphRender();
     performanceMonitor.mark('large-data-render-complete');
-    
+
     const metrics = await performanceMonitor.getMetrics();
-    
+
     // Large dataset should still meet reasonable performance thresholds
     expect(metrics.loadTime).toBeLessThan(15_000); // 15 seconds
     expect(metrics.renderTime).toBeLessThan(5_000); // 5 seconds
-    
+
     console.log('📊 Large Dataset Performance:', {
       uploadTime: `${metrics.loadTime}ms`,
       renderTime: `${metrics.renderTime}ms`
@@ -476,32 +476,32 @@ test.describe('MELD Visualizer - Performance', () => {
  * Tests application robustness with type-safe error handling
  */
 test.describe('MELD Visualizer - Error Handling', () => {
-  
+
   /**
    * Network Error Handling Test
    * Tests graceful handling of network issues
    */
-  test('should handle network errors gracefully @regression', async ({ 
-    mcpPage, 
+  test('should handle network errors gracefully @regression', async ({
+    mcpPage,
     networkMocker,
     homePage,
-    consoleMonitor 
+    consoleMonitor
   }) => {
     // Mock API error
     await networkMocker.mockApiError('/_dash-update-component', 500);
-    
+
     await homePage.goto();
-    
+
     // Application should still load basic interface
     await expect(homePage.header).toBeVisible();
-    
+
     // Should handle errors gracefully without crashing
     const errors = consoleMonitor.getErrors();
-    const criticalErrors = errors.filter(e => 
-      e.text.includes('TypeError') || 
+    const criticalErrors = errors.filter(e =>
+      e.text.includes('TypeError') ||
       e.text.includes('ReferenceError')
     );
-    
+
     expect(criticalErrors).toHaveLength(0);
   });
 
@@ -509,16 +509,16 @@ test.describe('MELD Visualizer - Error Handling', () => {
    * Invalid Data Handling Test
    * Tests handling of corrupted or invalid data files
    */
-  test('should handle corrupted data files @regression', async ({ 
-    uploadPage, 
+  test('should handle corrupted data files @regression', async ({
+    uploadPage,
     testFiles,
-    consoleMonitor 
+    consoleMonitor
   }) => {
     await uploadPage.goto();
-    
+
     // Test with corrupted file
     const corruptedFile = testFiles.corruptedFile;
-    
+
     try {
       await uploadPage.uploadFile(corruptedFile);
       const status = await uploadPage.getUploadStatus();
@@ -527,17 +527,17 @@ test.describe('MELD Visualizer - Error Handling', () => {
       // Expected to fail
       expect(error).toBeInstanceOf(Error);
     }
-    
+
     // Application should remain stable
     await expect(uploadPage.dropzone).toBeVisible();
-    
+
     // No critical console errors
     const errors = consoleMonitor.getErrors();
-    const criticalErrors = errors.filter(e => 
-      e.text.includes('CRITICAL') || 
+    const criticalErrors = errors.filter(e =>
+      e.text.includes('CRITICAL') ||
       e.text.includes('FATAL')
     );
-    
+
     expect(criticalErrors).toHaveLength(0);
   });
 });
@@ -547,28 +547,28 @@ test.describe('MELD Visualizer - Error Handling', () => {
  * Basic accessibility checks with type safety
  */
 test.describe('MELD Visualizer - Accessibility @a11y', () => {
-  
+
   /**
    * Basic Accessibility Test
    * Verifies basic accessibility compliance
    */
-  test('should meet basic accessibility standards', async ({ 
-    homePage, 
-    mcpPage 
+  test('should meet basic accessibility standards', async ({
+    homePage,
+    mcpPage
   }) => {
     await homePage.goto();
-    
+
     // Check for proper heading structure
     const headings = await mcpPage.locator('h1, h2, h3, h4, h5, h6').all();
     expect(headings.length).toBeGreaterThan(0);
-    
+
     // Check for proper alt text on images
     const images = await mcpPage.locator('img').all();
     for (const img of images) {
       const alt = await img.getAttribute('alt');
       expect(alt).toBeTruthy();
     }
-    
+
     // Check for proper form labels
     const inputs = await mcpPage.locator('input').all();
     for (const input of inputs) {
@@ -584,7 +584,7 @@ test.describe('MELD Visualizer - Accessibility @a11y', () => {
  * Tests the type-safe data generation utilities
  */
 test.describe('Test Data Generation and Validation', () => {
-  
+
   /**
    * Data Generator Test
    * Tests the synthetic data generation with proper typing
@@ -604,22 +604,22 @@ test.describe('Test Data Generation and Validation', () => {
         ToolTemp: 'normal'
       }
     };
-    
+
     const dataset = TestDataGenerator.generateMELDDataset(config);
-    
+
     // Validate generated dataset
     expect(dataset.data).toHaveLength(50);
     expect(dataset.metadata.recordCount).toBe(50);
     expect(dataset.statistics).toBeDefined();
-    
+
     // Validate individual data points
     expect(dataset.data).toBeValidMELDData();
-    
+
     // Check that ranges were applied
     const toolTemps = dataset.data.map(d => d.ToolTemp);
     const minTemp = Math.min(...toolTemps);
     const maxTemp = Math.max(...toolTemps);
-    
+
     expect(minTemp).toBeGreaterThanOrEqual(200);
     expect(maxTemp).toBeLessThanOrEqual(400);
   });
@@ -654,21 +654,21 @@ test.describe('Test Data Generation and Validation', () => {
         SpinPwr: 565
       }
     ];
-    
+
     const result = MELDDataValidator.validateDataset(testData);
-    
+
     // Should detect issues
     expect(result.isValid).toBeFalsy();
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.summary.validRows).toBe(1);
     expect(result.summary.totalRows).toBe(2);
     expect(result.summary.dataQuality).toBe('poor');
-    
+
     // Check specific error types
     const dateError = result.errors.find(e => e.field === 'Date');
     const numericError = result.errors.find(e => e.field === 'XPos');
     const rangeWarning = result.warnings?.find(w => w.field === 'ToolTemp');
-    
+
     expect(dateError).toBeDefined();
     expect(numericError).toBeDefined();
   });

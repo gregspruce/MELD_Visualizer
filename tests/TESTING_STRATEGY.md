@@ -313,15 +313,15 @@ Release Requirements:
 # Good Test Structure
 class TestDataProcessing:
     """Test suite for data processing functionality"""
-    
+
     def test_csv_loading_with_valid_file_returns_dataframe(self):
         """Test that valid CSV files are loaded correctly"""
         # Arrange
         csv_path = "tests/fixtures/valid_data.csv"
-        
+
         # Act
         result = load_csv_data(csv_path)
-        
+
         # Assert
         assert isinstance(result, pd.DataFrame)
         assert len(result) > 0

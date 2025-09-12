@@ -2,7 +2,7 @@
 
 > /workflows:full-review is running…
 
-● I'll perform a comprehensive review of your MELD Visualizer application using multiple specialized agents to examine different       
+● I'll perform a comprehensive review of your MELD Visualizer application using multiple specialized agents to examine different
   aspects of the codebase.
 
   ★ Insight ─────────────────────────────────────

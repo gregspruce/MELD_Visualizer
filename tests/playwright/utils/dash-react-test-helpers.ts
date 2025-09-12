@@ -4,10 +4,10 @@
  */
 
 import { Page, Locator, expect } from '@playwright/test';
-import type { 
-  DashComponents, 
-  TestTypes, 
-  PlotlyTypes 
+import type {
+  DashComponents,
+  TestTypes,
+  PlotlyTypes
 } from '../types';
 
 /**
@@ -31,25 +31,25 @@ export class DashComponentStateInspector {
       // Access Dash's internal React component registry
       const dash = (window as any).dash_clientside;
       const element = document.getElementById(id);
-      
+
       if (!element) {
         throw new Error(`Component with id "${id}" not found`);
       }
 
       // Get React fiber node (Dash uses React internally)
-      const reactKey = Object.keys(element).find(key => 
-        key.startsWith('__reactInternalInstance') || 
+      const reactKey = Object.keys(element).find(key =>
+        key.startsWith('__reactInternalInstance') ||
         key.startsWith('__reactFiber')
       );
-      
+
       const reactNode = reactKey ? (element as any)[reactKey] : null;
-      
+
       return {
         props: reactNode?.memoizedProps || {},
         state: reactNode?.memoizedState || {},
         children: reactNode?.child ? 'has-children' : null,
         isConnected: !!element.isConnected,
-        hasCallbacks: dash && dash.callback_map && 
+        hasCallbacks: dash && dash.callback_map &&
                       Object.keys(dash.callback_map).some(key => key.includes(id))
       };
     }, componentId);
@@ -62,18 +62,18 @@ export class DashComponentStateInspector {
     await this.page.waitForFunction((id) => {
       const element = document.getElementById(id);
       if (!element) return false;
-      
+
       // Check if React has finished rendering this component
-      const reactKey = Object.keys(element).find(key => 
-        key.startsWith('__reactInternalInstance') || 
+      const reactKey = Object.keys(element).find(key =>
+        key.startsWith('__reactInternalInstance') ||
         key.startsWith('__reactFiber')
       );
-      
+
       const reactNode = reactKey ? (element as any)[reactKey] : null;
-      
+
       // Component is considered rendered if it has props and is not in pending state
-      return reactNode && 
-             reactNode.memoizedProps && 
+      return reactNode &&
+             reactNode.memoizedProps &&
              !reactNode.pendingProps;
     }, componentId, { timeout });
   }
@@ -101,17 +101,17 @@ export class DashComponentStateInspector {
         startTime: 0,
         tracking: false
       };
-      
+
       // Monkey patch the component's render method if accessible
-      const reactKey = Object.keys(element).find(key => 
-        key.startsWith('__reactInternalInstance') || 
+      const reactKey = Object.keys(element).find(key =>
+        key.startsWith('__reactInternalInstance') ||
         key.startsWith('__reactFiber')
       );
-      
+
       if (reactKey) {
         const reactNode = (element as any)[reactKey];
         const tracking = (window as any).__renderTracking[id];
-        
+
         // Hook into React's commit phase
         const originalUpdate = reactNode.stateNode?.forceUpdate;
         if (originalUpdate && !tracking.hooked) {
@@ -141,7 +141,7 @@ export class DashComponentStateInspector {
           }
         }, componentId);
       },
-      
+
       stopTracking: async () => {
         return await this.page.evaluate((id) => {
           const tracking = (window as any).__renderTracking[id];
@@ -150,8 +150,8 @@ export class DashComponentStateInspector {
             return {
               renderCount: tracking.renderCount,
               lastRenderTime: tracking.renderTimes[tracking.renderTimes.length - 1] || 0,
-              averageRenderTime: tracking.renderTimes.length > 0 
-                ? tracking.renderTimes.reduce((a, b) => a + b) / tracking.renderTimes.length 
+              averageRenderTime: tracking.renderTimes.length > 0
+                ? tracking.renderTimes.reduce((a, b) => a + b) / tracking.renderTimes.length
                 : 0
             };
           }
@@ -165,28 +165,28 @@ export class DashComponentStateInspector {
    * Validate component props match expected types
    */
   async validateComponentProps(
-    componentId: string, 
+    componentId: string,
     expectedProps: Record<string, { type: string; required?: boolean }>
   ): Promise<{ valid: boolean; errors: string[] }> {
     const state = await this.getComponentState(componentId);
     const errors: string[] = [];
-    
+
     // Check required props
     Object.entries(expectedProps).forEach(([propName, config]) => {
       if (config.required && !(propName in state.props)) {
         errors.push(`Required prop '${propName}' is missing`);
       }
-      
+
       if (propName in state.props) {
         const actualType = typeof state.props[propName];
         const expectedType = config.type;
-        
+
         if (actualType !== expectedType) {
           errors.push(`Prop '${propName}' expected ${expectedType}, got ${actualType}`);
         }
       }
     });
-    
+
     return { valid: errors.length === 0, errors };
   }
 }
@@ -279,16 +279,16 @@ export class DashCallbackChainTester {
       const dash = (window as any).dash_clientside;
       if (dash && dash.callback && !dash.callback._monitoringHooked) {
         const originalCallback = dash.callback;
-        
+
         dash.callback = function(callbackId: string, inputs: any, state: any) {
           const monitor = (window as any).__callbackMonitoring;
-          
+
           if (monitor.active) {
             const startTime = performance.now();
             const callbackOrder = opts.trackOrder ? ++monitor.order : 0;
-            
+
             const result = originalCallback.call(this, callbackId, inputs, state);
-            
+
             if (result && typeof result.then === 'function') {
               // Handle async callback
               result.then((outputs: any) => {
@@ -312,13 +312,13 @@ export class DashCallbackChainTester {
                 order: callbackOrder
               });
             }
-            
+
             return result;
           }
-          
+
           return originalCallback.call(this, callbackId, inputs, state);
         };
-        
+
         dash.callback._monitoringHooked = true;
       }
     }, { timeout, trackOrder });
@@ -376,14 +376,14 @@ export class DashCallbackChainTester {
 
     // Trigger the error
     await triggerError();
-    
+
     // Wait a bit for error propagation
     await this.page.waitForTimeout(1000);
 
     // Test if other callbacks still work
     const testElement = this.page.locator(`#${componentId}`);
     let callbacksStillWorking = true;
-    
+
     try {
       // Try a simple interaction to test if callbacks are still responsive
       if (await testElement.count() > 0) {
@@ -409,14 +409,14 @@ export class DashCallbackChainTester {
     actualExecution: Array<{ callbackId: string; order: number }>
   ): Promise<{ valid: boolean; issues: string[] }> {
     const issues: string[] = [];
-    
+
     // Sort actual execution by order
     const sortedExecution = actualExecution.sort((a, b) => a.order - b.order);
-    
+
     // Check if expected callbacks executed
     expectedOrder.forEach((expectedCallback, index) => {
       const actualCallback = sortedExecution[index];
-      
+
       if (!actualCallback) {
         issues.push(`Expected callback '${expectedCallback}' at position ${index} but found none`);
       } else if (actualCallback.callbackId !== expectedCallback) {
@@ -462,11 +462,11 @@ export class DashReactEventSimulator {
 
       // Add React-specific properties
       Object.defineProperty(event, 'nativeEvent', { value: event });
-      Object.defineProperty(event, 'isDefaultPrevented', { 
-        value: () => event.defaultPrevented 
+      Object.defineProperty(event, 'isDefaultPrevented', {
+        value: () => event.defaultPrevented
       });
-      Object.defineProperty(event, 'isPropagationStopped', { 
-        value: () => event.cancelBubble 
+      Object.defineProperty(event, 'isPropagationStopped', {
+        value: () => event.cancelBubble
       });
 
       // Dispatch the event
@@ -489,27 +489,27 @@ export class DashReactEventSimulator {
     valueResetByApp: boolean;
   }> {
     const input = this.page.locator(`#${inputComponentId}`);
-    
+
     // Get initial value
     const initialValue = await input.inputValue();
-    
+
     // Try to type new value
     await input.clear();
     await input.type(testValue);
-    
+
     const userValue = await input.inputValue();
     const valueChangedByUser = userValue === testValue;
-    
+
     // Wait for potential callback to reset the value
     await this.page.waitForTimeout(1000);
-    
+
     const finalValue = await input.inputValue();
     const valueResetByApp = finalValue !== userValue;
-    
+
     // Restore initial value
     await input.clear();
     await input.type(initialValue);
-    
+
     return {
       isControlled: valueResetByApp,
       valueChangedByUser,
@@ -537,7 +537,7 @@ export class DashReactEventSimulator {
       const input = this.page.locator(`#${inputId}`);
       await input.clear();
       await input.type(value);
-      
+
       // Check for validation errors
       const errorElement = this.page.locator(`[data-error-for="${inputId}"], .error[data-field="${inputId}"]`);
       if (await errorElement.count() > 0) {
@@ -560,7 +560,7 @@ export class DashReactEventSimulator {
     const formData = await this.page.evaluate((formId) => {
       const form = document.getElementById(formId);
       const data: Record<string, unknown> = {};
-      
+
       if (form) {
         const inputs = form.querySelectorAll('input, select, textarea');
         inputs.forEach((input: any) => {
@@ -569,7 +569,7 @@ export class DashReactEventSimulator {
           }
         });
       }
-      
+
       return data;
     }, formComponentId);
 
@@ -594,31 +594,31 @@ export class DashComponentLifecycleTester {
     hasEffects: boolean;
   }> {
     const startTime = performance.now();
-    
+
     // Wait for component to appear in DOM
     await this.page.waitForSelector(`#${componentId}`, { timeout: 10000 });
-    
+
     const mountTime = performance.now() - startTime;
-    
+
     // Get component state after mounting
     const inspector = new DashComponentStateInspector(this.page);
     const state = await inspector.getComponentState(componentId);
-    
+
     // Check for side effects (event listeners, timers, etc.)
     const hasEffects = await this.page.evaluate((id) => {
       const element = document.getElementById(id);
       if (!element) return false;
-      
+
       // Check for event listeners
-      const hasListeners = (element as any)._listeners || 
+      const hasListeners = (element as any)._listeners ||
                           Object.keys(element).some(key => key.startsWith('on'));
-      
+
       // Check for active intervals/timeouts (basic detection)
       const hasTimers = (window as any)[`__${id}_timers`] !== undefined;
-      
+
       return hasListeners || hasTimers;
     }, componentId);
-    
+
     return {
       mounted: true,
       mountTime,
@@ -641,15 +641,15 @@ export class DashComponentLifecycleTester {
   }> {
     const inspector = new DashComponentStateInspector(this.page);
     const renderTracker = await inspector.trackReRenders(componentId);
-    
+
     // Start tracking
     await renderTracker.startTracking();
-    
+
     const startTime = performance.now();
-    
+
     // Get initial props
     const initialState = await inspector.getComponentState(componentId);
-    
+
     // Trigger prop change (simulate callback updating the component)
     await this.page.evaluate((id, prop, value) => {
       const dash = (window as any).dash_clientside;
@@ -664,16 +664,16 @@ export class DashComponentLifecycleTester {
         document.dispatchEvent(updateEvent);
       }
     }, componentId, propChange.prop, propChange.newValue);
-    
+
     // Wait for update to process
     await this.page.waitForTimeout(500);
-    
+
     const updateTime = performance.now() - startTime;
-    
+
     // Get updated state
     const updatedState = await inspector.getComponentState(componentId);
     const renderStats = await renderTracker.stopTracking();
-    
+
     return {
       updated: true,
       updateTime,
@@ -702,20 +702,20 @@ export class DashComponentLifecycleTester {
 
     // Trigger unmount
     await unmountTrigger();
-    
+
     // Wait for cleanup
     await this.page.waitForTimeout(500);
-    
+
     // Check if element was removed
     const elementExists = await this.page.locator(`#${componentId}`).count() > 0;
-    
+
     // Check for memory leaks (basic check)
     const memoryLeaks = await this.page.evaluate((id) => {
       // Check if any global references to the component still exist
-      const windowRefs = Object.keys(window).filter(key => 
+      const windowRefs = Object.keys(window).filter(key =>
         key.includes(id) && key !== 'componentId'
       );
-      
+
       return windowRefs.length > 0;
     }, componentId);
 
@@ -745,7 +745,7 @@ export class DashPerformanceProfiler {
     heavyRenders: Array<{ timestamp: number; duration: number }>;
   }> {
     const inspector = new DashComponentStateInspector(this.page);
-    
+
     // Start profiling
     await this.page.evaluate(() => {
       (window as any).performance.mark('dash-render-start');
@@ -756,7 +756,7 @@ export class DashPerformanceProfiler {
 
     // Simulate some interactions to trigger renders
     const component = this.page.locator(`#${componentId}`);
-    
+
     for (let i = 0; i < 5; i++) {
       if (await component.count() > 0) {
         // Trigger re-render through interaction
@@ -766,7 +766,7 @@ export class DashPerformanceProfiler {
     }
 
     const stats = await renderTracker.stopTracking();
-    
+
     await this.page.evaluate(() => {
       (window as any).performance.mark('dash-render-end');
       (window as any).performance.measure('dash-render-total', 'dash-render-start', 'dash-render-end');
@@ -775,7 +775,7 @@ export class DashPerformanceProfiler {
     const performanceEntries = await this.page.evaluate(() => {
       const entries = (window as any).performance.getEntriesByType('measure')
         .filter((entry: any) => entry.name.includes('dash-render'));
-      
+
       return entries.map((entry: any) => ({
         name: entry.name,
         duration: entry.duration,
@@ -824,7 +824,7 @@ export class DashPerformanceProfiler {
 
     // Wait for test duration
     await this.page.waitForTimeout(testDuration);
-    
+
     clearInterval(memoryInterval);
 
     // Try to trigger garbage collection for final measurement
@@ -835,7 +835,7 @@ export class DashPerformanceProfiler {
     });
 
     await this.page.waitForTimeout(1000);
-    
+
     const finalMemory = await this.page.evaluate(() => {
       return (performance as any).memory ? (performance as any).memory.usedJSHeapSize : 0;
     });
@@ -844,7 +844,7 @@ export class DashPerformanceProfiler {
       const initialMemory = memoryStats[0];
       const peakMemory = Math.max(...memoryStats);
       const memoryGrowth = finalMemory - initialMemory;
-      
+
       return {
         initialMemory,
         peakMemory,
@@ -899,8 +899,8 @@ export class DashTestIntegration {
   static async waitForDashAppReady(page: Page, timeout = 30000): Promise<void> {
     // Wait for Dash core libraries
     await page.waitForFunction(() => {
-      return (window as any).dash_clientside && 
-             (window as any).Plotly && 
+      return (window as any).dash_clientside &&
+             (window as any).Plotly &&
              (window as any).React;
     }, { timeout });
 
@@ -910,8 +910,8 @@ export class DashTestIntegration {
       if (!app) return false;
 
       // Check if React has attached to the app container
-      const reactKey = Object.keys(app).find(key => 
-        key.startsWith('__reactInternalInstance') || 
+      const reactKey = Object.keys(app).find(key =>
+        key.startsWith('__reactInternalInstance') ||
         key.startsWith('__reactFiber')
       );
 

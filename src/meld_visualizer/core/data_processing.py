@@ -240,7 +240,7 @@ def parse_gcode_file(
     path_points: List[Dict[str, float]] = []
 
     # Add an initial point at the origin to start the path
-    current_pos: Dict[str, float] = state["current_pos"]  # type: ignore
+    current_pos: Dict[str, float] = state["current_pos"]  # type: ignore[assignment]
     initial_point: Dict[str, float] = {
         "XPos": current_pos["X"],
         "YPos": current_pos["Y"],
@@ -277,7 +277,7 @@ def parse_gcode_file(
                     state["gcode_mode"] = g_code
 
                     # This is a movement command, so we generate a new point in the path
-                    current_pos_dict: Dict[str, float] = state["current_pos"]  # type: ignore
+                    current_pos_dict: Dict[str, float] = state["current_pos"]  # type: ignore[assignment]
                     target_pos: Dict[str, float] = current_pos_dict.copy()
 
                     # Update target position based on modal X, Y, Z, and F values
@@ -290,23 +290,23 @@ def parse_gcode_file(
                     if "F" in words:
                         state["path_vel"] = float(words["F"])
 
-                    current_pos_dict = state["current_pos"]  # type: ignore
+                    current_pos_dict = state["current_pos"]  # type: ignore[assignment]
                     p1: NDArray[np.float64] = np.array(list(current_pos_dict.values()))
                     p2: NDArray[np.float64] = np.array(list(target_pos.values()))
                     distance: float = float(np.linalg.norm(p2 - p1))
 
                     time_segment_seconds: float = 0
-                    path_vel: float = state["path_vel"]  # type: ignore
+                    path_vel: float = state["path_vel"]  # type: ignore[assignment]
                     if distance > 1e-9 and path_vel > 1e-9:
                         # F is in mm/min, so we convert segment time to seconds
                         time_segment_seconds = (distance / path_vel) * SECONDS_PER_MINUTE
-                    time_counter: float = float(state["time_counter"])  # type: ignore
+                    time_counter: float = float(state["time_counter"])  # type: ignore[arg-type]
                     state["time_counter"] = time_counter + time_segment_seconds
 
                     # Extrusion only occurs during G1 moves
-                    extrusion_on: bool = state["extrusion_on"]  # type: ignore
-                    gcode_mode: int = state["gcode_mode"]  # type: ignore
-                    feed_vel: float = state["feed_vel"]  # type: ignore
+                    extrusion_on: bool = state["extrusion_on"]  # type: ignore[assignment]
+                    gcode_mode: int = state["gcode_mode"]  # type: ignore[assignment]
+                    feed_vel: float = state["feed_vel"]  # type: ignore[assignment]
                     current_feed: float = feed_vel if extrusion_on and gcode_mode == 1 else 0
 
                     # Create the new data point for our DataFrame
@@ -316,7 +316,7 @@ def parse_gcode_file(
                         "ZPos": target_pos["Z"],
                         "FeedVel": current_feed,
                         "PathVel": path_vel,
-                        "TimeInSeconds": float(state["time_counter"]),  # type: ignore
+                        "TimeInSeconds": float(state["time_counter"]),  # type: ignore[arg-type]
                     }
                     path_points.append(new_point)
 

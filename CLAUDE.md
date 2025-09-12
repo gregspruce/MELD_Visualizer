@@ -140,7 +140,7 @@ These instructions MUST be followed when working on any software project:
   - Capture original user prompts and intent preservation
   - Document mental models and reasoning chains
   - Save multi-agent coordination context and findings
-- **COMPREHENSIVE RESTORATION CAPABILITY** 
+- **COMPREHENSIVE RESTORATION CAPABILITY**
   - Use /tools project-state-restore after any interruption
   - Validate restored context matches pre-interruption state
   - Verify all critical knowledge and insights are preserved
@@ -381,7 +381,7 @@ When working on any project:
 
 ### Priority Order for Instructions
 1. **Project-specific CLAUDE.md** (highest priority)
-2. **This general CLAUDE.md** 
+2. **This general CLAUDE.md**
 3. **Project README and documentation**
 4. **Framework/library best practices**
 5. **General programming principles** (lowest priority)

@@ -48,7 +48,7 @@ def process_data(
 ) -> Tuple[pd.DataFrame, Optional[str], bool]:
     """
     Process data file with optional configuration.
-    
+
     Returns:
         Tuple of (dataframe, error_message, conversion_flag)
     """
@@ -64,20 +64,20 @@ def process_upload(contents: str, filename: str) -> Tuple[Any, str, bool]:
     # 1. Validate input
     if not InputValidator.is_valid_file(filename):
         return None, "Invalid file type", False
-    
+
     # 2. Parse data
     try:
         data = parse_file(contents, filename)
     except Exception as e:
         return None, f"Parse error: {str(e)}", False
-    
+
     # 3. Transform data
     data = apply_transformations(data)
-    
+
     # 4. Validate output
     if not validate_data(data):
         return None, "Invalid data format", False
-    
+
     return data, None, True
 ```
 
@@ -93,7 +93,7 @@ def process_upload(contents: str, filename: str) -> Tuple[Any, str, bool]:
 def update_output(n_clicks, stored_data):
     if not n_clicks:
         raise PreventUpdate
-    
+
     try:
         # Process data
         result = process_data(stored_data)
@@ -117,10 +117,10 @@ def update_output(n_clicks, stored_data):
 def hot_reload_settings(n_clicks, theme):
     # Update runtime config
     APP_CONFIG['theme']['bootstrap'] = theme
-    
+
     # Save to file
     save_config(APP_CONFIG)
-    
+
     # Return new theme URL
     theme_url = get_theme_url(theme)
     return theme_url, APP_CONFIG
@@ -141,10 +141,10 @@ def create_graph_component(
             'filename': f'{graph_type}_plot'
         }
     }
-    
+
     if options:
         config.update(options)
-    
+
     return dcc.Graph(
         id={'type': 'graph-component', 'index': graph_id},
         config=config
@@ -166,15 +166,15 @@ class TestDataProcessing:
             'TIME': [1, 2, 3],
             'TEMP': [100, 150, 200]
         })
-    
+
     def test_parse_csv_file(self, sample_data, tmp_path):
         # Arrange
         file_path = tmp_path / "test.csv"
         sample_data.to_csv(file_path, index=False)
-        
+
         # Act
         result, error, converted = parse_csv_file(str(file_path))
-        
+
         # Assert
         assert error is None
         assert not converted
@@ -193,7 +193,7 @@ def test_callback_integration(dash_app):
             'upload-data',
             contents='base64,encoded,data'
         )
-        
+
         # Verify callback chain
         assert output['data-store'] is not None
         assert output['graph-output'] is not None
@@ -206,16 +206,16 @@ def test_user_workflow(selenium_driver, live_server):
     """Test complete user workflow."""
     # Navigate to app
     selenium_driver.get(live_server.url)
-    
+
     # Upload file
     upload = selenium_driver.find_element(By.ID, "upload-data")
     upload.send_keys("/path/to/test.csv")
-    
+
     # Wait for processing
     WebDriverWait(selenium_driver, 10).until(
         EC.presence_of_element_located((By.ID, "graph-output"))
     )
-    
+
     # Verify result
     graph = selenium_driver.find_element(By.ID, "graph-output")
     assert graph.is_displayed()
@@ -243,15 +243,15 @@ def validate_and_clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """Validate and clean dataframe."""
     # Remove invalid values
     df = df.replace([np.inf, -np.inf], np.nan)
-    
+
     # Drop rows with critical missing data
     required_cols = ['TIME', 'X', 'Y', 'Z']
     df = df.dropna(subset=required_cols)
-    
+
     # Ensure numeric types
     for col in required_cols:
         df[col] = pd.to_numeric(df[col], errors='coerce')
-    
+
     return df
 ```
 
@@ -264,7 +264,7 @@ logger = logging.getLogger(__name__)
 def process_with_logging(data):
     """Process with comprehensive logging."""
     logger.info(f"Starting processing of {len(data)} records")
-    
+
     try:
         result = heavy_processing(data)
         logger.info("Processing completed successfully")
@@ -296,10 +296,10 @@ def process_in_batches(data: List, batch_size: int = 1000):
         batch = data[i:i + batch_size]
         result = process_batch(batch)
         results.extend(result)
-        
+
         # Allow garbage collection
         del batch
-    
+
     return results
 ```
 
@@ -309,7 +309,7 @@ class LazyDataLoader:
     def __init__(self, file_path: str):
         self.file_path = file_path
         self._data = None
-    
+
     @property
     def data(self):
         """Load data only when accessed."""

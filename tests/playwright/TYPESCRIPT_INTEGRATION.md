@@ -14,7 +14,7 @@ This comprehensive TypeScript integration provides type-safe testing infrastruct
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - TypeScript 5.1+
 - Playwright Test Framework
 - MELD Visualizer application running
@@ -85,14 +85,14 @@ tests/playwright/
 ```typescript
 // Core data types
 MELDData.DataPoint → Individual measurement
-MELDData.Dataset → Collection with metadata  
+MELDData.Dataset → Collection with metadata
 MELDData.ValidationResult → Validation outcomes
 
 // UI component types
 DashComponents.* → Dash framework components
 PlotlyTypes.* → 3D visualization types
 
-// Test infrastructure types  
+// Test infrastructure types
 TestTypes.* → Test configuration and utilities
 ```
 
@@ -147,11 +147,11 @@ import { test } from '../fixtures/mcp-fixtures';
 
 test('homepage interaction', async ({ homePage }) => {
   await homePage.goto();
-  
+
   // Type-safe theme switching
   await homePage.switchTheme('dark'); // ✅ Valid theme
   // await homePage.switchTheme('invalid'); // ❌ TypeScript error
-  
+
   // Type-safe navigation
   await homePage.navigateToTab('visualization');
 });
@@ -179,7 +179,7 @@ if (validation.isValid) {
 ```typescript
 test('performance validation', async ({ performanceMonitor }) => {
   const metrics = await performanceMonitor.getMetrics();
-  
+
   // Type-safe performance assertions
   expect(metrics).toMeetPerformanceThresholds({
     loadTime: 5000,
@@ -199,7 +199,7 @@ test('visual regression', async ({ visualTester }) => {
     fullPage: true,
     animations: 'disabled'
   });
-  
+
   expect(result.passed).toBeTruthy();
 });
 ```
@@ -251,7 +251,7 @@ interface DashComponents.ThemeConfig {
   readonly fonts: ThemeFonts;
 }
 
-// File upload structure  
+// File upload structure
 interface DashComponents.UploadedFile {
   readonly filename: string;
   readonly contents: string; // base64
@@ -310,7 +310,7 @@ expect(data).toBeDefined();
 await homePage.switchTheme('dark');
 const currentTheme = await homePage.getCurrentTheme();
 
-// ❌ Avoid - Untyped interactions  
+// ❌ Avoid - Untyped interactions
 await page.click('.theme-toggle');
 const theme = await page.evaluate('document.body.className');
 ```

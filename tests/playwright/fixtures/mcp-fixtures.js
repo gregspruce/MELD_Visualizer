@@ -27,13 +27,13 @@ const test = base.extend({
     const context = await mcpUtils.createMCPContext(browser, {
       recordVideo: {
         dir: process.env.VIDEOS_DIR || '../reports/videos/',
-        size: { 
-          width: parseInt(process.env.VIDEO_SIZE_WIDTH) || 1920, 
-          height: parseInt(process.env.VIDEO_SIZE_HEIGHT) || 1080 
+        size: {
+          width: parseInt(process.env.VIDEO_SIZE_WIDTH) || 1920,
+          height: parseInt(process.env.VIDEO_SIZE_HEIGHT) || 1080
         }
       }
     });
-    
+
     await use(context);
     await context.close();
   },
@@ -43,30 +43,30 @@ const test = base.extend({
    */
   mcpPage: async ({ mcpContext, mcpUtils }, use) => {
     const page = await mcpContext.newPage();
-    
+
     // Navigate to MELD Visualizer
     await page.goto('/');
-    
+
     // Wait for Dash app to be ready
     if (process.env.WAIT_FOR_DASH_READY === 'true') {
-      await page.waitForSelector('[data-testid="app-container"], .dash-app-content, #app', { 
-        timeout: parseInt(process.env.NAVIGATION_TIMEOUT) || 30000 
+      await page.waitForSelector('[data-testid="app-container"], .dash-app-content, #app', {
+        timeout: parseInt(process.env.NAVIGATION_TIMEOUT) || 30000
       });
-      
+
       // Wait for initial JavaScript to load
       await page.waitForFunction(() => {
         return window.dash_clientside && window.Plotly;
       }, { timeout: 15000 });
     }
-    
+
     await use(page);
-    
+
     // Export logs after test
     const logs = mcpUtils.exportLogs();
     if (logs.summary.consoleErrors > 0 || logs.summary.networkRequests === 0) {
       console.log('📊 Test logs:', JSON.stringify(logs.summary, null, 2));
     }
-    
+
     await page.close();
   },
 
@@ -75,16 +75,16 @@ const test = base.extend({
    */
   testFiles: async ({}, use) => {
     const testDataDir = path.resolve(__dirname, process.env.TEST_DATA_DIR || 'test_data');
-    
+
     const createTestFile = async (filename, content) => {
       const filePath = path.join(testDataDir, filename);
       await fs.mkdir(testDataDir, { recursive: true });
       await fs.writeFile(filePath, content);
       return filePath;
     };
-    
+
     const files = {
-      csv: await createTestFile('test_meld_data.csv', 
+      csv: await createTestFile('test_meld_data.csv',
         'X,Y,Z,Temperature,Layer\n1,2,3,250,1\n4,5,6,260,1\n7,8,9,255,2'
       ),
       gcode: await createTestFile('test_toolpath.nc',
@@ -94,9 +94,9 @@ const test = base.extend({
         Array.from({length: 1000}, (_, i) => `${i},${i*2},${i*3},${250+i%50},${Math.floor(i/100)}`).join('\n')
       )
     };
-    
+
     await use(files);
-    
+
     // Cleanup test files
     try {
       await fs.rm(testDataDir, { recursive: true, force: true });
@@ -123,9 +123,9 @@ const test = base.extend({
         return await mcpUtils.getPerformanceMetrics(mcpPage);
       }
     };
-    
+
     await use(metrics);
-    
+
     // Log performance summary
     const finalMetrics = await metrics.getMetrics();
     if (finalMetrics.loadTime > parseInt(process.env.LOAD_TIME_THRESHOLD) || 5000) {
@@ -141,7 +141,7 @@ const test = base.extend({
       takeScreenshot: async (name, options = {}) => {
         return await mcpUtils.takeScreenshot(mcpPage, `${testInfo.title}-${name}`, options);
       },
-      
+
       compareScreenshot: async (name, options = {}) => {
         const result = await mcpUtils.compareScreenshot(mcpPage, `${testInfo.title}-${name}`, options);
         if (!result.success) {
@@ -149,12 +149,12 @@ const test = base.extend({
         }
         return result;
       },
-      
+
       waitForPlotlyGraph: async (selector = '.js-plotly-plot') => {
         await mcpUtils.waitForPlotlyGraph(mcpPage, selector);
       }
     };
-    
+
     await use(visual);
   },
 
@@ -175,7 +175,7 @@ const test = base.extend({
           });
         });
       },
-      
+
       mockFileUpload: async (response = { success: true }) => {
         await mcpContext.route('**/upload*', async (route) => {
           await route.fulfill({
@@ -185,7 +185,7 @@ const test = base.extend({
           });
         });
       },
-      
+
       mockApiError: async (endpoint, errorCode = 500) => {
         await mcpContext.route(`**${endpoint}**`, async (route) => {
           await route.fulfill({
@@ -196,7 +196,7 @@ const test = base.extend({
         });
       }
     };
-    
+
     await use(mocker);
   },
 
@@ -207,19 +207,19 @@ const test = base.extend({
     const monitor = {
       errors: [],
       warnings: [],
-      
+
       getErrors: () => monitor.errors,
       getWarnings: () => monitor.warnings,
-      
+
       expectNoErrors: () => {
         expect(monitor.errors).toHaveLength(0);
       },
-      
+
       expectNoWarnings: () => {
         expect(monitor.warnings).toHaveLength(0);
       }
     };
-    
+
     // Set up console monitoring
     mcpPage.on('console', (msg) => {
       if (msg.type() === 'error') {
@@ -236,7 +236,7 @@ const test = base.extend({
         });
       }
     });
-    
+
     await use(monitor);
   }
 });
@@ -249,11 +249,11 @@ expect.extend({
    * Check if Plotly graph has expected data structure
    */
   toHavePlotlyData(received, expectedStructure) {
-    const pass = received && 
-                  received._fullData && 
+    const pass = received &&
+                  received._fullData &&
                   Array.isArray(received._fullData) &&
                   received._fullData.length > 0;
-    
+
     return {
       message: () => `expected ${received} to have valid Plotly data structure`,
       pass
@@ -288,18 +288,18 @@ expect.extend({
       loadTime: parseInt(process.env.LOAD_TIME_THRESHOLD) || 5000,
       renderTime: parseInt(process.env.RENDER_TIME_THRESHOLD) || 2000
     };
-    
+
     const finalThresholds = { ...defaultThresholds, ...thresholds };
     const failures = [];
-    
+
     if (metrics.loadTime > finalThresholds.loadTime) {
       failures.push(`Load time ${metrics.loadTime}ms exceeds threshold ${finalThresholds.loadTime}ms`);
     }
-    
+
     if (metrics.firstContentfulPaint > finalThresholds.renderTime) {
       failures.push(`Render time ${metrics.firstContentfulPaint}ms exceeds threshold ${finalThresholds.renderTime}ms`);
     }
-    
+
     return {
       message: () => `Performance issues: ${failures.join(', ')}`,
       pass: failures.length === 0

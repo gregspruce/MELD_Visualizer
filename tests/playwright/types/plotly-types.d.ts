@@ -24,7 +24,7 @@ export namespace PlotlyTypes {
   /**
    * Plotly trace types
    */
-  export type TraceType = 
+  export type TraceType =
     | 'scatter3d'
     | 'surface'
     | 'mesh3d'
@@ -39,7 +39,7 @@ export namespace PlotlyTypes {
   /**
    * Hover information options
    */
-  export type HoverInfo = 
+  export type HoverInfo =
     | 'x'
     | 'y'
     | 'z'
@@ -120,7 +120,7 @@ export namespace PlotlyTypes {
   /**
    * Color scale options
    */
-  export type ColorScale = 
+  export type ColorScale =
     | 'Greys'
     | 'YlGnBu'
     | 'Greens'
@@ -147,7 +147,7 @@ export namespace PlotlyTypes {
   /**
    * Line dash types
    */
-  export type DashType = 
+  export type DashType =
     | 'solid'
     | 'dot'
     | 'dash'
@@ -158,7 +158,7 @@ export namespace PlotlyTypes {
   /**
    * Text position options
    */
-  export type TextPosition = 
+  export type TextPosition =
     | 'top left'
     | 'top center'
     | 'top right'
@@ -532,7 +532,7 @@ export namespace PlotlyTypes {
   /**
    * Category order options
    */
-  export type CategoryOrder = 
+  export type CategoryOrder =
     | 'trace'
     | 'category ascending'
     | 'category descending'
@@ -745,7 +745,7 @@ export namespace PlotlyTypes {
   /**
    * Drag mode options
    */
-  export type DragMode = 
+  export type DragMode =
     | 'zoom'
     | 'pan'
     | 'select'

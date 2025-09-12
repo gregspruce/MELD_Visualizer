@@ -274,19 +274,35 @@ class DataService:
             else:
                 logger.warning("Cached mesh data has unexpected format, regenerating")
 
-        # Prepare data with volume calculations if needed
-        if "Bead_Thickness_mm" not in df.columns:
-            df = self.volume_calculator.process_dataframe(df)
+        try:
+            # Prepare data with volume calculations if needed
+            if "Bead_Thickness_mm" not in df.columns:
+                df = self.volume_calculator.process_dataframe(df)
 
-        # Generate mesh using new modular system with width multiplier
-        raw_mesh_data = self.mesh_generator.generate_mesh_lod(
-            df,
-            color_column,
-            lod,
-            self.volume_calculator.bead_geometry.length_mm,
-            self.volume_calculator.bead_geometry.radius_mm,
-            width_multiplier=self.volume_calculator.width_multiplier,
-        )
+            # Validate that volume calculations were successful
+            if "Bead_Thickness_mm" not in df.columns:
+                logger.error("Volume calculations failed - Bead_Thickness_mm column not created")
+                return None
+
+            # Check for valid thickness values
+            thickness_values = df["Bead_Thickness_mm"]
+            if thickness_values.isna().all() or (thickness_values <= 0).all():
+                logger.error("No valid bead thickness values found after volume calculations")
+                return None
+
+            # Generate mesh using new modular system with width multiplier
+            raw_mesh_data = self.mesh_generator.generate_mesh_lod(
+                df,
+                color_column,
+                lod,
+                self.volume_calculator.bead_geometry.length_mm,
+                self.volume_calculator.bead_geometry.radius_mm,
+                width_multiplier=self.volume_calculator.width_multiplier,
+            )
+
+        except Exception as e:
+            logger.error(f"Error in mesh generation pipeline: {str(e)}", exc_info=True)
+            return None
 
         # Convert raw mesh data to typed structure
         if raw_mesh_data is not None and isinstance(raw_mesh_data, dict):

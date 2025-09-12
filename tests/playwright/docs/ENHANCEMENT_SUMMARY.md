@@ -186,17 +186,17 @@ test('basic React state validation', async ({ dashReactContext }) => {
 
 ### Advanced Integration
 ```typescript
-test('comprehensive component testing', async ({ 
+test('comprehensive component testing', async ({
   dashReactContext,
   componentStateValidator,
   callbackOrderValidator,
-  reactRenderProfiler 
+  reactRenderProfiler
 }) => {
   // Multiple utilities working together
   const validation = await componentStateValidator('component-id', expectedProps);
   const callbackValidator = await callbackOrderValidator(expectedOrder);
   const profiler = await reactRenderProfiler('component-id');
-  
+
   // All integrated for comprehensive testing
 });
 ```

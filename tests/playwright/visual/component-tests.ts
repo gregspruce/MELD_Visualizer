@@ -5,11 +5,11 @@
 
 import { test, expect } from '@playwright/test';
 import { VisualTestUtils } from './visual-utils';
-import { 
+import {
   COMPONENT_SELECTORS,
   DEFAULT_VISUAL_CONFIG,
   RESPONSIVE_VIEWPORTS,
-  THEME_CONFIGS 
+  THEME_CONFIGS
 } from './visual-config';
 
 // Component-specific configuration
@@ -21,26 +21,26 @@ const COMPONENT_CONFIG = {
 
 test.describe('Component Visual Testing', () => {
   let visualUtils: VisualTestUtils;
-  
+
   test.beforeEach(async ({ page }) => {
     visualUtils = new VisualTestUtils(page);
-    
+
     // Navigate to the application
     await page.goto('http://localhost:8050', { waitUntil: 'networkidle' });
-    
+
     // Disable animations for consistent screenshots
     await visualUtils.disableAnimations();
-    
+
     // Wait for initial page load
     await page.waitForLoadState('domcontentloaded');
     await visualUtils.waitForAnimationsToComplete();
   });
 
   test.describe('File Upload Component Visual States', () => {
-    
+
     test('File Upload - Empty State @visual @component @file-upload', async ({ page }) => {
       const uploadExists = await page.locator(COMPONENT_SELECTORS.fileUpload).count() > 0;
-      
+
       if (uploadExists) {
         await visualUtils.screenshotComponent(
           COMPONENT_SELECTORS.fileUpload,
@@ -295,10 +295,10 @@ test.describe('Component Visual Testing', () => {
             ">
               <div style="font-weight: bold; color: #721c24; margin-bottom: 8px;">Error Details:</div>
               <ul style="
-                text-align: left; 
-                margin: 0; 
-                padding-left: 20px; 
-                color: #721c24; 
+                text-align: left;
+                margin: 0;
+                padding-left: 20px;
+                color: #721c24;
                 font-size: 13px;
                 line-height: 1.4;
               ">
@@ -341,10 +341,10 @@ test.describe('Component Visual Testing', () => {
   });
 
   test.describe('Tab Navigation Visual States', () => {
-    
+
     test('Navigation Tabs - Default State @visual @component @navigation', async ({ page }) => {
       const navExists = await page.locator(COMPONENT_SELECTORS.navigation).count() > 0;
-      
+
       if (navExists) {
         await visualUtils.screenshotComponent(
           COMPONENT_SELECTORS.navigation,
@@ -487,7 +487,7 @@ test.describe('Component Visual Testing', () => {
 
     test('Navigation Tabs - Active States @visual @component @navigation', async ({ page }) => {
       const tabs = ['Overview', 'Visualization', 'Data Table', 'Export'];
-      
+
       for (let i = 0; i < tabs.length; i++) {
         await page.evaluate((activeIndex, tabNames) => {
           const navDiv = document.createElement('div');
@@ -515,10 +515,10 @@ test.describe('Component Visual Testing', () => {
               </div>
             </nav>
           `;
-          
+
           const existing = document.querySelector(`[data-testid^="navigation-tabs-active-"]`);
           if (existing) existing.remove();
-          
+
           document.body.appendChild(navDiv);
         }, i, tabs);
 
@@ -608,7 +608,7 @@ test.describe('Component Visual Testing', () => {
   });
 
   test.describe('Plotly Graph Visual Rendering', () => {
-    
+
     test('Plotly Graph - Empty State @visual @component @plotly', async ({ page }) => {
       await page.evaluate(() => {
         const graphDiv = document.createElement('div');
@@ -691,7 +691,7 @@ test.describe('Component Visual Testing', () => {
                 <p style="color: #6c757d; margin: 0; font-size: 14px;">Processing data...</p>
               </div>
             </div>
-            
+
             <div style="
               width: 100%;
               max-width: 300px;
@@ -707,7 +707,7 @@ test.describe('Component Visual Testing', () => {
                 transition: width 0.5s ease;
               "></div>
             </div>
-            
+
             <p style="color: #6c757d; font-size: 12px; margin-top: 12px;">
               Rendering 1,247 data points...
             </p>
@@ -763,7 +763,7 @@ test.describe('Component Visual Testing', () => {
               <button style="width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 12px;">📐</button>
               <button style="width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 12px;">🏠</button>
             </div>
-            
+
             <!-- Mock 3D visualization -->
             <div style="
               width: 100%;
@@ -790,7 +790,7 @@ test.describe('Component Visual Testing', () => {
                     <stop offset="100%" style="stop-color:#bd2130;stop-opacity:0.6" />
                   </radialGradient>
                 </defs>
-                
+
                 <!-- Sample scatter points -->
                 <circle cx="150" cy="120" r="8" fill="url(#point1)" />
                 <circle cx="280" cy="180" r="6" fill="url(#point2)" />
@@ -801,18 +801,18 @@ test.describe('Component Visual Testing', () => {
                 <circle cx="320" cy="280" r="8" fill="url(#point1)" />
                 <circle cx="250" cy="320" r="6" fill="url(#point2)" />
                 <circle cx="380" cy="240" r="7" fill="url(#point3)" />
-                
+
                 <!-- Axis lines -->
                 <line x1="50" y1="350" x2="450" y2="350" stroke="#6c757d" stroke-width="2" />
                 <line x1="50" y1="50" x2="50" y2="350" stroke="#6c757d" stroke-width="2" />
                 <line x1="50" y1="350" x2="80" y2="320" stroke="#6c757d" stroke-width="2" />
-                
+
                 <!-- Axis labels -->
                 <text x="250" y="380" text-anchor="middle" fill="#6c757d" font-size="12">X-Axis</text>
                 <text x="25" y="200" text-anchor="middle" fill="#6c757d" font-size="12" transform="rotate(-90 25 200)">Y-Axis</text>
                 <text x="65" y="305" fill="#6c757d" font-size="11">Z</text>
               </svg>
-              
+
               <!-- Legend -->
               <div style="
                 position: absolute;
@@ -921,7 +921,7 @@ test.describe('Component Visual Testing', () => {
   });
 
   test.describe('Data Table Visual States', () => {
-    
+
     test('Data Table - Empty State @visual @component @data-table', async ({ page }) => {
       await page.evaluate(() => {
         const tableDiv = document.createElement('div');
@@ -953,7 +953,7 @@ test.describe('Component Visual Testing', () => {
                 " disabled>Export</button>
               </div>
             </div>
-            
+
             <div style="
               border: 1px solid #dee2e6;
               border-radius: 8px;
@@ -1022,7 +1022,7 @@ test.describe('Component Visual Testing', () => {
                 ">Export CSV</button>
               </div>
             </div>
-            
+
             <div style="
               border: 1px solid #dee2e6;
               border-radius: 8px;
@@ -1097,7 +1097,7 @@ test.describe('Component Visual Testing', () => {
                   </tr>
                 </tbody>
               </table>
-              
+
               <div style="
                 background: #f8f9fa;
                 padding: 12px 16px;
@@ -1135,7 +1135,7 @@ test.describe('Component Visual Testing', () => {
   });
 
   test.describe('Export Component Visual States', () => {
-    
+
     test('Export Section - Available Options @visual @component @export', async ({ page }) => {
       await page.evaluate(() => {
         const exportDiv = document.createElement('div');
@@ -1143,7 +1143,7 @@ test.describe('Component Visual Testing', () => {
         exportDiv.innerHTML = `
           <div style="padding: 20px;">
             <h4 style="margin: 0 0 20px 0; color: #495057;">Export Options</h4>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
               <!-- Data Export -->
               <div style="
@@ -1199,7 +1199,7 @@ test.describe('Component Visual Testing', () => {
                   ">🔗 JSON</button>
                 </div>
               </div>
-              
+
               <!-- Visualization Export -->
               <div style="
                 border: 1px solid #dee2e6;
@@ -1254,7 +1254,7 @@ test.describe('Component Visual Testing', () => {
                   ">📄 PDF</button>
                 </div>
               </div>
-              
+
               <!-- Report Export -->
               <div style="
                 border: 1px solid #dee2e6;
@@ -1298,7 +1298,7 @@ test.describe('Component Visual Testing', () => {
                 </div>
               </div>
             </div>
-            
+
             <div style="
               background: #d1ecf1;
               color: #0c5460;
@@ -1329,7 +1329,7 @@ test.describe('Component Visual Testing', () => {
         exportDiv.innerHTML = `
           <div style="padding: 20px;">
             <h4 style="margin: 0 0 20px 0; color: #495057;">Export Options</h4>
-            
+
             <div style="
               border: 1px solid #007bff;
               border-radius: 8px;
@@ -1355,7 +1355,7 @@ test.describe('Component Visual Testing', () => {
                 "></div>
                 <h5 style="margin: 0; color: #007bff;">Generating Export...</h5>
               </div>
-              
+
               <div style="
                 width: 100%;
                 max-width: 400px;
@@ -1372,11 +1372,11 @@ test.describe('Component Visual Testing', () => {
                   transition: width 0.5s ease;
                 "></div>
               </div>
-              
+
               <p style="color: #6c757d; margin: 8px 0;">
                 Exporting data as CSV... (1,247 rows processed)
               </p>
-              
+
               <button style="
                 background: #dc3545;
                 color: white;
@@ -1388,7 +1388,7 @@ test.describe('Component Visual Testing', () => {
                 margin-top: 12px;
               ">Cancel Export</button>
             </div>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; opacity: 0.5;">
               <div style="border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; background: #f8f9fa;">
                 <h5 style="margin: 0 0 12px 0; color: #6c757d;">Data Export</h5>
@@ -1423,7 +1423,7 @@ test.describe('Component Visual Testing', () => {
         exportDiv.innerHTML = `
           <div style="padding: 20px;">
             <h4 style="margin: 0 0 20px 0; color: #495057;">Export Options</h4>
-            
+
             <div style="
               border: 1px solid #dee2e6;
               border-radius: 8px;
@@ -1446,7 +1446,7 @@ test.describe('Component Visual Testing', () => {
                 font-size: 14px;
               ">Upload Data File</button>
             </div>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; opacity: 0.4;">
               <div style="border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; background: #ffffff;">
                 <h5 style="margin: 0 0 12px 0; color: #adb5bd;">Data Export</h5>
@@ -1478,10 +1478,10 @@ test.describe('Component Visual Testing', () => {
   });
 
   test.describe('Loading and Error States', () => {
-    
+
     test('Global Loading Overlay @visual @component @loading', async ({ page }) => {
       await visualUtils.simulateLoadingState(2000);
-      
+
       await visualUtils.screenshotFullPage(
         'global-loading-overlay',
         COMPONENT_CONFIG
@@ -1495,7 +1495,7 @@ test.describe('Component Visual Testing', () => {
         loadingDiv.innerHTML = `
           <div style="padding: 20px;">
             <h4 style="margin-bottom: 30px;">Loading State Components</h4>
-            
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
               <!-- Small Spinner -->
               <div style="text-align: center; padding: 20px; border: 1px solid #dee2e6; border-radius: 8px;">
@@ -1510,7 +1510,7 @@ test.describe('Component Visual Testing', () => {
                 "></div>
                 <p style="margin: 0; font-size: 12px; color: #6c757d;">Small Spinner</p>
               </div>
-              
+
               <!-- Medium Spinner -->
               <div style="text-align: center; padding: 20px; border: 1px solid #dee2e6; border-radius: 8px;">
                 <div style="
@@ -1524,7 +1524,7 @@ test.describe('Component Visual Testing', () => {
                 "></div>
                 <p style="margin: 0; font-size: 12px; color: #6c757d;">Medium Spinner</p>
               </div>
-              
+
               <!-- Large Spinner -->
               <div style="text-align: center; padding: 20px; border: 1px solid #dee2e6; border-radius: 8px;">
                 <div style="
@@ -1538,7 +1538,7 @@ test.describe('Component Visual Testing', () => {
                 "></div>
                 <p style="margin: 0; font-size: 12px; color: #6c757d;">Large Spinner</p>
               </div>
-              
+
               <!-- Pulsing Dots -->
               <div style="text-align: center; padding: 20px; border: 1px solid #dee2e6; border-radius: 8px;">
                 <div style="display: flex; justify-content: center; gap: 4px; margin-bottom: 8px;">
@@ -1578,7 +1578,7 @@ test.describe('Component Visual Testing', () => {
         errorDiv.innerHTML = `
           <div style="padding: 20px;">
             <h4 style="margin-bottom: 30px;">Error State Components</h4>
-            
+
             <div style="display: flex; flex-direction: column; gap: 20px;">
               <!-- Critical Error -->
               <div style="
@@ -1595,7 +1595,7 @@ test.describe('Component Visual Testing', () => {
                 </div>
                 <p style="margin: 0;">Unable to process the uploaded file. The system encountered a critical error.</p>
               </div>
-              
+
               <!-- Warning -->
               <div style="
                 background: #fff3cd;
@@ -1611,7 +1611,7 @@ test.describe('Component Visual Testing', () => {
                 </div>
                 <p style="margin: 0;">Some data values are missing. Visualization may be incomplete.</p>
               </div>
-              
+
               <!-- Info -->
               <div style="
                 background: #d1ecf1;
@@ -1627,7 +1627,7 @@ test.describe('Component Visual Testing', () => {
                 </div>
                 <p style="margin: 0;">Data processing completed successfully. Ready for visualization.</p>
               </div>
-              
+
               <!-- Success -->
               <div style="
                 background: #d4edda;
@@ -1643,7 +1643,7 @@ test.describe('Component Visual Testing', () => {
                 </div>
                 <p style="margin: 0;">File uploaded and processed successfully. All data is valid.</p>
               </div>
-              
+
               <!-- Error with Actions -->
               <div style="
                 background: #f8d7da;

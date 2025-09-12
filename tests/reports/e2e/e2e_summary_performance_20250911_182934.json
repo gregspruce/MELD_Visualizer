@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-09-11T18:29:34.165450",
+  "test_suite": "performance",
+  "browser": "chromium",
+  "duration_seconds": 2.91,
+  "success": false,
+  "exit_code": 1,
+  "test_stats": {
+    "error": 3,
+    "total": 3,
+    "collected": 7
+  },
+  "reports": {
+    "html": "C:\\VSCode\\MELD_Visualizer\\tests\\reports\\e2e\\e2e_report_20250911_182931.html",
+    "json": "C:\\VSCode\\MELD_Visualizer\\tests\\reports\\e2e\\e2e_report_20250911_182931.json",
+    "screenshots": "C:\\VSCode\\MELD_Visualizer\\tests\\reports\\screenshots",
+    "videos": "C:\\VSCode\\MELD_Visualizer\\tests\\reports\\videos"
+  },
+  "environment": {
+    "python_version": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+    "working_directory": "C:\\VSCode\\MELD_Visualizer",
+    "base_url": "http://127.0.0.1:8050"
+  }
+}

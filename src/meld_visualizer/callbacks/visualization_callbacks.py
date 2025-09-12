@@ -123,69 +123,94 @@ def register_visualization_callbacks(app=None):
     )
     def update_mesh_plot(n_clicks, jsonified_df, color_col, cmin, cmax, z_stretch_factor):
         """Generate 3D volume mesh plot."""
-        if n_clicks is None or jsonified_df is None or color_col is None:
-            return create_empty_figure("Upload a file, select a color, and click 'Generate'.")
+        try:
+            if n_clicks is None or jsonified_df is None or color_col is None:
+                return create_empty_figure("Upload a file, select a color, and click 'Generate'.")
 
-        df = pd.read_json(io.StringIO(jsonified_df), orient="split")
-        df_active = data_service.filter_active_data(df)
+            df = pd.read_json(io.StringIO(jsonified_df), orient="split")
+            df_active = data_service.filter_active_data(df)
 
-        if df_active.empty:
-            return create_empty_figure(ERROR_NO_ACTIVE_DATA)
+            if df_active.empty:
+                return create_empty_figure(ERROR_NO_ACTIVE_DATA)
 
-        # Generate mesh with LOD support
-        mesh_data = data_service.generate_mesh(df_active, color_col, lod="high")
+            # Validate input parameters before mesh generation
+            if not color_col or color_col not in df_active.columns:
+                logger.error(f"Invalid color column: {color_col}")
+                return create_empty_figure(f"Invalid color column: {color_col}")
 
-        if mesh_data is None:
-            return create_empty_figure(ERROR_MESH_GENERATION)
+            # Generate mesh with LOD support
+            mesh_data = data_service.generate_mesh(df_active, color_col, lod="high")
 
-        # Validate Z-stretch factor
-        if not z_stretch_factor or float(z_stretch_factor) <= 0:
-            z_stretch_factor = DEFAULT_Z_STRETCH_FACTOR
+            if mesh_data is None:
+                return create_empty_figure(ERROR_MESH_GENERATION)
 
-        z_stretch_factor = max(MIN_Z_STRETCH_FACTOR, float(z_stretch_factor))
-        aspect_ratio = dict(x=1, y=1, z=z_stretch_factor)
+            # Validate Z-stretch factor
+            if not z_stretch_factor or float(z_stretch_factor) <= 0:
+                z_stretch_factor = DEFAULT_Z_STRETCH_FACTOR
 
-        fig = go.Figure(
-            data=[
-                go.Mesh3d(
-                    x=mesh_data["vertices"][:, 0],
-                    y=mesh_data["vertices"][:, 1],
-                    z=mesh_data["vertices"][:, 2],
-                    i=mesh_data["faces"][:, 0],
-                    j=mesh_data["faces"][:, 1],
-                    k=mesh_data["faces"][:, 2],
-                    colorscale=DEFAULT_COLORSCALE,
-                    intensity=mesh_data["vertex_colors"],
-                    colorbar=dict(title=color_col),
-                    showscale=True,
-                    cmin=cmin,
-                    cmax=cmax,
+            z_stretch_factor = max(MIN_Z_STRETCH_FACTOR, float(z_stretch_factor))
+            aspect_ratio = dict(x=1, y=1, z=z_stretch_factor)
+
+            # Validate mesh data structure
+            if (
+                not isinstance(mesh_data, dict)
+                or "vertices" not in mesh_data
+                or "faces" not in mesh_data
+            ):
+                logger.error("Invalid mesh data structure returned")
+                return create_empty_figure("Invalid mesh data structure")
+
+            if len(mesh_data["vertices"]) == 0 or len(mesh_data["faces"]) == 0:
+                logger.warning("Empty mesh data returned")
+                return create_empty_figure(
+                    "No mesh data generated - check your data has valid coordinates"
                 )
-            ]
-        )
 
-        fig.update_layout(
-            title="3D Mesh Visualization of the Print",
-            template=PLOTLY_TEMPLATE,
-            scene=dict(
-                xaxis_title="X Position (mm)",
-                yaxis_title="Y Position (mm)",
-                zaxis_title="Z Position (mm)",
-                aspectmode="data" if z_stretch_factor == 1.0 else "manual",
-                aspectratio=aspect_ratio,
-                camera=dict(
-                    eye=dict(
-                        x=DEFAULT_CAMERA_POSITION["x"],
-                        y=DEFAULT_CAMERA_POSITION["y"],
-                        z=DEFAULT_CAMERA_POSITION["z"],
+            fig = go.Figure(
+                data=[
+                    go.Mesh3d(
+                        x=mesh_data["vertices"][:, 0],
+                        y=mesh_data["vertices"][:, 1],
+                        z=mesh_data["vertices"][:, 2],
+                        i=mesh_data["faces"][:, 0],
+                        j=mesh_data["faces"][:, 1],
+                        k=mesh_data["faces"][:, 2],
+                        colorscale=DEFAULT_COLORSCALE,
+                        intensity=mesh_data["vertex_colors"],
+                        colorbar=dict(title=color_col),
+                        showscale=True,
+                        cmin=cmin,
+                        cmax=cmax,
+                    )
+                ]
+            )
+
+            fig.update_layout(
+                title="3D Mesh Visualization of the Print",
+                template=PLOTLY_TEMPLATE,
+                scene=dict(
+                    xaxis_title="X Position (mm)",
+                    yaxis_title="Y Position (mm)",
+                    zaxis_title="Z Position (mm)",
+                    aspectmode="data" if z_stretch_factor == 1.0 else "manual",
+                    aspectratio=aspect_ratio,
+                    camera=dict(
+                        eye=dict(
+                            x=DEFAULT_CAMERA_POSITION["x"],
+                            y=DEFAULT_CAMERA_POSITION["y"],
+                            z=DEFAULT_CAMERA_POSITION["z"],
+                        ),
+                        center=dict(x=0, y=0, z=0),
+                        up=dict(x=0, y=0, z=1),
                     ),
-                    center=dict(x=0, y=0, z=0),
-                    up=dict(x=0, y=0, z=1),
                 ),
-            ),
-        )
+            )
 
-        return fig
+            return fig
+
+        except Exception as e:
+            logger.error(f"Error in mesh plot visualization: {str(e)}", exc_info=True)
+            return create_empty_figure(f"Visualization failed: {str(e)[:100]}...")
 
     @callback(
         Output("gcode-graph", "figure"),
@@ -253,11 +278,29 @@ def register_visualization_callbacks(app=None):
             return fig
 
         elif view_mode == "mesh":
-            color_col = "ZPos"
-            mesh_data = data_service.generate_mesh(df_active, color_col, lod="medium")
+            try:
+                color_col = "ZPos"
+                mesh_data = data_service.generate_mesh(df_active, color_col, lod="medium")
 
-            if mesh_data is None:
-                return create_empty_figure(ERROR_MESH_GENERATION)
+                if mesh_data is None:
+                    return create_empty_figure(ERROR_MESH_GENERATION)
+
+                # Validate mesh data structure
+                if (
+                    not isinstance(mesh_data, dict)
+                    or "vertices" not in mesh_data
+                    or "faces" not in mesh_data
+                ):
+                    logger.error("Invalid mesh data structure returned for G-code visualization")
+                    return create_empty_figure("Invalid mesh data structure")
+
+                if len(mesh_data["vertices"]) == 0 or len(mesh_data["faces"]) == 0:
+                    logger.warning("Empty mesh data returned for G-code visualization")
+                    return create_empty_figure("No mesh data generated - check your G-code data")
+
+            except Exception as e:
+                logger.error(f"Error in G-code mesh generation: {str(e)}", exc_info=True)
+                return create_empty_figure(f"G-code mesh generation failed: {str(e)[:100]}...")
 
             fig = go.Figure(
                 data=[

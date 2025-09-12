@@ -41,24 +41,24 @@ jobs:
     name: Python Unit Tests
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'unit' || github.event.inputs.test_type == '' }}
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: 'pip'
-    
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install pytest pytest-cov pytest-xvfb pytest-mock
-    
+
     - name: Run Python Unit Tests
       run: |
         python -m pytest tests/python/unit/ \
@@ -71,14 +71,14 @@ jobs:
           --cov-report=term-missing \
           --junitxml=tests/reports/python_unit_results.xml \
           --cov-fail-under=70
-    
+
     - name: Upload Coverage Reports
       uses: codecov/codecov-action@v3
       with:
         file: tests/reports/coverage.xml
         flags: python-unit
         name: python-unit-coverage
-    
+
     - name: Upload Test Results
       uses: actions/upload-artifact@v3
       if: always()
@@ -88,7 +88,7 @@ jobs:
           tests/reports/python_unit_results.xml
           tests/reports/coverage.xml
           tests/reports/coverage.json
-    
+
     - name: Upload Coverage HTML Report
       uses: actions/upload-artifact@v3
       if: always()
@@ -101,43 +101,43 @@ jobs:
     name: Playwright E2E Tests
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'e2e' || github.event.inputs.test_type == '' }}
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: 'pip'
-    
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         cache-dependency-path: 'tests/playwright/package-lock.json'
-    
+
     - name: Install Python Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-    
+
     - name: Install Playwright
       working-directory: tests/playwright
       run: |
         npm ci
         npx playwright install --with-deps
-    
+
     - name: Start MELD Visualizer Application
       run: |
         python -m meld_visualizer &
         echo "MELD_PID=$!" >> $GITHUB_ENV
         sleep 30  # Wait for app to start
         curl -f http://localhost:8050 || exit 1  # Health check
-    
+
     - name: Run Playwright E2E Tests
       working-directory: tests/playwright
       run: |
@@ -146,14 +146,14 @@ jobs:
           --reporter=html \
           --reporter=json \
           --output-dir=../reports/playwright-results
-    
+
     - name: Stop Application
       if: always()
       run: |
         if [ ! -z "$MELD_PID" ]; then
           kill $MELD_PID || true
         fi
-    
+
     - name: Upload Playwright Results
       uses: actions/upload-artifact@v3
       if: always()
@@ -162,7 +162,7 @@ jobs:
         path: |
           tests/reports/playwright-results/
           tests/reports/playwright-report/
-    
+
     - name: Upload Screenshots
       uses: actions/upload-artifact@v3
       if: failure()
@@ -175,55 +175,55 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'integration' || github.event.inputs.test_type == '' }}
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: 'pip'
-    
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-    
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-    
+
     - name: Install Playwright
       working-directory: tests/playwright
       run: |
         npm ci
         npx playwright install --with-deps
-    
+
     - name: Start Application
       run: |
         python -m meld_visualizer &
         echo "MELD_PID=$!" >> $GITHUB_ENV
         sleep 30
         curl -f http://localhost:8050 || exit 1
-    
+
     - name: Run Integration Tests
       working-directory: tests/playwright
       run: |
         npx playwright test integration/ \
           --config=config/playwright.config.js \
           --reporter=json
-    
+
     - name: Stop Application
       if: always()
       run: |
         if [ ! -z "$MELD_PID" ]; then
           kill $MELD_PID || true
         fi
-    
+
     - name: Upload Integration Test Results
       uses: actions/upload-artifact@v3
       if: always()
@@ -236,42 +236,42 @@ jobs:
     name: Performance Tests
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'performance' }}
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: 'pip'
-    
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-    
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install memory-profiler
-    
+
     - name: Install Playwright
       working-directory: tests/playwright
       run: |
         npm ci
         npx playwright install --with-deps
-    
+
     - name: Start Application
       run: |
         python -m meld_visualizer &
         echo "MELD_PID=$!" >> $GITHUB_ENV
         sleep 30
         curl -f http://localhost:8050 || exit 1
-    
+
     - name: Run Performance Tests
       working-directory: tests/playwright
       run: |
@@ -279,18 +279,18 @@ jobs:
           --config=config/playwright.config.js \
           --reporter=json \
           --timeout=60000
-    
+
     - name: Generate Performance Report
       run: |
         python tests/run_tests.py --performance --verbose
-    
+
     - name: Stop Application
       if: always()
       run: |
         if [ ! -z "$MELD_PID" ]; then
           kill $MELD_PID || true
         fi
-    
+
     - name: Upload Performance Results
       uses: actions/upload-artifact@v3
       if: always()
@@ -306,25 +306,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: [python-unit-tests, playwright-e2e-tests, integration-tests]
     if: always()
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Download All Artifacts
       uses: actions/download-artifact@v3
       with:
         path: test-artifacts
-    
+
     - name: Display Test Results Structure
       run: |
         echo "=== Test Results Structure ==="
         find test-artifacts -type f -name "*.xml" -o -name "*.json" | head -20
-    
+
     - name: Parse Test Results
       run: |
         echo "=== Test Results Summary ==="
-        
+
         # Find and display JUnit XML results
         for junit_file in $(find test-artifacts -name "*.xml" -type f); do
           echo "Processing: $junit_file"
@@ -335,43 +335,43 @@ jobs:
             echo "  Tests: $tests, Failures: $failures, Errors: $errors"
           fi
         done
-        
+
         # Check for Playwright results
         for json_file in $(find test-artifacts -name "*results*.json" -type f); do
           echo "Found results file: $json_file"
         done
-    
+
     - name: Create Combined Report
       run: |
         mkdir -p combined-report
         cp -r test-artifacts/* combined-report/ 2>/dev/null || true
-        
+
         # Create summary
         cat > combined-report/summary.md << 'EOF'
         # MELD Visualizer Test Results Summary
-        
+
         ## Test Execution Overview
         - **Python Unit Tests**: Check python-unit-test-results artifact
-        - **Playwright E2E Tests**: Check playwright-e2e-results artifact  
+        - **Playwright E2E Tests**: Check playwright-e2e-results artifact
         - **Integration Tests**: Check integration-test-results artifact
         - **Performance Tests**: Check performance-test-results artifact (if ran)
-        
+
         ## Coverage Reports
         - **Python Coverage**: Available in python-coverage-html artifact
-        
+
         ## Screenshots and Videos
         - **Test Failures**: Available in playwright-*-screenshots artifacts
-        
+
         Generated on: $(date)
         EOF
-    
+
     - name: Upload Combined Report
       uses: actions/upload-artifact@v3
       with:
         name: combined-test-report
         path: combined-report/
         retention-days: 30
-    
+
     - name: Comment PR with Results
       if: github.event_name == 'pull_request'
       uses: actions/github-script@v6
@@ -379,19 +379,19 @@ jobs:
         script: |
           const fs = require('fs');
           const path = require('path');
-          
+
           let comment = '## 🧪 Test Results Summary\n\n';
           comment += '| Test Suite | Status | Artifacts |\n';
           comment += '|------------|--------|----------|\n';
-          
+
           // This would be enhanced with actual result parsing
           comment += '| Python Unit Tests | ✅ | [Results](../actions/runs/${{ github.run_id }}) |\n';
           comment += '| Playwright E2E | ✅ | [Results](../actions/runs/${{ github.run_id }}) |\n';
           comment += '| Integration Tests | ✅ | [Results](../actions/runs/${{ github.run_id }}) |\n';
-          
+
           comment += '\n📊 **Coverage**: Check the coverage report in artifacts\n';
           comment += '🎭 **Screenshots**: Available for any test failures\n';
-          
+
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
@@ -404,31 +404,31 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'pull_request'
-    
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    
+
     - name: Install Security Tools
       run: |
         python -m pip install --upgrade pip
         pip install bandit safety
-    
+
     - name: Run Bandit Security Scan
       run: |
         bandit -r src/ -f json -o tests/reports/bandit_report.json || true
         bandit -r src/ -f txt
-    
+
     - name: Run Safety Check
       run: |
         safety check --json --output tests/reports/safety_report.json || true
         safety check
-    
+
     - name: Upload Security Reports
       uses: actions/upload-artifact@v3
       if: always()

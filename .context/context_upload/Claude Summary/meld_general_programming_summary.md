@@ -28,7 +28,7 @@
 
 ### Path Smoothing Types
 1. **Circular**: `#set paramCircularSmoothing(<radius>)#` - Arc between straight lines
-2. **Parabola**: `#set paramVertexSmoothing(2; <subtype>; <radius>)#` - Steady velocity transition  
+2. **Parabola**: `#set paramVertexSmoothing(2; <subtype>; <radius>)#` - Steady velocity transition
 3. **Biquadratic**: `#set paramVertexSmoothing(3; <subtype>; <radius>)#` - No acceleration steps
 4. **Bezier 3rd/5th**: `#set paramVertexSmoothing(4/5; <subtype>; <radius>)#` - Advanced smoothing
 

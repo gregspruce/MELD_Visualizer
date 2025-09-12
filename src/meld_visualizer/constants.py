@@ -222,45 +222,7 @@ SUCCESS_FILE_LOADED = "File loaded successfully."
 SUCCESS_CONFIG_SAVED = "Settings saved successfully!"
 SUCCESS_UNITS_CONVERTED = "Imperial units detected and converted to metric."
 
-# Processing and Calculation Constants
-MELD_FEED_VELOCITY_SCALE_FACTOR = 10.0  # MELD S value is mm/min × 10
-SECONDS_PER_MINUTE = 60.0
-MM3_TO_CM3 = 1000.0
-MESH_VERTICES_PER_CROSS_SECTION = 12
-
-# Network Configuration
-DEFAULT_HOST = "127.0.0.1"
-DEFAULT_PORT = 8050
-
-# Performance Thresholds
-PERFORMANCE_WARNING_THRESHOLD_SECONDS = 2.0
-
-# UI Timing Constants (milliseconds)
-UI_DEBOUNCE_DELAY_MS = 300
-VIEWPORT_CHECK_INTERVAL_MS = 5000
-CONFIG_ALERT_DURATION_MS = 10000
-ALERT_DURATION_SUCCESS_MS = 4000
-ALERT_DURATION_ERROR_MS = 6000
-ALERT_DURATION_INFO_MS = 3000
-DEFAULT_TOAST_DURATION_MS = 5000
-TOAST_SHOW_DELAY_MS = 10
-PROGRESS_COMPLETE_DELAY_MS = 500
-
-# UI Dimensions and Ratios
-DEFAULT_VIEWPORT_WIDTH = 1920
-DEFAULT_VIEWPORT_HEIGHT = 1080
-UI_SCROLL_AMOUNT_PX = 200
-UI_SCROLL_WIDTH_RATIO = 0.3
-UI_NUMERIC_INPUT_STEP = 0.1
-
-# 3D Visualization Defaults
-DEFAULT_CAMERA_POSITION = {"x": 1.5, "y": 1.5, "z": 1.5}
-
-# Security Limits
-MAX_GCODE_WORD_LENGTH = 20
-MAX_CONFIG_LIST_LENGTH = 50
-
-# Logging Configuration
-LOG_FILE_MAX_BYTES = 10 * 1024 * 1024  # 10MB
-ERROR_LOG_FILE_MAX_BYTES = 5 * 1024 * 1024  # 5MB
-LOG_BACKUP_COUNT = 10
+# Enhanced UI Constants (additional constants not present in main section)
+DEFAULT_TOAST_DURATION_MS = 5000  # Default toast notification duration
+TOAST_SHOW_DELAY_MS = 10  # Delay before showing toast animations
+PROGRESS_COMPLETE_DELAY_MS = 500  # Delay before hiding completed progress bars

@@ -1,0 +1,116 @@
+{
+  "timestamp": 1757633370.9983587,
+  "analysis_type": "comprehensive",
+  "baseline_metrics": {
+    "component_performance": {
+      "javascript_optimization": {
+        "file_size_bytes": 18886,
+        "event_listeners": 16,
+        "performance_optimizations": {
+          "requestAnimationFrame_usage": 3,
+          "abort_controllers": 4,
+          "passive_listeners": 2,
+          "raf_batching": 7,
+          "cleanup_methods": 2
+        },
+        "potential_issues": {
+          "inline_event_handlers": 0,
+          "synchronous_operations": 6,
+          "dom_queries": 10
+        },
+        "performance_score": 100
+      },
+      "callback_optimization": {
+        "total_callbacks": 15,
+        "clientside_callbacks": 8,
+        "serverside_callbacks": 7,
+        "performance_patterns": {
+          "prevent_initial_call": 14,
+          "allow_duplicate": 13,
+          "debouncing": 2,
+          "performance_logging": 17
+        },
+        "optimization_opportunities": {
+          "long_functions": 0,
+          "exception_handling": 7,
+          "memory_monitoring": 4
+        },
+        "performance_score": 100
+      },
+      "memory_management": {
+        "cleanup_implemented": true,
+        "abort_controllers": true,
+        "event_listener_cleanup": true,
+        "memory_monitoring": true,
+        "score": 85
+      }
+    }
+  },
+  "optimization_recommendations": [
+    {
+      "priority": "High",
+      "category": "React Component Performance",
+      "issue": "3D Visualization Rendering",
+      "current_metric": "334ms for 1000-point mesh generation",
+      "target_metric": "<200ms for 1000-point mesh generation",
+      "implementation": "Implement Plotly.js progressive loading with Level of Detail (LOD)",
+      "effort": "Medium",
+      "impact": "High"
+    },
+    {
+      "priority": "High",
+      "category": "Memory Management",
+      "issue": "Event Listener Cleanup",
+      "current_metric": "Potential memory leaks in UI events",
+      "target_metric": "Zero memory leaks with proper cleanup",
+      "implementation": "Implemented AbortController patterns and cleanup methods",
+      "effort": "Low",
+      "impact": "High",
+      "status": "COMPLETED"
+    },
+    {
+      "priority": "Medium",
+      "category": "Bundle Optimization",
+      "issue": "JavaScript Bundle Size",
+      "current_metric": "Enhanced UI JS size needs analysis",
+      "target_metric": "Minimize bundle with code splitting",
+      "implementation": "Implement dynamic imports for non-critical UI components",
+      "effort": "Medium",
+      "impact": "Medium"
+    },
+    {
+      "priority": "Medium",
+      "category": "Dash Callback Performance",
+      "issue": "Callback Chain Optimization",
+      "current_metric": "7 clientside callbacks with potential cascading",
+      "target_metric": "Optimized callback chains with debouncing",
+      "implementation": "Implemented debouncing in loading callbacks",
+      "effort": "Low",
+      "impact": "Medium",
+      "status": "COMPLETED"
+    },
+    {
+      "priority": "Low",
+      "category": "Core Web Vitals",
+      "issue": "Performance Monitoring",
+      "current_metric": "Basic performance logging",
+      "target_metric": "Comprehensive Core Web Vitals monitoring",
+      "implementation": "Add web-vitals library integration",
+      "effort": "Low",
+      "impact": "Low"
+    }
+  ],
+  "performance_scores": {
+    "react_component_performance": 100,
+    "memory_management": 85,
+    "dash_callback_efficiency": 100,
+    "bundle_optimization": 60,
+    "overall_score": 88
+  },
+  "test_results": {
+    "e2e_performance": {
+      "status": "failed",
+      "error": "2025-09-11 18:29:31,054 - INFO - \\U0001f50d Checking E2E test prerequisites...\n2025-09-11 18:29:31,054 - INFO - \\u2705 Python 3.13.7\n2025-09-11 18:29:31,150 - INFO - \\u2705 pytest installed\n2025-09-11 18:29:31,183 - INFO - \\u2705 pytest-asyncio installed\n2025-09-11 18:29:31,184 - INFO - \\u2705 playwright installed\n2025-09-11 18:29:31,256 - INFO - \\u2705 MELD Visualizer server is running\n2025-09-11 18:29:31,256 - INFO - \\u2705 test_critical_user_journeys.py\n2025-09-11 18:29:31,256 - INFO - \\u2705 test_enhanced_ui_functionality.py\n2025-09-11 18:29:31,256 - INFO - \\u2705 test_performance_benchmarks.py\n2025-09-11 18:29:31,256 - INFO - \\u2705 test_error_scenarios.py\n2025-09-11 18:29:31,256 - INFO - \\u2705 test_responsive_design.py\n2025-09-11 18:29:31,256 - INFO - \\u26a1 Running performance test suite...\n2025-09-11 18:29:31,256 - INFO - \\U0001f680 Starting E2E test suite: performance\n2025-09-11 18:29:31,256 - INFO - \\U0001f4cb Command: C:\\Python313\\python.exe -m pytest C:\\VSCode\\MELD_Visualizer\\tests\\playwright\\e2e\\test_performance_benchmarks.py -v --html=C:\\VSCode\\MELD_Visualizer\\tests\\reports\\e2e\\e2e_report_20250911_182931.html --self-contained-html --json-report --json-report-file=C:\\VSCode\\MELD_Visualizer\\tests\\reports\\e2e\\e2e_report_20250911_182931.json --tb=short --capture=no\n2025-09-11 18:29:34,174 - INFO - \\U0001f4ca E2E Test Summary (\\u274c FAILED):\n2025-09-11 18:29:34,174 - INFO -    Suite: performance\n2025-09-11 18:29:34,174 - INFO -    Browser: chromium\n2025-09-11 18:29:34,174 - INFO -    Duration: 2.9s\n2025-09-11 18:29:34,174 - INFO -    Tests: 3 total, 0 passed, 0 failed, 0 skipped\n2025-09-11 18:29:34,174 - INFO -    HTML Report: C:\\VSCode\\MELD_Visualizer\\tests\\reports\\e2e\\e2e_report_20250911_182931.html\n2025-09-11 18:29:34,174 - INFO -    Summary: C:\\VSCode\\MELD_Visualizer\\tests\\reports\\e2e\\e2e_summary_performance_20250911_182934.json\n"
+    }
+  }
+}
