@@ -94,8 +94,8 @@ class TestCriticalUserJourneys:
         # Test graph interactions
         graph_element = mcp_page.locator("#main-graph .plotly-graph-div")
 
-        # Get initial graph bounds
-        initial_bounds = await mcp_page.evaluate(
+        # Get initial graph bounds (for future use in interaction verification)
+        await mcp_page.evaluate(
             """
             () => {
                 const graphDiv = document.querySelector('#main-graph');

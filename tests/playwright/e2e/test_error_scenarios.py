@@ -92,7 +92,7 @@ class TestErrorScenarios:
         upload_input = mcp_page.locator(upload_selector)
         assert await upload_input.count() > 0, "Upload functionality should remain available"
 
-        print(f"Invalid CSV handling:")
+        print("Invalid CSV handling:")
         print(f"  UI Error Messages: {error_texts}")
         print(f"  Console Errors: {len(console_errors)}")
         print(f"  Error Indication Present: {has_error_indication}")
@@ -210,7 +210,7 @@ class TestErrorScenarios:
             await main_content.is_visible()
         ), "Application should remain visible during network issues"
 
-        print(f"Network Interruption Test:")
+        print("Network Interruption Test:")
         print(f"  Client-side functional during interruption: {client_side_functional}")
         print(f"  Network recovery successful: {network_recovery_successful}")
 
@@ -303,7 +303,7 @@ class TestErrorScenarios:
             else:
                 memory_cleaned_up = True  # Can't measure, assume good
 
-            print(f"Memory Pressure Test:")
+            print("Memory Pressure Test:")
             print(f"  Functions under pressure: {functions_under_pressure}")
             print(f"  Memory cleaned up: {memory_cleaned_up}")
 
@@ -378,7 +378,7 @@ class TestErrorScenarios:
         assert app_responsive, "Application should remain responsive after rapid inputs"
         assert not excessive_errors, f"Should not have excessive errors: {error_count}"
 
-        print(f"Rapid Input Test:")
+        print("Rapid Input Test:")
         print(f"  Graph functional: {graph_functional}")
         print(f"  Rapid interactions handled: {rapid_interaction_handled}")
         print(f"  Console errors: {error_count}")
@@ -400,7 +400,7 @@ class TestErrorScenarios:
                     // Test undefined function call (common compatibility issue)
                     if (typeof window.nonExistentFunction === 'undefined') {
                         window.nonExistentFunction = function() {
-                            console.warn('Calling undefined function - compatibility test');
+                            console.log('[WARNING] Calling undefined function - compatibility test');
                         };
                     }
 
@@ -476,7 +476,7 @@ class TestErrorScenarios:
 
         assert app_functional, "Application should remain functional after compatibility errors"
 
-        print(f"Browser Compatibility Test:")
+        print("Browser Compatibility Test:")
         print(f"  JS Error Injected: {js_error_injected}")
         print(f"  CSS Test Applied: {css_test_applied}")
         print(f"  App Functional: {app_functional}")
@@ -558,7 +558,7 @@ class TestErrorScenarios:
             basic_functionality_available
         ), "Application should provide basic functionality even with feature degradation"
 
-        print(f"Graceful Degradation Test:")
+        print("Graceful Degradation Test:")
         print(f"  Console Available: {degradation_test_results['consoleAvailable']}")
         print(f"  LocalStorage Available: {degradation_test_results['localStorageAvailable']}")
         print(f"  WebGL Available: {degradation_test_results['webGLAvailable']}")
@@ -668,9 +668,6 @@ class TestErrorScenarios:
                 )
 
         # Verify application handles all error scenarios gracefully
-        all_handled_gracefully = all(
-            result["handled_gracefully"] for result in error_handling_results
-        )
         app_remains_responsive = all(result["app_responsive"] for result in error_handling_results)
 
         # Application should remain responsive even with bad data
@@ -678,7 +675,7 @@ class TestErrorScenarios:
             app_remains_responsive
         ), "Application should remain responsive with all data validation errors"
 
-        print(f"Data Validation Error Boundaries:")
+        print("Data Validation Error Boundaries:")
         for result in error_handling_results:
             print(
                 f"  {result['file_type']}: handled_gracefully={result['handled_gracefully']}, responsive={result['app_responsive']}"
@@ -809,7 +806,7 @@ class TestErrorScenarios:
             "responsive"
         ], "Application should remain responsive during concurrent errors"
 
-        print(f"Concurrent Error Scenarios:")
+        print("Concurrent Error Scenarios:")
         print(f"  App Responsive During Errors: {app_state['responsive']}")
         print(f"  Errors Detected: {app_state['hasErrors']}")
         print(f"  Memory Pressure Applied: {app_state['memoryPressureActive']}")

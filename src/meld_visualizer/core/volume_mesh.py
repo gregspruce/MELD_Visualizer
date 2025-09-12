@@ -239,7 +239,7 @@ class MeshGenerator:
 
         # Pre-allocate lists for efficiency
         all_vertices = []
-        all_faces = []
+        all_faces: list[np.ndarray] = []
         vertex_colors = []
         vertex_offset = 0
 
@@ -291,7 +291,13 @@ class MeshGenerator:
 
         logger.info(f"Generated mesh: {len(final_vertices)} vertices, {len(final_faces)} faces")
 
-        return {"vertices": final_vertices, "faces": final_faces, "vertex_colors": final_colors}
+        return {
+            "vertices": final_vertices,
+            "faces": final_faces,
+            "colors": final_colors,  # For backward compatibility
+            "vertex_colors": final_colors,
+            "metadata": {},
+        }
 
     def generate_mesh_lod(
         self,

@@ -68,8 +68,8 @@ class FileService:
         """
         decoded, error = FileService.decode_file_contents(contents)
 
-        if error:
-            return False, error
+        if error or decoded is None:
+            return False, error or "Failed to decode file contents"
 
         size_mb = len(decoded) / (1024 * 1024)
         if size_mb > MAX_FILE_SIZE_MB:
@@ -100,7 +100,7 @@ class FileService:
                 delimiter_counts[delimiter] += line.count(delimiter)
 
         # Return most frequent delimiter
-        return max(delimiter_counts, key=delimiter_counts.get)
+        return max(delimiter_counts, key=lambda k: delimiter_counts[k])
 
     @staticmethod
     def get_file_info(contents: str, filename: str) -> dict:
@@ -116,8 +116,8 @@ class FileService:
         """
         decoded, error = FileService.decode_file_contents(contents)
 
-        if error:
-            return {"error": error}
+        if error or decoded is None:
+            return {"error": error or "Failed to decode file contents"}
 
         size_bytes = len(decoded)
         size_mb = size_bytes / (1024 * 1024)

@@ -425,7 +425,7 @@ def register_performance_callbacks(app):
                 if (performance.memory) {
                     const memMB = performance.memory.usedJSHeapSize / 1024 / 1024;
                     if (memMB > 150) { // 150MB threshold
-                        console.warn('High memory usage detected:', memMB.toFixed(1) + 'MB');
+                        console.log('[WARNING] High memory usage detected:', memMB.toFixed(1) + 'MB');
                     }
                 }
             }

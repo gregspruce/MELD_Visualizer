@@ -278,7 +278,7 @@ def generate_large_dataframe(rows=10000):
     return pd.DataFrame(
         {
             "Date": ["2024-01-15"] * rows,
-            "Time": [f"10:{i//60:02d}:{i%60:02d}.00" for i in range(rows)],
+            "Time": [f"10:{i//60:02d}:{i % 60:02d}.00" for i in range(rows)],
             "SpinVel": np.random.normal(100, 10, rows),
             "XPos": np.random.normal(5, 2, rows),
             "YPos": np.random.normal(10, 3, rows),

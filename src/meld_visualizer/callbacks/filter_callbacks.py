@@ -53,7 +53,7 @@ def register_filter_callbacks(app=None):
             index = triggered_id.get("index")
 
             # Determine which data column to filter
-            if index.startswith("zpos"):
+            if index and index.startswith("zpos"):
                 col_name = "ZPos"
             elif index == "time-2d":
                 col_name = "TimeInSeconds"

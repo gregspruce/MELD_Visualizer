@@ -308,10 +308,6 @@ class TestEnhancedUIIntegration:
     def test_enhanced_ui_responsive_design_integration(self):
         """Test responsive design aspects of Enhanced UI."""
 
-        # Test that UI components adapt to different contexts
-        mobile_context = {"viewport_width": 480, "viewport_height": 800}
-        desktop_context = {"viewport_width": 1920, "viewport_height": 1080}
-
         # Test responsive loading states
         mobile_loading = self.feedback_manager.create_loading_overlay(
             "Mobile loading...", show=True
@@ -409,12 +405,7 @@ class TestEnhancedUIEdgeCases:
     def test_memory_efficiency_with_large_ui_operations(self):
         """Test memory efficiency of UI operations."""
 
-        # Create many UI operations to test memory usage
-        large_message = (
-            "Loading large dataset with many data points for comprehensive analysis..." * 100
-        )
-
-        # Perform many operations
+        # Perform many operations to test memory usage
         for i in range(100):
             result = self.tester.invoke_callback(
                 "loading_show", {"csv_contents": f"data_{i}", "gcode_contents": None}

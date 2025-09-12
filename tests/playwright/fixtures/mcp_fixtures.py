@@ -331,15 +331,15 @@ class MCPPageUtils:
     async def get_element_metrics(self, selector: str):
         """Get metrics for an element (size, position, visibility)."""
         return await self.page.evaluate(
-            f"""
-            (selector) => {{
+            """
+            (selector) => {
                 const element = document.querySelector(selector);
                 if (!element) return null;
 
                 const rect = element.getBoundingClientRect();
                 const styles = window.getComputedStyle(element);
 
-                return {{
+                return {
                     width: rect.width,
                     height: rect.height,
                     x: rect.x,
@@ -347,8 +347,8 @@ class MCPPageUtils:
                     visible: rect.width > 0 && rect.height > 0 && styles.visibility !== 'hidden',
                     display: styles.display,
                     opacity: styles.opacity
-                }};
-            }}
+                };
+            }
         """,
             selector,
         )

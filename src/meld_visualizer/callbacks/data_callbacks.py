@@ -39,8 +39,14 @@ def register_data_callbacks(app=None):
         data_service = get_data_service()
         df, error_message, converted = data_service.parse_file(contents, filename)
 
-        if error_message and df is None:
-            return no_update, error_message, no_update, no_update, no_update
+        if error_message or df is None:
+            return (
+                no_update,
+                error_message or "Failed to parse file",
+                no_update,
+                no_update,
+                no_update,
+            )
 
         # Prepare success message
         filename_message = f"Current file: {filename}"

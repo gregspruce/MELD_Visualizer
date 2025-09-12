@@ -102,7 +102,10 @@ class InputValidator:
 
     @staticmethod
     def sanitize_numeric_input(
-        value: Any, min_val: float = None, max_val: float = None, default: float = 0
+        value: Any,
+        min_val: Optional[float] = None,
+        max_val: Optional[float] = None,
+        default: float = 0,
     ) -> float:
         """
         Sanitize numeric input values.
@@ -219,12 +222,12 @@ class ConfigurationManager:
         """
         try:
             # Validate config path
-            config_path = Path(config_path)
-            if config_path.is_absolute():
+            config_path_obj = Path(config_path)
+            if config_path_obj.is_absolute():
                 return False, "Absolute paths not allowed for configuration"
 
             # Ensure we're writing to the correct directory
-            safe_path = Path.cwd() / config_path.name
+            safe_path = Path.cwd() / config_path_obj.name
 
             # Validate configuration keys
             invalid_keys = set(config_data.keys()) - SAFE_CONFIG_KEYS
@@ -277,7 +280,7 @@ class ConfigurationManager:
 
     @staticmethod
     def load_config(
-        config_path: str = "config.json", default_config: Dict = None
+        config_path: str = "config.json", default_config: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """
         Securely load configuration file.
@@ -291,12 +294,12 @@ class ConfigurationManager:
         """
         try:
             # Validate path
-            config_path = Path(config_path)
-            if config_path.is_absolute() or ".." in str(config_path):
+            config_path_obj = Path(config_path)
+            if config_path_obj.is_absolute() or ".." in str(config_path_obj):
                 logger.warning("Invalid config path, using defaults")
                 return default_config or {}
 
-            safe_path = Path.cwd() / config_path.name
+            safe_path = Path.cwd() / config_path_obj.name
 
             if not safe_path.exists():
                 return default_config or {}

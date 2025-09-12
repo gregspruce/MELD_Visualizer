@@ -37,7 +37,9 @@ try:
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "reports"
     )
     sys.path.insert(0, reports_path)
-    from data_processing_optimized import generate_volume_mesh_lod as generate_mesh_lod_legacy
+    from data_processing_optimized import (
+        generate_volume_mesh_lod as generate_mesh_lod_legacy,  # type: ignore[import-not-found]
+    )
     from data_processing_optimized import parse_contents_optimized as parse_contents_impl
 
     OPTIMIZED_AVAILABLE = True
@@ -65,6 +67,7 @@ class MeshData(TypedDict):
     vertices: NDArray[np.float64]
     faces: NDArray[np.int32]
     colors: NDArray[np.float64]
+    vertex_colors: NDArray[np.float64]
     metadata: Dict[str, Any]
 
 
@@ -310,6 +313,9 @@ class DataService:
                 "vertices": raw_mesh_data.get("vertices", np.array([])),
                 "faces": raw_mesh_data.get("faces", np.array([])),
                 "colors": raw_mesh_data.get("colors", np.array([])),
+                "vertex_colors": raw_mesh_data.get(
+                    "vertex_colors", raw_mesh_data.get("colors", np.array([]))
+                ),
                 "metadata": raw_mesh_data.get("metadata", {}),
             }
         else:

@@ -37,6 +37,25 @@ class E2ETestRunner:
         logger.info("🔍 Checking E2E test prerequisites...")
 
         # Check Python environment
+        if not self._check_python_version():
+            return False
+
+        # Check required packages
+        if not self._check_required_packages():
+            return False
+
+        # Check if MELD Visualizer server is running
+        if not self._check_server_running():
+            return False
+
+        # Check test files exist
+        if not self._check_test_files_exist():
+            return False
+
+        return True
+
+    def _check_python_version(self):
+        """Check Python version requirement."""
         python_version = sys.version_info
         if python_version < (3, 8):
             logger.error(
@@ -46,8 +65,10 @@ class E2ETestRunner:
         logger.info(
             f"✅ Python {python_version.major}.{python_version.minor}.{python_version.micro}"
         )
+        return True
 
-        # Check required packages
+    def _check_required_packages(self):
+        """Check required packages are installed."""
         required_packages = ["pytest", "pytest-asyncio", "playwright"]
         missing_packages = []
 
@@ -63,8 +84,10 @@ class E2ETestRunner:
             logger.error(f"❌ Missing packages: {', '.join(missing_packages)}")
             logger.info("Install with: pip install pytest pytest-asyncio playwright")
             return False
+        return True
 
-        # Check if MELD Visualizer server is running
+    def _check_server_running(self):
+        """Check if MELD Visualizer server is running."""
         try:
             import requests
 
@@ -79,8 +102,10 @@ class E2ETestRunner:
             logger.error("❌ MELD Visualizer server not accessible at http://127.0.0.1:8050")
             logger.error("   Please start the server with: python -m meld_visualizer")
             return False
+        return True
 
-        # Check test files exist
+    def _check_test_files_exist(self):
+        """Check test files exist."""
         test_files = [
             "test_critical_user_journeys.py",
             "test_enhanced_ui_functionality.py",
@@ -101,7 +126,6 @@ class E2ETestRunner:
         if missing_files:
             logger.error(f"❌ Missing test files: {', '.join(missing_files)}")
             return False
-
         return True
 
     def install_playwright_browsers(self):
@@ -156,23 +180,43 @@ class E2ETestRunner:
         logger.info(f"🚀 Starting E2E test suite: {test_suite}")
 
         # Build pytest command
+        cmd = self._build_pytest_command(test_suite)
+
+        # Configure environment
+        self._configure_test_environment(browser, headed)
+
+        # Add execution options
+        self._add_execution_options(cmd, parallel, test_suite, verbose, markers, max_failures)
+
+        # Add output configuration
+        report_file, json_report = self._add_output_configuration(cmd)
+
+        logger.info(f"📋 Command: {' '.join(str(x) for x in cmd)}")
+
+        # Run tests
+        return self._execute_tests(cmd, test_suite, browser, report_file, json_report)
+
+    def _build_pytest_command(self, test_suite):
+        """Build pytest command based on test suite."""
         cmd = [sys.executable, "-m", "pytest"]
 
-        # Test directory
-        if test_suite == "all":
-            cmd.append(str(self.e2e_dir))
-        elif test_suite == "smoke":
-            cmd.extend([str(self.e2e_dir), "-m", "smoke"])
-        elif test_suite == "critical":
-            cmd.append(str(self.e2e_dir / "test_critical_user_journeys.py"))
-        elif test_suite == "enhanced_ui":
-            cmd.append(str(self.e2e_dir / "test_enhanced_ui_functionality.py"))
-        elif test_suite == "performance":
-            cmd.append(str(self.e2e_dir / "test_performance_benchmarks.py"))
-        elif test_suite == "error_handling":
-            cmd.append(str(self.e2e_dir / "test_error_scenarios.py"))
-        elif test_suite == "responsive":
-            cmd.append(str(self.e2e_dir / "test_responsive_design.py"))
+        # Test directory mapping
+        suite_mapping = {
+            "all": str(self.e2e_dir),
+            "smoke": [str(self.e2e_dir), "-m", "smoke"],
+            "critical": str(self.e2e_dir / "test_critical_user_journeys.py"),
+            "enhanced_ui": str(self.e2e_dir / "test_enhanced_ui_functionality.py"),
+            "performance": str(self.e2e_dir / "test_performance_benchmarks.py"),
+            "error_handling": str(self.e2e_dir / "test_error_scenarios.py"),
+            "responsive": str(self.e2e_dir / "test_responsive_design.py"),
+        }
+
+        if test_suite in suite_mapping:
+            suite_config = suite_mapping[test_suite]
+            if isinstance(suite_config, list):
+                cmd.extend(suite_config)
+            else:
+                cmd.append(suite_config)
         else:
             # Treat as specific test file or pattern
             test_path = self.e2e_dir / test_suite
@@ -181,39 +225,36 @@ class E2ETestRunner:
             else:
                 cmd.extend([str(self.e2e_dir), "-k", test_suite])
 
-        # Browser configuration
+        return cmd
+
+    def _configure_test_environment(self, browser, headed):
+        """Configure test environment variables."""
         if browser != "all":
             os.environ["BROWSER"] = browser
 
-        # Headed/headless mode
-        if headed:
-            os.environ["HEADLESS"] = "false"
-        else:
-            os.environ["HEADLESS"] = "true"
+        os.environ["HEADLESS"] = "false" if headed else "true"
+        os.environ["SCREENSHOT"] = "only-on-failure"
+        os.environ["VIDEO"] = "retain-on-failure"
 
+    def _add_execution_options(self, cmd, parallel, test_suite, verbose, markers, max_failures):
+        """Add execution options to pytest command."""
         # Parallel execution
         if parallel and test_suite != "performance":  # Performance tests run better sequentially
             try:
-                pass
-
                 cmd.extend(["-n", "auto"])
                 logger.info("✅ Running tests in parallel")
             except ImportError:
                 logger.warning("⚠️  pytest-xdist not installed, running sequentially")
 
-        # Verbose output
         if verbose:
             cmd.append("-v")
-
-        # Additional markers
         if markers:
             cmd.extend(["-m", markers])
-
-        # Max failures
         if max_failures:
             cmd.extend(["--maxfail", str(max_failures)])
 
-        # Output configuration
+    def _add_output_configuration(self, cmd):
+        """Add output configuration to pytest command."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_file = self.reports_dir / "e2e" / f"e2e_report_{timestamp}.html"
         json_report = self.reports_dir / "e2e" / f"e2e_report_{timestamp}.json"
@@ -222,20 +263,17 @@ class E2ETestRunner:
             [
                 f"--html={report_file}",
                 "--self-contained-html",
-                f"--json-report",
+                "--json-report",
                 f"--json-report-file={json_report}",
                 "--tb=short",
-                "--capture=no" if verbose else "--capture=sys",
+                "--capture=sys",
             ]
         )
 
-        # Screenshots and videos
-        os.environ["SCREENSHOT"] = "only-on-failure"
-        os.environ["VIDEO"] = "retain-on-failure"
+        return report_file, json_report
 
-        logger.info(f"📋 Command: {' '.join(str(x) for x in cmd)}")
-
-        # Run tests
+    def _execute_tests(self, cmd, test_suite, browser, report_file, json_report):
+        """Execute tests and handle results."""
         start_time = time.time()
         try:
             # Set environment variables

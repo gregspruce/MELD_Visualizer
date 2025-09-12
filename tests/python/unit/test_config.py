@@ -99,8 +99,8 @@ class TestThemeManagement:
         # Adjust assertions based on actual validation rules
 
 
-class TestThemeManagement:
-    """Test theme management functionality"""
+class TestThemeManagementExtended:
+    """Test extended theme management functionality"""
 
     def test_default_themes_available(self):
         """Test that default themes are properly defined"""

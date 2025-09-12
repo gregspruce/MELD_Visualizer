@@ -385,7 +385,8 @@ class TestResponsiveDesign:
 
                 # Test horizontal scrolling prevention
                 scroll_x = await mcp_page.evaluate("window.scrollX")
-                horizontal_scroll_prevented = scroll_x == 0
+                # Verify no horizontal scroll (scroll_x should be 0)
+                assert scroll_x == 0, f"No horizontal scroll expected on {viewport['name']}"
 
             except Exception as e:
                 mobile_scrolling_works = False
@@ -643,8 +644,6 @@ class TestResponsiveDesign:
 
             # Check if breakpoint behavior matches expectations
             expected_mobile = breakpoint["expected_layout"] == "mobile"
-            expected_tablet = breakpoint["expected_layout"] == "tablet"
-            expected_desktop = breakpoint["expected_layout"] == "desktop"
 
             # Evaluate responsive effectiveness
             responsive_score = 0

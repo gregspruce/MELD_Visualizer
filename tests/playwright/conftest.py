@@ -6,6 +6,7 @@ Configures pytest environment for comprehensive E2E testing with MCP integration
 import asyncio
 import os
 import sys
+import time
 from pathlib import Path
 
 import pytest

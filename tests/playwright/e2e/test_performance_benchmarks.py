@@ -94,7 +94,7 @@ class TestPerformanceBenchmarks:
             performance_metrics["ttfb"] < 1000
         ), f"TTFB should be under 1s, actual: {performance_metrics['ttfb']:.0f}ms"
 
-        print(f"Performance Summary:")
+        print("Performance Summary:")
         print(f"  DOM Load: {dom_load_time:.0f}ms")
         print(f"  Network Idle: {network_idle_time:.0f}ms")
         print(f"  Full Load: {full_load_time:.0f}ms")
@@ -212,7 +212,7 @@ class TestPerformanceBenchmarks:
                 )
 
         # Print performance summary
-        print(f"CSV Processing Performance:")
+        print("CSV Processing Performance:")
         for result in upload_performance:
             if result["success"]:
                 print(
@@ -319,7 +319,7 @@ class TestPerformanceBenchmarks:
             assert graph_metrics["dataPointCount"] > 0, "Graph should have data points"
             assert graph_metrics["traceCount"] > 0, "Graph should have traces"
 
-        print(f"Graph Performance Summary:")
+        print("Graph Performance Summary:")
         print(f"  Initial Render: {initial_render_time:.0f}ms")
         print(f"  Zoom Response: {zoom_time:.0f}ms")
         print(f"  Pan Response: {pan_time:.0f}ms")
@@ -439,7 +439,7 @@ class TestPerformanceBenchmarks:
             total_increase < 150
         ), f"Total memory increase should be reasonable, actual: {total_increase:.1f}MB"
 
-        print(f"Memory Usage Summary:")
+        print("Memory Usage Summary:")
         print(f"  Baseline: {baseline_mb:.1f}MB")
         print(f"  After Upload: {upload_mb:.1f}MB (+{upload_increase:.1f}MB)")
         print(f"  After Interactions: {interaction_mb:.1f}MB (+{interaction_increase:.1f}MB)")
@@ -521,7 +521,7 @@ class TestPerformanceBenchmarks:
             stress_duration < 10000
         ), f"Stress test operations should complete reasonably fast, actual: {stress_duration:.0f}ms"
 
-        print(f"Stress Test Summary:")
+        print("Stress Test Summary:")
         print(f"  Duration: {stress_duration:.0f}ms")
         print(f"  Console Errors: {error_count}")
         print(f"  Graph Functional: {graph_functional}")
@@ -594,7 +594,7 @@ class TestPerformanceBenchmarks:
             duplication_ratio < 3.0
         ), f"Request duplication ratio should be reasonable: {duplication_ratio:.2f}"
 
-        print(f"Network Optimization Summary:")
+        print("Network Optimization Summary:")
         print(f"  Total Requests: {total_requests}")
         print(f"  Load Requests: {len(load_requests)}")
         print(f"  Upload Requests: {len(upload_requests)}")
@@ -720,7 +720,7 @@ class TestPerformanceBenchmarks:
         """
         )
 
-        print(f"Resource Efficiency Summary:")
+        print("Resource Efficiency Summary:")
         print(f"  Initial Elements: {initial_metrics['elementCount']}")
         print(f"  Final Elements: {final_metrics['elementCount']}")
         print(f"  Element Growth: {element_growth}")

@@ -17,10 +17,7 @@ from meld_visualizer.services.cache_service import CacheService
 from meld_visualizer.services.data_service import DataService
 from meld_visualizer.services.file_service import FileService
 
-from ..fixtures.dash_app_fixtures import (
-    CallbackAssertions,
-    MockFileUpload,
-)
+from ..fixtures.dash_app_fixtures import CallbackAssertions, MockFileUpload
 
 
 class TestServiceCoordination:
@@ -131,7 +128,7 @@ class TestServiceCoordination:
             extended_df = pd.DataFrame(
                 {
                     "Date": ["2024-01-15"] * 50,
-                    "Time": [f"10:{i//60:02d}:{i%60:02d}.00" for i in range(50)],
+                    "Time": [f"10:{i//60:02d}:{i % 60:02d}.00" for i in range(50)],
                     "XPos": np.random.normal(5, 2, 50),
                     "YPos": np.random.normal(10, 3, 50),
                     "ZPos": np.random.normal(2, 0.5, 50),
@@ -356,7 +353,6 @@ class TestServiceCoordination:
         assert retrieved_health == health_data, "CacheService should retrieve correctly"
 
         # Check FileService health
-        temp_content = "test,data\n1,2\n"
         upload_content = MockFileUpload.create_csv_upload(
             pd.DataFrame({"test": [1], "data": [2]}), "health_check.csv"
         )

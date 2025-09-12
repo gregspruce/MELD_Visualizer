@@ -24,9 +24,7 @@ from meld_visualizer.callbacks.graph_callbacks import (
     update_graph_2,
 )
 
-from ..fixtures.dash_app_fixtures import (
-    CallbackAssertions,
-)
+from ..fixtures.dash_app_fixtures import CallbackAssertions
 
 
 class TestDataUploadCallbackChain:
@@ -424,8 +422,7 @@ class TestDataUploadErrorScenarios:
 
             self.mock_services.data_service.parse_file.side_effect = memory_intensive_parse
 
-            start_memory = None  # Would need psutil for actual memory tracking
-
+            # Would need psutil for actual memory tracking
             result = self.tester.invoke_callback(
                 "data_upload", {"contents": "large_file_content", "filename": "huge_file.csv"}
             )

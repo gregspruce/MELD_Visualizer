@@ -83,7 +83,21 @@ class TestEnhancedUIFunctionality:
         """
         Test toast notification system for user feedback.
         """
-        # Look for toast container
+        toast_container = await self._find_toast_container(mcp_page)
+
+        # Test success notifications
+        await self._test_success_notifications(mcp_page)
+
+        # Verify notification system
+        if toast_container:
+            container_element = mcp_page.locator(toast_container)
+            assert await container_element.count() > 0, "Toast container should exist"
+
+        # Test error notifications
+        await self._test_error_notifications(mcp_page)
+
+    async def _find_toast_container(self, mcp_page):
+        """Find toast container element."""
         toast_selectors = [
             ".toast-container",
             "#toast-container",
@@ -92,25 +106,47 @@ class TestEnhancedUIFunctionality:
             ".enhanced-toast",
         ]
 
-        toast_container = None
         for selector in toast_selectors:
             if await mcp_page.locator(selector).count() > 0:
-                toast_container = selector
-                break
+                return selector
+        return None
 
-        # Upload valid file to potentially trigger success notification
+    async def _test_success_notifications(self, mcp_page):
+        """Test success notifications with valid file upload."""
         test_csv = Path(__file__).parent.parent / "fixtures" / "test_data" / "sample_meld_data.csv"
         upload_selector = 'input[type="file"]'
         await mcp_page.set_input_files(upload_selector, str(test_csv))
-
-        # Wait for processing
         await mcp_page.wait_for_timeout(3000)
 
         # Check for any notification messages
         notification_selectors = [".toast", ".alert", ".notification", ".message", "[role='alert']"]
+        notifications_found = await self._collect_visible_notifications(
+            mcp_page, notification_selectors
+        )
+        print(f"Success notifications found: {len(notifications_found)}")
 
+    async def _test_error_notifications(self, mcp_page):
+        """Test error notifications with invalid file upload."""
+        invalid_csv = (
+            Path(__file__).parent.parent / "fixtures" / "test_data" / "invalid_meld_data.csv"
+        )
+        if not invalid_csv.exists():
+            return
+
+        upload_selector = 'input[type="file"]'
+        await mcp_page.set_input_files(upload_selector, str(invalid_csv))
+        await mcp_page.wait_for_timeout(3000)
+
+        notification_selectors = [".toast", ".alert", ".notification", ".message", "[role='alert']"]
+        error_notifications = await self._collect_error_notifications(
+            mcp_page, notification_selectors
+        )
+        print(f"Error notifications found: {error_notifications}")
+
+    async def _collect_visible_notifications(self, mcp_page, selectors):
+        """Collect all visible notifications."""
         notifications_found = []
-        for selector in notification_selectors:
+        for selector in selectors:
             notifications = mcp_page.locator(selector)
             count = await notifications.count()
             if count > 0:
@@ -122,39 +158,26 @@ class TestEnhancedUIFunctionality:
                         notifications_found.append(
                             {"text": text.strip(), "classes": classes, "selector": selector}
                         )
+        return notifications_found
 
-        # Verify notification system is working (even if no notifications are currently shown)
-        if toast_container:
-            container_element = mcp_page.locator(toast_container)
-            assert await container_element.count() > 0, "Toast container should exist"
-
-        # Test invalid file upload to trigger error notification
-        invalid_csv = (
-            Path(__file__).parent.parent / "fixtures" / "test_data" / "invalid_meld_data.csv"
-        )
-        if invalid_csv.exists():
-            await mcp_page.set_input_files(upload_selector, str(invalid_csv))
-            await mcp_page.wait_for_timeout(3000)
-
-            # Look for error notifications
-            error_notifications = []
-            for selector in notification_selectors:
-                notifications = mcp_page.locator(selector)
-                count = await notifications.count()
-                if count > 0:
-                    for i in range(count):
-                        notification = notifications.nth(i)
-                        if await notification.is_visible():
-                            text = await notification.text_content()
-                            classes = await notification.get_attribute("class") or ""
-                            if any(
-                                error_class in classes.lower()
-                                for error_class in ["error", "danger", "fail"]
-                            ):
-                                error_notifications.append(text.strip())
-
-            # Error notifications are good to have but not required
-            print(f"Error notifications found: {error_notifications}")
+    async def _collect_error_notifications(self, mcp_page, selectors):
+        """Collect error notifications specifically."""
+        error_notifications = []
+        for selector in selectors:
+            notifications = mcp_page.locator(selector)
+            count = await notifications.count()
+            if count > 0:
+                for i in range(count):
+                    notification = notifications.nth(i)
+                    if await notification.is_visible():
+                        text = await notification.text_content()
+                        classes = await notification.get_attribute("class") or ""
+                        if any(
+                            error_class in classes.lower()
+                            for error_class in ["error", "danger", "fail"]
+                        ):
+                            error_notifications.append(text.strip())
+        return error_notifications
 
     async def test_progress_indicator_functionality(self, mcp_page):
         """

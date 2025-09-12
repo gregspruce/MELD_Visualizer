@@ -54,8 +54,9 @@ repos:
           numpy,
           typing-extensions
         ]
-        args: [--config-file=pyproject.toml]
+        args: [--config-file=pyproject.toml, --explicit-package-bases]
         exclude: "tests/reports/"
+        files: ^src/
 
   # Security checks with bandit (temporarily disabled due to dependency issue)
   # - repo: https://github.com/pycqa/bandit

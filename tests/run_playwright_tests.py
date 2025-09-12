@@ -67,7 +67,7 @@ class PlaywrightMCPTestRunner:
         try:
             # Navigate to the application
             # Using the MCP Playwright function
-            result = await self.playwright_navigate(
+            await self.playwright_navigate(
                 url=self.app_url, timeout=30000, wait_until="networkidle"
             )
 
@@ -85,7 +85,7 @@ class PlaywrightMCPTestRunner:
 
         try:
             # Take a full page screenshot
-            result = await self.playwright_screenshot(
+            await self.playwright_screenshot(
                 name="meld_visualizer_homepage",
                 full_page=True,
                 save_png=True,
@@ -113,7 +113,7 @@ class PlaywrightMCPTestRunner:
                 return
 
             # Upload the file
-            result = await self.playwright_upload_file(
+            await self.playwright_upload_file(
                 selector='input[type="file"]', file_path=str(csv_file)
             )
 
